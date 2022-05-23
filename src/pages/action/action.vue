@@ -10,20 +10,20 @@
       :style="{height:screenHeight+'px'}"
     ></canvas>
 
-    <view
-        class="list-item"
-        style="flex-grow: 1; display: flex"
-        v-for="(item, index) in items"
-        :key="item.title"
-        ontouchstart="onTouchStart"
-        @touchend="onTouchEnd(index)"
-    >
-      <image class="button-background-image" :src="item.image"> </image>
-      <view class="translucent">
-        <text class="button-title">{{ item.title }}</text>
-        <text class="button-description">{{ item.description }}</text>
+    <text class="action_name">肩部绕环</text>
+
+    <view class="list">
+      <view
+          class="list-item"
+          v-for="(item, index) in items"
+          :key="item.title"
+          ontouchstart="onTouchStart"
+          @touchend="onTouchEnd(index)"
+      >
+        <img class="image" :src="item.image">
       </view>
     </view>
+
 
   </view>
 </template>
@@ -50,7 +50,29 @@ export default {
       disposing: false,
       platform: null,
       frameId: -1,
-      screenHeight:""
+      screenHeight:"",
+      items: [
+        {
+          image: "/static/small.png",
+          title:"action1",
+          touchDown: false,
+        },
+        {
+          image: "/static/small.png",
+          title:"action2",
+          touchDown: false,
+        },
+        {
+          image: "/static/small.png",
+          title:"action3",
+          touchDown: false,
+        },
+        {
+          image: "/static/small.png",
+          title:"action4",
+          touchDown: false,
+        },
+      ],
     };
   },
   onLoad() {
@@ -79,7 +101,7 @@ export default {
           1,
           2000
         );
-        camera.position.set(0, 3, 3);
+        camera.position.set(0, 2, 4);
         camera.lookAt(new Vector3(0, 0, 0));
         const scene = new Scene();
         const gltfLoader = new GLTFLoader();
@@ -126,6 +148,8 @@ export default {
     this.screenHeight = uni.getSystemInfoSync().windowHeight
   },
   methods: {
+    onTouchStart(index) {},
+    onTouchEnd(index) {},
     onTX(e) {
       this.platform.dispatchTouchEvent(e);
     },
@@ -137,23 +161,55 @@ export default {
 .content {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  height:500px;
+  align-content: center;
 }
-
-.logo {
-  height: 200rpx;
-  width: 200rpx;
-  margin: 200rpx auto 50rpx auto;
+.webgl{
+  z-index: 0;
 }
-
-.text-area {
+.action_name{
+  position: fixed;
+  margin-left: 10%;
+  margin-top: 380px;
+}
+.list {
+  z-index: 1;
+  position: absolute;
+  height: 10%;
+  width: 100%;
   display: flex;
-  justify-content: center;
+  flex-direction: row;
+  justify-content:center;
+  position: fixed;
+  margin-top: 420px;
+  /*margin-left:10%;*/
 }
 
-.title {
-  font-size: 36rpx;
-  color: #8f8f94;
+.list-item {
+  width: 34px;
+  z-index: 1;
+  transition: all 200ms;
+  touch-action: manipulation;
+  position: relative;
+  margin-left: 20px;
 }
+
+.list-item:active {
+  pointer-events: none;
+  transform: scale(0.96);
+}
+
+.list-item:hover {
+  transform: scale(0.96);
+}
+
+.image {
+  z-index: 1;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 3px;
+  box-shadow: rgba(0, 0, 0, 0.19) 0px 5px 10px, rgba(0, 0, 0, 0.23) 0px 3px 3px;
+}
+
 </style>
