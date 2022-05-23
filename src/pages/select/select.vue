@@ -1,49 +1,118 @@
 <template>
-	<view class="content">
-		<image class="logo" src="/static/logo.png"></image>
-		<view>
-			<text class="title">{{title}}</text>
-		</view>
-	</view>
+  <view class="content">
+    <view class="list">
+      <view
+        class="list-item"
+        style="flex-grow: 1; display: flex"
+        v-for="(item, index) in items"
+        :key="item.title"
+        ontouchstart="onTouchStart"
+        @touchend="onTouchEnd(index)"
+      >
+        <image class="button-background-image" :src="item.image"> </image>
+        <view class="translucent">
+          <text class="button-title">{{ item.title }}</text>
+          <text class="button-description">{{ item.description }}</text>
+        </view>
+      </view>
+    </view>
+  </view>
 </template>
 
 <script>
-	export default {
-		data() {
-			return {
-				title: 'Hello'
-			}
-		},
-		onLoad() {
-
-		},
-		methods: {
-
-		}
-	}
+export default {
+  data() {
+    return {
+      items: [
+        {
+          image: "/static/warm-up.jpg",
+          title: "热身动作",
+          description:
+            "热身运动是热身运动是热身运动是热身运动是热身运动是热身运动是热身运动是热身运动是热身运动",
+          touchDown: false,
+        },
+        {
+          image: "/static/pain-spots.jpg",
+          title: "疼痛缓解",
+          description:
+            "疼痛缓解是疼痛缓解是疼痛缓解是疼痛缓解是疼痛缓解是疼痛缓解是疼痛缓解是疼痛缓解是疼痛缓解",
+          touchDown: false,
+        },
+      ],
+    };
+  },
+  onLoad() {},
+  methods: {
+    onTouchStart(index) {},
+    onTouchEnd(index) {},
+  },
+};
 </script>
-
 <style>
-	.content {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-	}
+page {
+  height: 100%;
+}
 
-	.logo {
-		height: 200rpx;
-		width: 200rpx;
-		margin: 200rpx auto 50rpx auto;
-	}
+.content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
 
-	.text-area {
-		display: flex;
-		justify-content: center;
-	}
+.list {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
 
-	.title {
-		font-size: 36rpx;
-		color: #8f8f94;
-	}
+.list-item {
+  transition: all 200ms;
+  touch-action: manipulation;
+  flex-grow: 1;
+  position: relative;
+  margin: 20rpx;
+}
+
+.list-item:active {
+  pointer-events: none;
+  transform: scale(0.96);
+}
+
+.list-item:hover {
+  transform: scale(0.96);
+}
+
+.button-background-image {
+  z-index: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 30rpx;
+  box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;
+}
+
+.translucent {
+  z-index: 1;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 30rpx;
+  background: rgba(0, 0, 0, 0.7);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.button-title {
+  font-size: 50rpx;
+  color: #ffffff;
+}
+
+.button-description {
+  margin: 30rpx 60rpx 0 60rpx;
+  font-size: 30rpx;
+  color: #ffffff;
+}
 </style>
