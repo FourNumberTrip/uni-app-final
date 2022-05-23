@@ -7,7 +7,24 @@
       @touchstart="onTX"
       @touchmove="onTX"
       @touchend="onTX"
+      :style="{height:screenHeight+'px'}"
     ></canvas>
+
+    <view
+        class="list-item"
+        style="flex-grow: 1; display: flex"
+        v-for="(item, index) in items"
+        :key="item.title"
+        ontouchstart="onTouchStart"
+        @touchend="onTouchEnd(index)"
+    >
+      <image class="button-background-image" :src="item.image"> </image>
+      <view class="translucent">
+        <text class="button-title">{{ item.title }}</text>
+        <text class="button-description">{{ item.description }}</text>
+      </view>
+    </view>
+
   </view>
 </template>
 
@@ -33,6 +50,7 @@ export default {
       disposing: false,
       platform: null,
       frameId: -1,
+      screenHeight:""
     };
   },
   onLoad() {
@@ -61,7 +79,7 @@ export default {
           1,
           2000
         );
-        camera.position.set(0, 2, 2);
+        camera.position.set(0, 3, 3);
         camera.lookAt(new Vector3(0, 0, 0));
         const scene = new Scene();
         const gltfLoader = new GLTFLoader();
@@ -74,7 +92,7 @@ export default {
           success: (res) => {
             gltfLoader.parse(res.data, "", (gltf) => {
               gltf.parser = null;
-              gltf.scene.position.y = -2;
+              gltf.scene.position.y = -1;
               scene.add(gltf.scene);
               mixer = new AnimationMixer(gltf.scene);
               let activeAction = mixer.clipAction(gltf.animations[0]);
@@ -103,6 +121,9 @@ export default {
         };
         render();
       });
+  },
+  mounted() {
+    this.screenHeight = uni.getSystemInfoSync().windowHeight
   },
   methods: {
     onTX(e) {
