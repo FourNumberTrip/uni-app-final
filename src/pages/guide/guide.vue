@@ -12,6 +12,14 @@
           @click="onButtonClick"
         >
         </view>
+        <!-- the wrapper is for keep the icon transparent but the shadow visible -->
+        <view class="button-arrow-wrapper">
+          <view
+            class="button-arrow material-icon"
+            data-color="black"
+            data-icon="chevron-right"
+          ></view
+        ></view>
       </view>
     </view>
     <view class="bottom-place-holder"></view>
@@ -35,7 +43,12 @@ export default {
 </script>
 
 <style lang="scss">
+@import "@/lib/material-icons.scss";
+
 $animation-duration: 1s;
+$guide-button-size: 130rpx;
+$guide-button-arrow-size: 0.6;
+$guide-main-color: #03a9f4; 
 
 page {
   height: 100%;
@@ -69,15 +82,36 @@ page {
 
     .button-anchor {
       display: flex;
+      width: $guide-button-size;
+      height: $guide-button-size;
       justify-content: center;
       align-items: center;
 
       .button {
-        width: 130rpx;
-        height: 130rpx;
+        width: $guide-button-size;
+        height: $guide-button-size;
         position: absolute;
         border-radius: 50%;
         background: yellow;
+      }
+
+      @include material-icon(
+        "black",
+        #000000,
+        "chevron-right",
+        $material-icon-chevron-right
+      );
+      .button-arrow-wrapper {
+        position: absolute;
+        pointer-events: none;
+        color: transparent;
+
+        .button-arrow {
+          pointer-events: none;
+          padding-top: 10rpx;
+          width: $guide-button-size * $guide-button-arrow-size;
+          box-shadow: green 0 0 0 0;
+        }
       }
     }
   }
@@ -120,8 +154,8 @@ page {
 @mixin button-animation-keyframes($index, $colorFrom, $colorTo) {
   @keyframes button-animation-#{$index} {
     0% {
-      width: 130rpx;
-      height: 130rpx;
+      width: $guide-button-size;
+      height: $guide-button-size;
       margin-left: 0rpx;
       margin-right: 0rpx;
       background: $colorFrom;
@@ -129,27 +163,27 @@ page {
     }
 
     50% {
-      width: 200130rpx;
-      height: 200130rpx;
+      width: 200000rpx + $guide-button-size;
+      height: 200000rpx + $guide-button-size;
       margin-left: 200000rpx;
       margin-right: 0rpx;
       background: $colorFrom;
     }
 
     50% {
-      width: 200130rpx;
-      height: 200130rpx;
+      width: 200000rpx + $guide-button-size;
+      height: 200000rpx + $guide-button-size;
       margin-left: 0rpx;
-      margin-right: 200260rpx;
+      margin-right: 200000rpx + $guide-button-size * 2;
       background: $colorTo;
       animation-timing-function: cubic-bezier(0, 1, 0, 1);
     }
 
     100% {
-      width: 130rpx;
-      height: 130rpx;
+      width: $guide-button-size;
+      height: $guide-button-size;
       margin-left: 0rpx;
-      margin-right: 260rpx;
+      margin-right: $guide-button-size * 2;
       background: $colorTo;
     }
   }
@@ -176,11 +210,11 @@ page {
 
     50% {
       margin-left: 0rpx;
-      animation-timing-function: ease-out;
+      animation-timing-function: ease-in;
     }
 
     100% {
-      margin-left: 260rpx;
+      margin-left: $guide-button-size * 2;
     }
   }
 }
@@ -193,4 +227,7 @@ page {
     animation-fill-mode: forwards;
   }
 }
+
+
+
 </style>
