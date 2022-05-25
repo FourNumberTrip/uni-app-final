@@ -6,11 +6,12 @@
       </view>
     </view>
     <view class="button-area">
-      <view class="button-anchor">
+      <view :class="['button-anchor', `button-anchor-animation-${stage}`]">
         <view
           :class="['button', `button-animation-${stage}`]"
           @click="onButtonClick"
-        ></view>
+        >
+        </view>
       </view>
     </view>
     <view class="bottom-place-holder"></view>
@@ -34,6 +35,8 @@ export default {
 </script>
 
 <style lang="scss">
+$animation-duration: 1s;
+
 page {
   height: 100%;
 }
@@ -45,7 +48,7 @@ page {
   background: green;
 
   .text-area {
-    flex-grow: 8;
+    flex-grow: 7;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -60,13 +63,11 @@ page {
 
   .button-area {
     flex-grow: 2;
-    /* background: yellow; */
     display: flex;
     justify-content: center;
     align-items: center;
 
     .button-anchor {
-      flex-grow: 1;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -82,18 +83,18 @@ page {
   }
 
   .bottom-place-holder {
-    flex-grow: 1;
+    flex-grow: 2;
   }
 }
 
-@mixin content-animation-keyframes($index, $colorFrom, $colorTo, $step: 40%) {
+@mixin content-animation-keyframes($index, $colorFrom, $colorTo) {
   @keyframes content-animation-#{$index} {
     0% {
       background: $colorFrom;
       animation-timing-function: steps(1, end);
     }
 
-    #{$step} {
+    50% {
       background: $colorTo;
     }
 
@@ -111,12 +112,12 @@ page {
 @for $i from 1 through 4 {
   .content-animation-#{$i} {
     animation-name: content-animation-#{$i};
-    animation-duration: 1s;
+    animation-duration: $animation-duration;
     animation-fill-mode: forwards;
   }
 }
 
-@mixin button-animation-keyframes($index, $colorFrom, $colorTo, $step: 40%) {
+@mixin button-animation-keyframes($index, $colorFrom, $colorTo) {
   @keyframes button-animation-#{$index} {
     0% {
       width: 130rpx;
@@ -127,7 +128,7 @@ page {
       animation-timing-function: cubic-bezier(1, 0, 1, 0);
     }
 
-    #{$step} {
+    50% {
       width: 200130rpx;
       height: 200130rpx;
       margin-left: 200000rpx;
@@ -135,7 +136,7 @@ page {
       background: $colorFrom;
     }
 
-    #{$step} {
+    50% {
       width: 200130rpx;
       height: 200130rpx;
       margin-left: 0rpx;
@@ -144,24 +145,12 @@ page {
       animation-timing-function: cubic-bezier(0, 1, 0, 1);
     }
 
-    #{$step * 2} {
+    100% {
       width: 130rpx;
       height: 130rpx;
       margin-left: 0rpx;
       margin-right: 260rpx;
-      animation-timing-function: linear;
-    }
-
-    100% {
-      width: 130rpx;
-      height: 130rpx;
-      margin-left: 0rpx;
-      margin-right: 0rpx;
       background: $colorTo;
-    }
-
-    100% {
-
     }
   }
 }
@@ -169,14 +158,39 @@ page {
 @include button-animation-keyframes(1, yellow, green);
 @include button-animation-keyframes(2, green, cyan);
 @include button-animation-keyframes(3, cyan, blue);
-@include button-animation-keyframes(4, blue , purple);
+@include button-animation-keyframes(4, blue, purple);
 
 @for $i from 1 through 4 {
   .button-animation-#{$i} {
     animation-name: button-animation-#{$i};
-    animation-duration: 1s;
+    animation-duration: $animation-duration;
     animation-fill-mode: forwards;
   }
 }
 
+@mixin button-anchor-animation-keyframes($index) {
+  @keyframes button-anchor-animation-#{$index} {
+    0% {
+      margin-left: 0rpx;
+    }
+
+    50% {
+      margin-left: 0rpx;
+      animation-timing-function: ease-out;
+    }
+
+    100% {
+      margin-left: 260rpx;
+    }
+  }
+}
+
+@for $i from 1 through 4 {
+  @include button-anchor-animation-keyframes($i);
+  .button-anchor-animation-#{$i} {
+    animation-name: button-anchor-animation-#{$i};
+    animation-duration: $animation-duration;
+    animation-fill-mode: forwards;
+  }
+}
 </style>
