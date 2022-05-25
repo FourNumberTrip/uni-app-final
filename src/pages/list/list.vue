@@ -1,49 +1,238 @@
 <template>
-	<view class="content">
-		<image class="logo" src="/static/logo.png"></image>
-		<view>
-			<text class="title">{{title}}</text>
-		</view>
-	</view>
+  <view class="content">
+    <view class="list">
+      <view
+        :class="['list-item', item.class]"
+        @click="onListItemClick(index)"
+        v-for="(item, index) in items"
+        :key="index"
+        :data-index="index"
+      >
+        <image class="cover-image" :src="item.coverUrl"></image>
+        <text>{{ item.title }}</text>
+        <text>item id: {{ index }}</text>
+      </view>
+    </view>
+  </view>
 </template>
 
 <script>
-	export default {
-		data() {
-			return {
-				title: 'Hello'
-			}
-		},
-		onLoad() {
-
-		},
-		methods: {
-
-		}
-	}
+let observer;
+export default {
+  data() {
+    return {
+      items: [
+        {
+          coverUrl: "/static/logo.png",
+          title: "上身活动",
+          description: "上身活动",
+          animationSetId: 0,
+          // for animation
+          class: "list-item-out-bottom",
+        },
+        {
+          coverUrl: "/static/logo.png",
+          title: "上身活动",
+          description: "上身活动",
+          animationSetId: 0,
+          class: "list-item-out-bottom",
+        },
+        {
+          coverUrl: "/static/logo.png",
+          title: "上身活动",
+          description: "上身活动",
+          animationSetId: 0,
+          class: "list-item-out-bottom",
+        },
+        {
+          coverUrl: "/static/logo.png",
+          title: "上身活动",
+          description: "上身活动",
+          animationSetId: 0,
+          class: "list-item-out-bottom",
+        },
+        {
+          coverUrl: "/static/logo.png",
+          title: "上身活动",
+          description: "上身活动",
+          animationSetId: 0,
+          class: "list-item-out-bottom",
+        },
+        {
+          coverUrl: "/static/logo.png",
+          title: "上身活动",
+          description: "上身活动",
+          animationSetId: 0,
+          class: "list-item-out-bottom",
+        },
+        {
+          coverUrl: "/static/logo.png",
+          title: "上身活动",
+          description: "上身活动",
+          animationSetId: 0,
+          class: "list-item-out-bottom",
+        },
+        {
+          coverUrl: "/static/logo.png",
+          title: "上身活动",
+          description: "上身活动",
+          animationSetId: 0,
+          class: "list-item-out-bottom",
+        },
+        {
+          coverUrl: "/static/logo.png",
+          title: "上身活动",
+          description: "上身活动",
+          animationSetId: 0,
+          class: "list-item-out-bottom",
+        },
+        {
+          coverUrl: "/static/logo.png",
+          title: "上身活动",
+          description: "上身活动",
+          animationSetId: 0,
+          class: "list-item-out-bottom",
+        },
+        {
+          coverUrl: "/static/logo.png",
+          title: "上身活动",
+          description: "上身活动",
+          animationSetId: 0,
+          class: "list-item-out-bottom",
+        },
+        {
+          coverUrl: "/static/logo.png",
+          title: "上身活动",
+          description: "上身活动",
+          animationSetId: 0,
+          class: "list-item-out-bottom",
+        },
+        {
+          coverUrl: "/static/logo.png",
+          title: "上身活动",
+          description: "上身活动",
+          animationSetId: 0,
+          class: "list-item-out-bottom",
+        },
+        {
+          coverUrl: "/static/logo.png",
+          title: "上身活动",
+          description: "上身活动",
+          animationSetId: 0,
+          class: "list-item-out-bottom",
+        },
+        {
+          coverUrl: "/static/logo.png",
+          title: "上身活动",
+          description: "上身活动",
+          animationSetId: 0,
+          class: "list-item-out-bottom",
+        },
+      ],
+    };
+  },
+  onLoad() {},
+  onReady() {
+    // for scroll in animation
+    observer = uni.createIntersectionObserver(this, {
+      observeAll: true,
+    });
+    observer
+      .relativeToViewport({
+        bottom: 0,
+      })
+      .observe(".list-item", (res) => {
+        if (res.intersectionRatio > 0) {
+          // appear
+          this.items[res.dataset.index].class = "";
+          // if (res.boundingClientRect.top < 0) {
+          //   // appear from top
+          // } else {
+          //   // appear from bottom
+          // }
+        } else {
+          // disappear
+          if (res.boundingClientRect.top < 0) {
+            // disappear to top
+            this.items[res.dataset.index].class = "list-item-out-top";
+          } else {
+            // disappear to bottom
+            this.items[res.dataset.index].class = "list-item-out-bottom";
+          }
+        }
+      });
+  },
+  onUnload() {
+    if (observer) {
+      observer.disconnect();
+    }
+  },
+  methods: {
+    onListItemClick(index) {},
+  },
+};
 </script>
 
 <style>
-	.content {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-	}
+.list {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
 
-	.logo {
-		height: 200rpx;
-		width: 200rpx;
-		margin: 200rpx auto 50rpx auto;
-	}
+.list-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 
-	.text-area {
-		display: flex;
-		justify-content: center;
-	}
+  width: 330rpx;
+  height: 330rpx;
+  background: lightgrey;
+  border-radius: 20rpx;
+  margin: 12rpx;
 
-	.title {
-		font-size: 36rpx;
-		color: #8f8f94;
-	}
+  box-shadow: rgba(0, 0, 0, 0.16) 0rpx 4rpx 8rpx,
+    rgba(0, 0, 0, 0.23) 0rpx 4rpx 8rpx;
+
+  transition: margin-top 600ms, margin-bottom 600ms, opacity 600ms,
+    transform 200ms;
+}
+
+.list-item:active {
+  pointer-events: none;
+  transform: scale(0.96);
+}
+
+.list-item:hover {
+  transform: scale(0.96);
+}
+
+.list-item-out-bottom {
+  margin-top: 60rpx !important;
+  opacity: 0;
+}
+
+.list-item-out-top {
+  margin-bottom: 60rpx !important;
+  opacity: 0;
+}
+
+.cover-image {
+  width: 200rpx;
+  height: 200rpx;
+}
+
+.text-area {
+  display: flex;
+  justify-content: center;
+}
+
+.title {
+  font-size: 36rpx;
+  color: #8f8f94;
+}
 </style>
