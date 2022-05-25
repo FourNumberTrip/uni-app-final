@@ -7,6 +7,12 @@
 			}
 		},
 		{
+			"path": "pages/guide/guide",
+			"style": {
+				"navigationBarTitleText": "uni-app"
+			}
+		},
+		{
 			"path": "pages/select/select",
 			"style": {
 				"navigationBarTitleText": "uni-app"
