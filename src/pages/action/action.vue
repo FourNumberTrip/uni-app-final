@@ -10,6 +10,8 @@
       :style="{height:screenHeight+'px'}"
     ></canvas>
 
+    <button @click="turnBack">180度</button>
+
     <text class="action_name">肩部绕环</text>
 
     <view class="list">
@@ -110,6 +112,7 @@ export default {
 
         uni.request({
           url: "https://egg.moe/custom/untitled1.glb",
+          // url: "https://threejs.org/examples/models/gltf/RobotExpressive/RobotExpressive.glb",
           responseType: "arraybuffer",
           success: (res) => {
             gltfLoader.parse(res.data, "", (gltf) => {
@@ -153,6 +156,9 @@ export default {
     onTX(e) {
       this.platform.dispatchTouchEvent(e);
     },
+    turnBack(){
+
+    },
   },
 };
 </script>
@@ -161,11 +167,14 @@ export default {
 .content {
   display: flex;
   flex-direction: column;
+
   height:500px;
   align-content: center;
 }
 .webgl{
   z-index: 0;
+  width: 100%;
+  height: 100%;
 }
 .action_name{
   position: fixed;
@@ -196,11 +205,11 @@ export default {
 
 .list-item:active {
   pointer-events: none;
-  transform: scale(0.96);
+  transform: scale(0.9);
 }
 
 .list-item:hover {
-  transform: scale(0.96);
+  transform: scale(0.9);
 }
 
 .image {
