@@ -6,11 +6,10 @@
         style="flex-grow: 1; display: flex"
         v-for="(item, index) in items"
         :key="item.title"
-        ontouchstart="onTouchStart"
-        @touchend="onTouchEnd(index)"
+        @tap="onTap(index)"
       >
         <image class="button-background-image" :src="item.image"> </image>
-        <view class="translucent">
+        <view class="translucent-box">
           <text class="button-title">{{ item.title }}</text>
           <text class="button-description">{{ item.description }}</text>
         </view>
@@ -29,22 +28,19 @@ export default {
           title: "热身动作",
           description:
             "热身运动是热身运动是热身运动是热身运动是热身运动是热身运动是热身运动是热身运动是热身运动",
-          touchDown: false,
         },
         {
           image: "/static/pain-spots.jpg",
           title: "疼痛缓解",
           description:
             "疼痛缓解是疼痛缓解是疼痛缓解是疼痛缓解是疼痛缓解是疼痛缓解是疼痛缓解是疼痛缓解是疼痛缓解",
-          touchDown: false,
         },
       ],
     };
   },
   onLoad() {},
   methods: {
-    onTouchStart(index) {},
-    onTouchEnd(index) {},
+    onTap(index) {},
   },
 };
 </script>
@@ -91,7 +87,7 @@ page {
   box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;
 }
 
-.translucent {
+.translucent-box {
   z-index: 1;
   position: absolute;
   width: 100%;
