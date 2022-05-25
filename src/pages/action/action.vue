@@ -10,7 +10,7 @@
       :style="{height:screenHeight+'px'}"
     ></canvas>
 
-    <button @click="turnBack">180度</button>
+    <button @click="turnBack">直接转</button>
 
     <text class="action_name">肩部绕环</text>
 
@@ -49,6 +49,9 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 export default {
   data() {
     return {
+      canvas:null,
+      scene:null,
+      camera:null,
       disposing: false,
       platform: null,
       frameId: -1,
@@ -87,6 +90,7 @@ export default {
         let clock = new Clock();
 
         const canvas = res[0].node;
+        this.canvas=canvas;
 
         this.platform = new WechatPlatform(canvas);
         console.log(this.platform);
@@ -97,12 +101,15 @@ export default {
           antialias: true,
           alpha: true,
         });
+
         const camera = new PerspectiveCamera(
           45,
           canvas.width / canvas.height,
           1,
           2000
         );
+        this.camera=camera
+
         camera.position.set(0, 2, 4);
         camera.lookAt(new Vector3(0, 0, 0));
         const scene = new Scene();
@@ -125,6 +132,7 @@ export default {
             });
           },
         });
+        this.scene=scene
 
         // camera.position.z = 10;
         renderer.outputEncoding = sRGBEncoding;
@@ -157,8 +165,10 @@ export default {
       this.platform.dispatchTouchEvent(e);
     },
     turnBack(){
-
+      console.log(this.scene)
+      this.scene.rotateY(Math.PI);
     },
+
   },
 };
 </script>
