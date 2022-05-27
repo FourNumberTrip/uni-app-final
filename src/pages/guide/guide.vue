@@ -1,6 +1,6 @@
 <template>
-  <view :class="['content', `content-animation-${stage}`]">
-    <view :class="['guide-area', `guide-area-animation-${stage}`]">
+  <view :class="['content', `content-animation-${guideStage}`]">
+    <view :class="['guide-area', `guide-area-animation-${guideStage}`]">
       <view class="image-container">
         <img class="image" :src="guide.image" alt=""
       /></view>
@@ -9,16 +9,16 @@
       </view>
     </view>
     <view class="button-area">
-      <view :class="['button-anchor', `button-anchor-animation-${stage}`]">
+      <view :class="['button-anchor', `button-anchor-animation-${guideStage}`]">
         <view
-          :class="['button', `button-animation-${stage}`]"
+          :class="['button', `button-animation-${guideStage}`]"
           @click="onButtonClick"
         >
           <view
             :class="[
               'button-arrow-white',
               'material-icon',
-              `button-arrow-white-animation-${stage}`,
+              `button-arrow-white-animation-${guideStage}`,
             ]"
             data-color="white"
             data-icon="chevron-right"
@@ -27,7 +27,7 @@
             :class="[
               'button-arrow-theme',
               'material-icon',
-              `button-arrow-theme-animation-${stage}`,
+              `button-arrow-theme-animation-${guideStage}`,
             ]"
             data-color="theme"
             data-icon="chevron-right"
@@ -62,16 +62,16 @@ const guides = [
 export default {
   data() {
     return {
-      stage: 0,
+      guideStage: 0,
       guide: guides[0],
     };
   },
   onLoad() {},
   methods: {
     onButtonClick() {
-      this.stage++;
+      this.guideStage++;
       setTimeout(() => {
-        this.guide = guides[this.stage];
+        this.guide = guides[this.guideStage];
       }, 500);
     },
   },
@@ -83,10 +83,11 @@ export default {
 
 $animation-duration: 0.8s;
 $guide-button-size: 130rpx;
-$guide-button-arrow-size: 0.6;
+$guide-button-arrow-size: 0.5;
 $guide-content-ratio: 7 2 2;
 
 $theme-color: #000000;
+// should be actually number of pages - 1
 $guide-pages: 4;
 
 page {
@@ -191,18 +192,32 @@ page {
 }
 
 @mixin content-animation-keyframes($index, $colorFrom, $colorTo) {
-  @keyframes content-animation-#{$index} {
-    0% {
-      background: $colorFrom;
-      animation-timing-function: steps(1, end);
-    }
+  @if $index < $guide-pages {
+    @keyframes content-animation-#{$index} {
+      0% {
+        background: $colorFrom;
+        animation-timing-function: steps(1, end);
+      }
 
-    50% {
-      background: $colorTo;
-    }
+      50% {
+        background: $colorTo;
+      }
 
-    100% {
-      background: $colorTo;
+      100% {
+        background: $colorTo;
+      }
+    }
+  } @else {
+    // for page transitioning
+    @keyframes content-animation-#{$index} {
+      0% {
+        background: $colorFrom;
+        animation-timing-function: steps(1, end);
+      }
+
+      100% {
+        background: $colorFrom;
+      }
     }
   }
 }
@@ -221,35 +236,66 @@ page {
 }
 
 @mixin guide-area-animation-keyframes($index, $disappear-percentage) {
-  @if $index % 2 == 1 {
-    @keyframes guide-area-animation-#{$index} {
-      0% {
-        transform: translateX(0rpx);
-        opacity: 100%;
-        animation-timing-function: linear;
-        color: black;
-      }
+  @if $index < $guide-pages {
+    @if $index % 2 == 1 {
+      @keyframes guide-area-animation-#{$index} {
+        0% {
+          transform: translateX(0rpx);
+          opacity: 100%;
+          animation-timing-function: linear;
+          color: black;
+        }
 
-      #{$disappear-percentage} {
-        transform: translateX(-300rpx);
-        opacity: 0%;
-        color: black;
-      }
+        #{$disappear-percentage} {
+          transform: translateX(-300rpx);
+          opacity: 0%;
+          color: black;
+        }
 
-      #{100% - $disappear-percentage} {
-        transform: translateX(300rpx);
-        opacity: 0%;
-        animation-timing-function: linear;
-        color: white;
-      }
+        #{100% - $disappear-percentage} {
+          transform: translateX(300rpx);
+          opacity: 0%;
+          animation-timing-function: linear;
+          color: white;
+        }
 
-      100% {
-        transform: translateX(0rpx);
-        opacity: 100%;
-        color: white;
+        100% {
+          transform: translateX(0rpx);
+          opacity: 100%;
+          color: white;
+        }
+      }
+    } @else {
+      @keyframes guide-area-animation-#{$index} {
+        0% {
+          transform: translateX(0rpx);
+          opacity: 100%;
+          animation-timing-function: linear;
+          color: white;
+        }
+
+        #{$disappear-percentage} {
+          transform: translateX(-300rpx);
+          opacity: 0%;
+          color: white;
+        }
+
+        #{100% - $disappear-percentage} {
+          transform: translateX(300rpx);
+          opacity: 0%;
+          animation-timing-function: linear;
+          color: black;
+        }
+
+        100% {
+          transform: translateX(0rpx);
+          opacity: 100%;
+          color: black;
+        }
       }
     }
   } @else {
+    // for page transitioning
     @keyframes guide-area-animation-#{$index} {
       0% {
         transform: translateX(0rpx);
@@ -264,17 +310,9 @@ page {
         color: white;
       }
 
-      #{100% - $disappear-percentage} {
-        transform: translateX(300rpx);
-        opacity: 0%;
-        animation-timing-function: linear;
-        color: black;
-      }
-
       100% {
-        transform: translateX(0rpx);
-        opacity: 100%;
-        color: black;
+        transform: translateX(-300rpx);
+        opacity: 0%;
       }
     }
   }
@@ -291,39 +329,57 @@ page {
 }
 
 @mixin button-animation-keyframes($index, $colorFrom, $colorTo) {
-  @keyframes button-animation-#{$index} {
-    0% {
-      width: $guide-button-size;
-      height: $guide-button-size;
-      margin-left: 0rpx;
-      margin-right: 0rpx;
-      background: $colorFrom;
-      animation-timing-function: cubic-bezier(1, 0, 1, 0);
-    }
+  @if $index < $guide-pages {
+    @keyframes button-animation-#{$index} {
+      0% {
+        width: $guide-button-size;
+        height: $guide-button-size;
+        margin-left: 0rpx;
+        margin-right: 0rpx;
+        background: $colorFrom;
+        animation-timing-function: cubic-bezier(1, 0, 1, 0);
+      }
 
-    50% {
-      width: 200000rpx + $guide-button-size;
-      height: 200000rpx + $guide-button-size;
-      margin-left: 200000rpx;
-      margin-right: 0rpx;
-      background: $colorFrom;
-    }
+      50% {
+        width: 200000rpx + $guide-button-size;
+        height: 200000rpx + $guide-button-size;
+        margin-left: 200000rpx;
+        margin-right: 0rpx;
+        background: $colorFrom;
+      }
 
-    50% {
-      width: 200000rpx + $guide-button-size;
-      height: 200000rpx + $guide-button-size;
-      margin-left: 0rpx;
-      margin-right: 200000rpx + $guide-button-size * 2;
-      background: $colorTo;
-      animation-timing-function: cubic-bezier(0, 1, 0, 1);
-    }
+      50% {
+        width: 200000rpx + $guide-button-size;
+        height: 200000rpx + $guide-button-size;
+        margin-left: 0rpx;
+        margin-right: 200000rpx + $guide-button-size * 2;
+        background: $colorTo;
+        animation-timing-function: cubic-bezier(0, 1, 0, 1);
+      }
 
-    100% {
-      width: $guide-button-size;
-      height: $guide-button-size;
-      margin-left: 0rpx;
-      margin-right: $guide-button-size * 2;
-      background: $colorTo;
+      100% {
+        width: $guide-button-size;
+        height: $guide-button-size;
+        margin-left: 0rpx;
+        margin-right: $guide-button-size * 2;
+        background: $colorTo;
+      }
+    }
+  } @else {
+    @keyframes button-animation-#{$index} {
+      0% {
+        width: $guide-button-size;
+        height: $guide-button-size;
+        margin-right: 0rpx;
+        background: $colorFrom;
+        animation-timing-function: cubic-bezier(.18,.55,.43,.81);
+      }
+
+      100% {
+        width: 4000rpx;
+        height: 4000rpx;
+        background: $colorFrom;
+      }
     }
   }
 }
