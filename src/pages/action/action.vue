@@ -10,7 +10,8 @@
       :style="{height:screenHeight+'px'}"
     ></canvas>
 
-    <button @click="turnBack">直接转</button>
+    <button @click="turnBack" style="margin-top: 0px">直接转</button>
+    <button @click="animateTurn"style="margin-top: 30px">动画转</button>
 
     <text class="action_name">肩部绕环</text>
 
@@ -49,6 +50,8 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 export default {
   data() {
     return {
+      controls:null,
+      renderer:null,
       canvas:null,
       scene:null,
       camera:null,
@@ -101,6 +104,7 @@ export default {
           antialias: true,
           alpha: true,
         });
+        this.renderer=renderer
 
         const camera = new PerspectiveCamera(
           45,
@@ -116,6 +120,7 @@ export default {
         const gltfLoader = new GLTFLoader();
         const controls = new OrbitControls(camera, canvas);
         controls.enableDamping = true;
+        this.controls=controls
 
         uni.request({
           url: "https://egg.moe/custom/untitled1.glb",
@@ -168,7 +173,23 @@ export default {
       console.log(this.scene)
       this.scene.rotateY(Math.PI);
     },
-
+    animateTurn(){
+      //应该用setinterval，requestAnimationFrame好像不被小程序支持
+      let angle=Math.PI
+      let cnt_interval=0;
+      let step=0.1*Math.PI
+      let interval_num=angle/step
+      let intervalId=setInterval(() => {
+        this.controls.update();
+        this.renderer.render(this.scene, this.camera);
+        this.scene.rotateY(step);//每次绕y轴旋转step弧度
+        cnt_interval=cnt_interval+1;
+        if(cnt_interval>=interval_num){//结束缩放
+          clearInterval(intervalId);
+          console.log("end")
+        }
+      }, 1);
+    },
   },
 };
 </script>
@@ -182,7 +203,7 @@ export default {
   align-content: center;
 }
 .webgl{
-  z-index: 0;
+  /*z-index: 0;*/
   width: 100%;
   height: 100%;
 }
@@ -192,7 +213,7 @@ export default {
   margin-top: 380px;
 }
 .list {
-  z-index: 1;
+  /*z-index: 1;*/
   position: absolute;
   height: 10%;
   width: 100%;
@@ -206,7 +227,7 @@ export default {
 
 .list-item {
   width: 34px;
-  z-index: 1;
+  /*z-index: 1;*/
   transition: all 200ms;
   touch-action: manipulation;
   position: relative;
@@ -223,7 +244,7 @@ export default {
 }
 
 .image {
-  z-index: 1;
+  /*z-index: 1;*/
   position: absolute;
   width: 100%;
   height: 100%;
