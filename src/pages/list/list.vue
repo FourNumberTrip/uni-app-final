@@ -173,7 +173,14 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss">
+$list-background-color: #f3f5f8;
+$list-item-card-color: white;
+
+.content {
+  background: $list-background-color;
+}
+
 .list {
   display: flex;
   flex-direction: row;
@@ -191,12 +198,11 @@ export default {
 
   width: 330rpx;
   height: 330rpx;
-  background: lightgrey;
+  background: $list-item-card-color;
   border-radius: 20rpx;
   margin: 12rpx;
 
-  box-shadow: rgba(0, 0, 0, 0.16) 0rpx 4rpx 8rpx,
-    rgba(0, 0, 0, 0.23) 0rpx 4rpx 8rpx;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
 
   transition: margin-top 600ms, margin-bottom 600ms, opacity 600ms,
     transform 200ms;
