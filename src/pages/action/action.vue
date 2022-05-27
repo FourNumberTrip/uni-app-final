@@ -20,7 +20,7 @@
           class="list-item"
           v-for="(item, index) in items"
           :key="item.title"
-          ontouchstart="onTouchStart"
+          @ontouchstart="onTouchStart(index)"
           @touchend="onTouchEnd(index)"
       >
         <img class="image" :src="item.image">
@@ -46,10 +46,13 @@ import {
 import { WechatPlatform, PlatformManager } from "platformize-three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-
+let clock = new Clock();
 export default {
   data() {
     return {
+      mixer:null,
+      clock:null,
+      gltfLoader:null,
       controls:null,
       renderer:null,
       canvas:null,
@@ -84,88 +87,135 @@ export default {
     };
   },
   onLoad() {
-    uni
-      .createSelectorQuery()
-      .select("#gl")
-      .node()
-      .exec((res) => {
-        let mixer;
-        let clock = new Clock();
-
-        const canvas = res[0].node;
-        this.canvas=canvas;
-
-        this.platform = new WechatPlatform(canvas);
-        console.log(this.platform);
-        PlatformManager.set(this.platform);
-
-        const renderer = new WebGL1Renderer({
-          canvas,
-          antialias: true,
-          alpha: true,
-        });
-        this.renderer=renderer
-
-        const camera = new PerspectiveCamera(
-          45,
-          canvas.width / canvas.height,
-          1,
-          2000
-        );
-        this.camera=camera
-
-        camera.position.set(0, 2, 4);
-        camera.lookAt(new Vector3(0, 0, 0));
-        const scene = new Scene();
-        const gltfLoader = new GLTFLoader();
-        const controls = new OrbitControls(camera, canvas);
-        controls.enableDamping = true;
-        this.controls=controls
-
-        uni.request({
-          url: "https://egg.moe/custom/untitled1.glb",
-          // url: "https://threejs.org/examples/models/gltf/RobotExpressive/RobotExpressive.glb",
-          responseType: "arraybuffer",
-          success: (res) => {
-            gltfLoader.parse(res.data, "", (gltf) => {
-              gltf.parser = null;
-              gltf.scene.position.y = -1;
-              scene.add(gltf.scene);
-              mixer = new AnimationMixer(gltf.scene);
-              let activeAction = mixer.clipAction(gltf.animations[0]);
-              activeAction.play();
-            });
-          },
-        });
-        this.scene=scene
-
-        // camera.position.z = 10;
-        renderer.outputEncoding = sRGBEncoding;
-        scene.add(new AmbientLight(0xffffff, 1.0));
-        scene.add(new DirectionalLight(0xffffff, 1.0));
-        renderer.setSize(canvas.width, canvas.height);
-        uni.getSystemInfo({
-          success: (res) => {
-            renderer.setPixelRatio(res.pixelRatio);
-          },
-        });
-
-        const render = () => {
-          if (mixer) mixer.update(clock.getDelta());
-          if (!this.disposing)
-            this.frameId = canvas.requestAnimationFrame(render);
-          controls.update();
-          renderer.render(scene, camera);
-        };
-        render();
-      });
+    // this.load("https://egg.moe/custom/untitled1.glb")
   },
   mounted() {
     this.screenHeight = uni.getSystemInfoSync().windowHeight
+    // this.load("https://threejs.org/examples/models/gltf/RobotExpressive/RobotExpressive.glb")
+    this.load("https://egg.moe/custom/untitled1.glb")
+
   },
   methods: {
-    onTouchStart(index) {},
-    onTouchEnd(index) {},
+    // action(url,index){
+    //   let mixer;
+    //   uni.request({
+    //           url: url,
+    //           // url: "https://threejs.org/examples/models/gltf/RobotExpressive/RobotExpressive.glb",
+    //           // url: "https://egg.moe/custom/untitled1.glb",
+    //           responseType: "arraybuffer",
+    //           success: (res) => {
+    //             this.gltfLoader.parse(res.data, "", (gltf) => {
+    //               gltf.parser = null;
+    //               gltf.scene.position.y = -1;
+    //               this.scene.add(gltf.scene);
+    //               mixer = new AnimationMixer(gltf.scene);
+    //               let activeAction = mixer.clipAction(gltf.animations[index]);
+    //               activeAction.play();
+    //             });
+    //           },
+    //         });
+    //   let clock=new Clock();
+    //   this.render(clock,mixer)
+    // },
+    load(url){
+      console.log("loading:")
+      console.log(url)
+      uni
+          .createSelectorQuery()
+          .select("#gl")
+          .node()
+          .exec((res) => {
+            let mixer;
+            // let clock = new Clock();
+
+            const canvas = res[0].node;
+            this.canvas=canvas;
+
+            this.platform = new WechatPlatform(canvas);
+            console.log(this.platform);
+            PlatformManager.set(this.platform);
+
+            const renderer = new WebGL1Renderer({
+              canvas,
+              antialias: true,
+              alpha: true,
+            });
+            this.renderer=renderer
+
+            const camera = new PerspectiveCamera(
+                45,
+                canvas.width / canvas.height,
+                1,
+                2000
+            );
+            this.camera=camera
+
+            camera.position.set(0, 2, 4);
+            camera.lookAt(new Vector3(0, 0, 0));
+            const scene = new Scene();
+            const gltfLoader = new GLTFLoader();
+            const controls = new OrbitControls(camera, canvas);
+            controls.enableDamping = true;
+            this.controls=controls
+            this.gltfLoader=gltfLoader
+            uni.request({
+              // url: url,
+              url: "https://threejs.org/examples/models/gltf/RobotExpressive/RobotExpressive.glb",
+              // url: "https://egg.moe/custom/untitled1.glb",
+              responseType: "arraybuffer",
+              success: (res) => {
+                gltfLoader.parse(res.data, "", (gltf) => {
+                  gltf.parser = null;
+                  gltf.scene.position.y = -1;
+                  scene.add(gltf.scene);
+                  mixer = new AnimationMixer(gltf.scene);
+                  let activeAction = mixer.clipAction(gltf.animations[0]);
+                  activeAction.timeScale = 20;
+                  activeAction.play();
+                });
+              },
+            });
+            // this.action(url,0)
+            this.scene=scene
+            // camera.position.z = 10;
+            renderer.outputEncoding = sRGBEncoding;
+            scene.add(new AmbientLight(0xffffff, 1.0));
+            scene.add(new DirectionalLight(0xffffff, 1.0));
+            renderer.setSize(canvas.width, canvas.height);
+            uni.getSystemInfo({
+              success: (res) => {
+                renderer.setPixelRatio(res.pixelRatio);
+              },
+            });
+
+            const render = () => {
+                // console.log("hello render")
+              if (mixer) mixer.update(clock.getDelta());
+              if (!this.disposing)
+                this.frameId = canvas.requestAnimationFrame(render);
+              controls.update();
+              renderer.render(scene, camera);
+            };
+            render();
+            // this.render(mixer);
+          });
+    },
+    // render(mixer){
+    //   // console.log("hello render")
+    //   if (mixer) mixer.update(clock.getDelta());
+    //   if (!this.disposing)
+    //     this.frameId = this.canvas.requestAnimationFrame(this.render);
+    //   this.controls.update();
+    //   this.renderer.render(this.scene, this.camera);
+    // },
+    onTouchStart(index) {
+    },
+    onTouchEnd(index) {
+      let url=this.items[index].url
+      this.load(url)
+      console.log("onTouchEnd")
+      console.log(url)
+    },
     onTX(e) {
       this.platform.dispatchTouchEvent(e);
     },
@@ -190,6 +240,9 @@ export default {
           console.log("end")
         }
       }, 1);
+    },
+    animationTurn(){
+
     },
   },
 };
