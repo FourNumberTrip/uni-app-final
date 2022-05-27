@@ -44,7 +44,9 @@ export default {
   },
 };
 </script>
-<style>
+<style lang="scss">
+$select-background-color: #f3f5f8;
+
 page {
   height: 100%;
 }
@@ -53,6 +55,7 @@ page {
   height: 100%;
   display: flex;
   flex-direction: column;
+  background: $select-background-color;
 }
 
 .list {
