@@ -2,8 +2,8 @@
   <view :class="['content', `content-animation-${guideStage}`]">
     <view :class="['guide-area', `guide-area-animation-${guideStage}`]">
       <view class="image-container">
-        <img class="image" :src="guide.image" alt=""
-      /></view>
+        <img class="image" :src="guide.image" alt="" />
+      </view>
       <view class="text">
         {{ guide.text }}
       </view>
@@ -372,7 +372,7 @@ page {
         height: $guide-button-size;
         margin-right: 0rpx;
         background: $colorFrom;
-        animation-timing-function: cubic-bezier(.18,.55,.43,.81);
+        animation-timing-function: cubic-bezier(0.18, 0.55, 0.43, 0.81);
       }
 
       100% {
