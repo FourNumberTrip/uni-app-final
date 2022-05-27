@@ -184,6 +184,7 @@ export default {
         this.renderer.render(this.scene, this.camera);
         this.scene.rotateY(step);//每次绕y轴旋转step弧度
         cnt_interval=cnt_interval+1;
+        console.log(cnt_interval)
         if(cnt_interval>=interval_num){//结束缩放
           clearInterval(intervalId);
           console.log("end")
