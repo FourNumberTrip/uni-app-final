@@ -11,7 +11,7 @@
     ></canvas>
 
     <button @click="turnBack" style="margin-top: 0px">直接转</button>
-    <button @click="animateTurn" style="margin-top: 30px">动画转</button>
+    <button @click="autoTurn" style="margin-top: 30px">动画转</button>
 
     <text class="action_name">肩部绕环</text>
 
@@ -55,11 +55,16 @@ let camera;
 let platform;
 let disposing = false;
 let frameId = -1;
-let screenHeight = "";
+let activeAction=[];
 
 export default {
   data() {
     return {
+      screenHeight : "",
+      turning:false,
+      cnt_turn:0,
+      cur_idx:0,
+      url:"https://threejs.org/examples/models/gltf/RobotExpressive/RobotExpressive.glb",
       items: [
         {
           image: "/static/small.png",
@@ -88,33 +93,15 @@ export default {
     // this.load("https://egg.moe/custom/untitled1.glb")
   },
   mounted() {
-    screenHeight = uni.getSystemInfoSync().windowHeight
-    // this.load("https://threejs.org/examples/models/gltf/RobotExpressive/RobotExpressive.glb")
-    this.load("https://egg.moe/custom/untitled1.glb")
-
+    this.screenHeight = uni.getSystemInfoSync().windowHeight
+    this.load(this.url)
   },
   methods: {
-    // action(url,index){
-    //   let mixer;
-    //   uni.request({
-    //           url: url,
-    //           // url: "https://threejs.org/examples/models/gltf/RobotExpressive/RobotExpressive.glb",
-    //           // url: "https://egg.moe/custom/untitled1.glb",
-    //           responseType: "arraybuffer",
-    //           success: (res) => {
-    //             this.gltfLoader.parse(res.data, "", (gltf) => {
-    //               gltf.parser = null;
-    //               gltf.scene.position.y = -1;
-    //               this.scene.add(gltf.scene);
-    //               mixer = new AnimationMixer(gltf.scene);
-    //               let activeAction = mixer.clipAction(gltf.animations[index]);
-    //               activeAction.play();
-    //             });
-    //           },
-    //         });
-    //   let clock=new Clock();
-    //   this.render(clock,mixer)
-    // },
+    action(index){
+            activeAction[this.cur_idx].stop();
+            activeAction[index].play();
+            this.cur_idx=index;
+    },
     load(url){
       console.log("loading:")
       console.log(url)
@@ -149,8 +136,8 @@ export default {
             controls = new OrbitControls(camera, canvas);
             controls.enableDamping = true;
             uni.request({
-              // url: url,
-              url: "https://threejs.org/examples/models/gltf/RobotExpressive/RobotExpressive.glb",
+              url: url,
+              // url: "https://threejs.org/examples/models/gltf/RobotExpressive/RobotExpressive.glb",
               // url: "https://egg.moe/custom/untitled1.glb",
               responseType: "arraybuffer",
               success: (res) => {
@@ -159,13 +146,14 @@ export default {
                   gltf.scene.position.y = -1;
                   scene.add(gltf.scene);
                   mixer = new AnimationMixer(gltf.scene);
-                  let activeAction = mixer.clipAction(gltf.animations[0]);
-                  activeAction.timeScale = 1;
-                  activeAction.play();
+                  for (let i=0;i<gltf.animations.length;i++){
+                    activeAction[i]=mixer.clipAction(gltf.animations[i])
+                  }
+                  activeAction[this.cur_idx].play();
                 });
               },
             });
-            // this.action(url,0)
+            // this.action(0)
             // camera.position.z = 10;
             renderer.outputEncoding = sRGBEncoding;
             scene.add(new AmbientLight(0xffffff, 1.0));
@@ -179,6 +167,7 @@ export default {
 
             const render = () => {
                 // console.log("hello render")
+              if(this.turning) this.turn(0.01);
               if (mixer) mixer.update(clock.getDelta());
               if (!disposing)
                 frameId = canvas.requestAnimationFrame(render);
@@ -186,7 +175,6 @@ export default {
               renderer.render(scene, camera);
             };
             render();
-            // this.render(mixer);
           });
     },
     // render(mixer){
@@ -200,10 +188,10 @@ export default {
     onTouchStart(index) {
     },
     onTouchEnd(index) {
-      let url=this.items[index].url
-      this.load(url)
+      this.action(index)
+      this.cur_idx=index
       console.log("onTouchEnd")
-      console.log(url)
+      console.log(index)
     },
     onTX(e) {
       platform.dispatchTouchEvent(e);
@@ -212,27 +200,20 @@ export default {
       console.log(scene)
       scene.rotateY(Math.PI);
     },
-    animateTurn(){
-      //应该用setinterval，requestAnimationFrame好像不被小程序支持
-      let angle=Math.PI
-      let cnt_interval=0;
-      let step=0.1*Math.PI
-      let interval_num=angle/step
-      let intervalId=setInterval(() => {
-        controls.update();
-        renderer.render(scene, camera);
-        scene.rotateY(step);//每次绕y轴旋转step弧度
-        cnt_interval=cnt_interval+1;
-        console.log(cnt_interval)
-        if(cnt_interval>=interval_num){//结束缩放
-          clearInterval(intervalId);
-          console.log("end")
-        }
-      }, 1);
+    autoTurn(){
+      this.cnt_turn=0
+      this.turning=true;
     },
-    animationTurn(){
-
-    },
+    turn(step){
+      // let step=0.01
+      controls.update();
+      renderer.render(scene, camera);
+      scene.rotateY(step*Math.PI)
+      this.cnt_turn+=1;
+      if(this.cnt_turn>=(1/step)){
+        this.turning=false;
+      }
+    }
   },
 };
 </script>
