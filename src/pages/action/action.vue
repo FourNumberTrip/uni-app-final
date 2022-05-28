@@ -12,8 +12,8 @@
 
     <button @click="turnBack" style="margin-top: 0px">直接转</button>
     <button @click="autoTurn" style="margin-top: 30px">动画转</button>
-
     <button @click="reset" style="margin-top: 40px">复位</button>
+    <button @click="setSpeed" style="margin-top: 20px">0.5倍速</button>
 
     <text class="action_name">肩部绕环</text>
 
@@ -99,6 +99,9 @@ export default {
     this.load(this.url)
   },
   methods: {
+    setSpeed(){
+      mixer.timeScale=0.1
+    },
     reset(){
       controls.reset()
     },
@@ -158,7 +161,6 @@ export default {
                 });
               },
             });
-            // this.action(0)
             // camera.position.z = 10;
             renderer.outputEncoding = sRGBEncoding;
             scene.add(new AmbientLight(0xffffff, 1.0));
@@ -171,7 +173,6 @@ export default {
             });
 
             const render = () => {
-                // console.log("hello render")
               if(this.turning) this.turn(0.01);
               if (mixer) mixer.update(clock.getDelta());
               if (!disposing)
@@ -182,14 +183,6 @@ export default {
             render();
           });
     },
-    // render(mixer){
-    //   // console.log("hello render")
-    //   if (mixer) mixer.update(clock.getDelta());
-    //   if (!this.disposing)
-    //     this.frameId = this.canvas.requestAnimationFrame(this.render);
-    //   this.controls.update();
-    //   this.renderer.render(this.scene, this.camera);
-    // },
     onTouchStart(index) {
     },
     onTouchEnd(index) {
