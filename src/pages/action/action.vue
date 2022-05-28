@@ -13,6 +13,8 @@
     <button @click="turnBack" style="margin-top: 0px">直接转</button>
     <button @click="autoTurn" style="margin-top: 30px">动画转</button>
 
+    <button @click="reset" style="margin-top: 40px">复位</button>
+
     <text class="action_name">肩部绕环</text>
 
     <view class="list">
@@ -97,6 +99,9 @@ export default {
     this.load(this.url)
   },
   methods: {
+    reset(){
+      controls.reset()
+    },
     action(index){
             activeAction[this.cur_idx].stop();
             activeAction[index].play();
