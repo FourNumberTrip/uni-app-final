@@ -3,7 +3,6 @@
     <view class="list">
       <view
         class="list-item"
-        style="flex-grow: 1; display: flex"
         v-for="(item, index) in items"
         :key="item.title"
         @tap="onTap(index)"
@@ -56,62 +55,65 @@ page {
   display: flex;
   flex-direction: column;
   background: $select-background-color;
-}
 
-.list {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-}
+  .list {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 
-.list-item {
-  transition: all 200ms;
-  touch-action: manipulation;
-  flex-grow: 1;
-  position: relative;
-  margin: 20rpx;
-}
+    .list-item {
+      flex: 1;
+      display: flex;
+      transition: all 200ms;
+      position: relative;
+      margin: 20rpx;
 
-.list-item:active {
-  pointer-events: none;
-  transform: scale(0.96);
-}
+      touch-action: manipulation;
 
-.list-item:hover {
-  transform: scale(0.96);
-}
+      .button-background-image {
+        z-index: 0;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 30rpx;
+        box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px,
+          rgba(0, 0, 0, 0.23) 0px 6px 6px;
+      }
 
-.button-background-image {
-  z-index: 0;
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border-radius: 30rpx;
-  box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;
-}
+      .translucent-box {
+        z-index: 1;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 30rpx;
+        background: rgba(0, 0, 0, 0.7);
 
-.translucent-box {
-  z-index: 1;
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border-radius: 30rpx;
-  background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
 
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
+        .button-title {
+          font-size: 50rpx;
+          color: #ffffff;
+        }
 
-.button-title {
-  font-size: 50rpx;
-  color: #ffffff;
-}
+        .button-description {
+          margin: 30rpx 60rpx 0 60rpx;
+          font-size: 30rpx;
+          color: #ffffff;
+        }
+      }
+    }
 
-.button-description {
-  margin: 30rpx 60rpx 0 60rpx;
-  font-size: 30rpx;
-  color: #ffffff;
+    .list-item:active {
+      pointer-events: none;
+      transform: scale(0.96);
+    }
+
+    .list-item:hover {
+      transform: scale(0.96);
+    }
+  }
 }
 </style>
