@@ -10,10 +10,18 @@
       :style="{ height: screenHeight + 'px' }"
     ></canvas>
 
-    <button @click="turnBack" style="margin-top: 0px">直接转</button>
-    <button @click="autoTurn" style="margin-top: 30px">动画转</button>
-    <button @click="reset" style="margin-top: 40px">复位</button>
-    <button @click="setSpeed" style="margin-top: 20px">0.5倍速</button>
+    <button @click="turnBack" style="margin-top: 0px;z-index: 1">直接转</button>
+    <button @click="autoTurn" style="margin-top: 0px;z-index: 1">动画转</button>
+    <button @click="reset" style="margin-top: 0px;z-index: 1">复位</button>
+    <button @click="setSpeed" style="margin-top: 0px;z-index: 1">
+      <text v-if="lowSpeed==false">0.5倍速</text>
+      <text v-else>常速</text>
+    </button>
+    <button @click="pause" style="margin-top: 0px;z-index: 1">
+      <text v-if="paused==false">暂停</text>
+      <text v-else>播放</text>
+    </button>
+
 
     <text class="action_name">肩部绕环</text>
 
@@ -66,6 +74,8 @@ export default {
       turning:false,
       cnt_turn:0,
       cur_idx:0,
+      paused:false,
+      lowSpeed:false,
       url:"https://threejs.org/examples/models/gltf/RobotExpressive/RobotExpressive.glb",
       items: [
         {
@@ -99,8 +109,24 @@ export default {
     this.load(this.url)
   },
   methods: {
+    pause(){
+      let cur_action=activeAction[this.cur_idx]
+      if(this.paused){
+        cur_action.paused=false
+        this.paused=false
+      }else{
+        cur_action.paused=true
+        this.paused=true
+      }
+    },
     setSpeed(){
-      mixer.timeScale=0.1
+      if(this.lowSpeed){
+        mixer.timeScale=1
+        this.lowSpeed=false
+      }else{
+        mixer.timeScale=0.5
+        this.lowSpeed=true
+      }
     },
     reset(){
       controls.reset()
