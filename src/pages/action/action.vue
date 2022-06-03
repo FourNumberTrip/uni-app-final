@@ -35,10 +35,11 @@
       >
     </view>
     <view class="action-name-area">
-      <text class="action-name"
-        >{{ currentAnimationIndex + 1 }}/{{ currentAnimations.length }}
-        {{ animations[currentAnimationId].name }}</text
-      >
+      <text class="action-name">{{
+        `${currentAnimationIndex + 1}/${currentAnimations.length} ${
+          animations[currentAnimationId].name
+        }`
+      }}</text>
     </view>
     <view class="control-area">
       <view class="background-progress">
