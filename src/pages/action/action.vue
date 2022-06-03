@@ -16,7 +16,7 @@
     </view>
     <view class="overall-timer-area">
       <text class="overall-timer">{{ currentOverallTime }}</text>
-      <text class="overall-full-time">{{ totalTime }}</text>
+      <!-- <text class="overall-full-time">{{ totalTime }}</text> -->
     </view>
     <canvas
       class="webgl"
@@ -26,21 +26,47 @@
       @touchmove="onTX"
       @touchend="onTX"
     ></canvas>
+    <view class="timer-area">
+      <text class="timer"></text>
+    </view>
+    <view class="action-name-area">
+      <text class="action-name"></text>
+    </view>
     <view class="control-area">
       <view class="background-progress">
-        <view class="progress"></view>
+        <view
+          class="progress"
+          :style="{
+            width: `${Math.round(
+              completedPercentages[currentAnimationIndex] * 100
+            )}%`,
+          }"
+        ></view>
       </view>
       <view class="controls">
+        <view class="side-spacer"></view>
         <view
           class="material-icon previous"
           data-color="black"
           data-icon="skip-previous"
+          @click="onClickPrevious"
         ></view>
         <view class="spacer"></view>
-        <view class="pause"></view>
-        <view class="space"></view>
-        <view class="next"></view
-      ></view>
+        <view
+          class="material-icon pause"
+          data-color="black"
+          data-icon="pause"
+          @click="onClickPause"
+        ></view>
+        <view class="spacer"></view>
+        <view
+          class="material-icon next"
+          data-color="black"
+          data-icon="skip-next"
+          @click="onClickNext"
+        ></view>
+        <view class="side-spacer"></view>
+      </view>
     </view>
   </view>
 </template>
@@ -183,7 +209,7 @@ export default {
     },
   },
   methods: {
-    pause() {
+    togglePause() {
       let cur_action = activeAction[this.currentAnimationId];
       if (this.paused) {
         cur_action.paused = false;
@@ -197,7 +223,7 @@ export default {
         clock.stop();
       }
     },
-    setSpeed() {
+    toggleSlowMotion() {
       if (this.lowSpeed) {
         mixer.timeScale = 1;
         this.lowSpeed = false;
@@ -206,10 +232,10 @@ export default {
         this.lowSpeed = true;
       }
     },
-    reset() {
+    resetControl() {
       controls.reset();
     },
-    action(index) {
+    setAction(index) {
       activeAction[this.currentAnimationId].stop();
       this.currentAnimationIndex = index;
       // make sure currentAnimationId is updated
@@ -217,6 +243,15 @@ export default {
         activeAction[this.currentAnimationId].play();
       });
       mixer.time = 0;
+    },
+    onClickPause() {
+      this.togglePause();
+    },
+    onClickPrevious() {
+      this.setAction(this.currentAnimationIndex - 1);
+    },
+    onClickNext() {
+      this.setAction(this.currentAnimationIndex + 1);
     },
     load(url) {
       console.log("loading:");
@@ -296,14 +331,6 @@ export default {
           render();
         });
     },
-    onClick(index) {
-      this.action(index);
-      console.log("onClick", index);
-      console.log(index);
-    },
-    onClickPushDown(e) {
-      this.canvasPusherVisible = "canvas-pusher";
-    },
     turnBack() {
       console.log(scene);
       scene.rotateY(Math.PI);
@@ -322,6 +349,8 @@ export default {
         this.turning = false;
       }
     },
+
+    // for three.js touch control
     onTX(e) {
       platform.dispatchTouchEvent(e);
     },
@@ -354,15 +383,17 @@ page {
 
     display: flex;
     flex-direction: row;
+    align-items: stretch;
 
     .overall-progressbar-parts {
       flex: 1;
-      height: 10rpx;
-      margin: 0rpx 1rpx;
+      margin: 0rpx 2rpx;
+      background: rgb(223, 223, 223);
 
       .progress {
-        background: rgb(153, 153, 153);
+        background: #808080;
         border-radius: 5rpx;
+        transition: width 1s;
         height: 100%;
         float: left;
       }
@@ -371,83 +402,100 @@ page {
 
   .overall-timer-area {
     flex: 0;
+    margin-top: 10rpx;
     width: 100%;
+    color: #808080;
 
     .overall-timer {
       float: left;
-      font-size: 50rpx;
+      font-size: 60rpx;
       font-weight: bold;
-      margin-left: 10rpx;
+      margin-left: 20rpx;
     }
 
     .overall-full-time {
       float: right;
-      font-size: 50rpx;
+      font-size: 60rpx;
       font-weight: bold;
-      margin-right: 10rpx;
+      margin-right: 20rpx;
     }
   }
 
   .webgl {
-    flex: 8;
+    flex: 10;
     /*z-index: 0;*/
     width: 100%;
   }
 
   .control-area {
     flex: 2;
-    width: 98%;
-    margin-bottom: 10rpx;
+    width: 93%;
+    margin-bottom: 30rpx;
     position: relative;
 
     .background-progress {
+      z-index: 0;
       position: absolute;
-
       width: 100%;
       height: 100%;
+
       border-radius: 400rpx;
+      box-shadow: rgba(100, 100, 111, 0.3) 0rpx 7rpx 20rpx 0rpx;
+
       overflow: hidden;
 
       .progress {
+        transition: width 1s;
         float: left;
-        width: 60%;
         height: 100%;
-        background: rgb(174, 174, 255);
+        background: rgb(181, 222, 179);
       }
     }
 
     .controls {
+      z-index: 1;
       position: absolute;
+      width: 100%;
+      height: 100%;
 
       display: flex;
       flex-direction: row;
-      justify-content: space-between;
       align-items: center;
+
+      .side-spacer {
+        flex: 4;
+      }
+
+      .spacer {
+        flex: 6;
+      }
 
       @include material-icon(
         "black",
-        #000000,
+        #707070,
         "skip-previous",
         $material-icon-skip-previous
       );
       .previous {
+        padding-top: 10rpx;
         flex: 5;
-        height: 30rpx;
-        width: 30rpx;
       }
 
-      .spacer {
-        flex: 1
-      }
-
+      @include material-icon("black", #707070, "pause", $material-icon-pause);
       .pause {
+        padding-top: 10rpx;
         flex: 5;
-        height: 30rpx;
       }
 
+      @include material-icon(
+        "black",
+        #707070,
+        "skip-next",
+        $material-icon-skip-next
+      );
       .next {
+        padding-top: 10rpx;
         flex: 5;
-        height: 30rpx;
       }
     }
   }
