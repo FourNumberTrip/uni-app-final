@@ -31,7 +31,7 @@
       <text class="timer-total">/{{`${Math.floor(currentAnimationDurations[currentAnimationIndex])}"`}}</text>
     </view>
     <view class="action-name-area">
-      <text class="action-name">{{currentAnimationIndex + 1}}/{{currentAnimations.length}} 卷腹摸膝</text>
+      <text class="action-name">{{currentAnimationIndex + 1}}/{{currentAnimations.length}} {{animations[currentAnimationId].name}}</text>
     </view>
     <view class="control-area">
       <view class="background-progress">
@@ -141,20 +141,20 @@ export default {
         },
       ],
       animations: [
-        { name: "Dance" },
-        { name: "Death" },
-        { name: "Idle" },
-        { name: "Jump" },
-        { name: "No" },
-        { name: "Punch" },
-        { name: "Running" },
-        { name: "Sitting" },
-        { name: "Standing" },
-        { name: "ThumbsUp" },
-        { name: "Walking" },
-        { name: "WalkJump" },
-        { name: "Wave" },
-        { name: "Yes" },
+        { name: "跳舞" },
+        { name: "死亡" },
+        { name: "静止" },
+        { name: "跳跃" },
+        { name: "不好" },
+        { name: "打拳" },
+        { name: "跑步" },
+        { name: "坐着" },
+        { name: "站着" },
+        { name: "大拇指" },
+        { name: "走路" },
+        { name: "走路跳" },
+        { name: "挥手" },
+        { name: "好的" },
       ],
       animationDurations: [],
 
