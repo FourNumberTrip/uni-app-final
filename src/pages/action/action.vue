@@ -27,10 +27,11 @@
       @touchend="onTX"
     ></canvas>
     <view class="timer-area">
-      <text class="timer"></text>
+      <text class="timer">{{Math.floor(currentPlayingTime)}}</text>
+      <text class="timer-total">/{{`${Math.floor(currentAnimationDurations[currentAnimationIndex])}"`}}</text>
     </view>
     <view class="action-name-area">
-      <text class="action-name"></text>
+      <text class="action-name">{{currentAnimationIndex + 1}}/{{currentAnimations.length}} 卷腹摸膝</text>
     </view>
     <view class="control-area">
       <view class="background-progress">
@@ -138,6 +139,22 @@ export default {
           title: "action4",
           touchDown: false,
         },
+      ],
+      animations: [
+        { name: "Dance" },
+        { name: "Death" },
+        { name: "Idle" },
+        { name: "Jump" },
+        { name: "No" },
+        { name: "Punch" },
+        { name: "Running" },
+        { name: "Sitting" },
+        { name: "Standing" },
+        { name: "ThumbsUp" },
+        { name: "Walking" },
+        { name: "WalkJump" },
+        { name: "Wave" },
+        { name: "Yes" },
       ],
       animationDurations: [],
 
@@ -280,7 +297,8 @@ export default {
             2000
           );
 
-          camera.position.set(0, 0, 8);
+          // TODO CHANGE THIS
+          camera.position.set(0, 0, 12);
           scene = new Scene();
           controls = new OrbitControls(camera, canvas);
           controls.enableDamping = true;
@@ -293,6 +311,7 @@ export default {
               const gltfLoader = new GLTFLoader();
               gltfLoader.parse(res.data, "", (gltf) => {
                 gltf.parser = null;
+                // TODO CHANGE THIS
                 gltf.scene.position.y = -2.2;
                 scene.add(gltf.scene);
                 mixer = new AnimationMixer(gltf.scene);
@@ -373,6 +392,8 @@ page {
   justify-content: center;
   align-items: center;
 
+  background: #f5f3f6;
+
   .overall-progressbar {
     flex: 0;
     margin-top: 5rpx;
@@ -427,6 +448,38 @@ page {
     width: 100%;
   }
 
+  .timer-area {
+    flex: 0;
+    width: 100%;
+    padding-left: 40rpx;
+    margin-bottom: 10rpx;
+    font-size: 80rpx;
+    font-weight: bold;
+
+    .timer {
+      float: left;
+      color: black;
+    }
+
+    .timer-total {
+      float: left;
+      color: #8b8b8b;
+    }
+  }
+
+  .action-name-area {
+    flex: 0;
+    width: 100%;
+    padding-left: 45rpx;
+    margin-bottom: 30rpx;
+
+    .action-name {
+      float: left;
+      font-size: 40rpx;
+      font-weight: bold;
+    }
+  }
+
   .control-area {
     flex: 2;
     width: 93%;
@@ -441,6 +494,7 @@ page {
 
       border-radius: 400rpx;
       box-shadow: rgba(100, 100, 111, 0.3) 0rpx 7rpx 20rpx 0rpx;
+      background: white;
 
       overflow: hidden;
 
@@ -499,9 +553,5 @@ page {
       }
     }
   }
-}
-
-hidden {
-  display: hidden;
 }
 </style>
