@@ -1,6 +1,11 @@
 <template>
   <view class="content">
-    <view class="top-part">
+    <view
+      :class="[
+        'top-part',
+        finished ? 'top-part-disappear-animation' : 'top-part-appear-animation',
+      ]"
+    >
       <view class="overall-progressbar">
         <view
           class="overall-progressbar-parts"
@@ -30,7 +35,14 @@
       @touchend="onTX"
     ></canvas>
 
-    <view class="bottom-part">
+    <view
+      :class="[
+        'bottom-part',
+        finished
+          ? 'bottom-part-disappear-animation'
+          : 'bottom-part-appear-animation',
+      ]"
+    >
       <view class="timer-area">
         <text class="timer">{{ Math.floor(currentPlayingTime) }}</text>
         <text class="timer-total"
@@ -61,21 +73,25 @@
           <view class="side-spacer"></view>
           <view
             class="material-icon previous"
-            data-color="black"
+            :data-color="currentAnimationIndex > 0 ? 'gray' : 'lightgray'"
             data-icon="skip-previous"
             @click="onClickPrevious"
           ></view>
           <view class="spacer"></view>
           <view
             class="material-icon pause"
-            data-color="black"
+            data-color="gray"
             :data-icon="paused ? 'play' : 'pause'"
             @click="onClickPause"
           ></view>
           <view class="spacer"></view>
           <view
             class="material-icon next"
-            data-color="black"
+            :data-color="
+              currentAnimationIndex < currentAnimations.length - 1
+                ? 'gray'
+                : 'lightgray'
+            "
             data-icon="skip-next"
             @click="onClickNext"
           ></view>
@@ -294,10 +310,14 @@ export default {
       this.togglePause();
     },
     onClickPrevious() {
-      this.setAction(this.currentAnimationIndex - 1);
+      if (this.currentAnimationIndex > 0) {
+        this.setAction(this.currentAnimationIndex - 1);
+      }
     },
     onClickNext() {
-      this.setAction(this.currentAnimationIndex + 1);
+      if (this.currentAnimationIndex < this.currentAnimations.length - 1) {
+        this.setAction(this.currentAnimationIndex + 1);
+      }
     },
     load(url) {
       console.log("loading:");
@@ -392,7 +412,7 @@ export default {
                       ) {
                         // if the current action is finished, then we proceed to the next one
                         if (
-                          this.currentAnimationIndex <=
+                          this.currentAnimationIndex + 1 <
                           this.currentAnimations.length
                         ) {
                           this.setAction(this.currentAnimationIndex + 1);
@@ -454,6 +474,36 @@ page {
   align-items: center;
 
   background: #f5f3f6;
+
+  @keyframes top-part-appear-animation {
+    from {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0%);
+      opacity: 1;
+    }
+  }
+
+  @keyframes top-part-disappear-animation {
+    from {
+      transform: translateY(0%);
+      opacity: 1;
+    }
+    to {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+  }
+
+  .top-part-disappear-animation {
+    animation: top-part-disappear-animation 1s ease-in forwards;
+  }
+
+  .top-part-appear-animation {
+    animation: top-part-appear-animation 1s ease-out forwards;
+  }
 
   .top-part {
     flex: 0;
@@ -517,6 +567,36 @@ page {
     flex: 11;
     /*z-index: 0;*/
     width: 100%;
+  }
+
+  @keyframes bottom-part-appear-animation {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0%);
+      opacity: 1;
+    }
+  }
+
+  @keyframes bottom-part-disappear-animation {
+    from {
+      transform: translateY(0%);
+      opacity: 1;
+    }
+    to {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+  }
+
+  .bottom-part-disappear-animation {
+    animation: bottom-part-disappear-animation 1s ease-in forwards;
+  }
+
+  .bottom-part-appear-animation {
+    animation: bottom-part-appear-animation 1s ease-out forwards;
   }
 
   .bottom-part {
@@ -605,8 +685,14 @@ page {
         }
 
         @include material-icon(
-          "black",
+          "gray",
           #707070,
+          "skip-previous",
+          $material-icon-skip-previous
+        );
+        @include material-icon(
+          "lightgray",
+          #bcbcbc,
           "skip-previous",
           $material-icon-skip-previous
         );
@@ -615,9 +701,9 @@ page {
           flex: 5;
         }
 
-        @include material-icon("black", #707070, "pause", $material-icon-pause);
+        @include material-icon("gray", #707070, "pause", $material-icon-pause);
         @include material-icon(
-          "black",
+          "gray",
           #707070,
           "play",
           $material-icon-play-arrow
@@ -628,8 +714,14 @@ page {
         }
 
         @include material-icon(
-          "black",
+          "gray",
           #707070,
+          "skip-next",
+          $material-icon-skip-next
+        );
+        @include material-icon(
+          "lightgray",
+          #bcbcbc,
           "skip-next",
           $material-icon-skip-next
         );
