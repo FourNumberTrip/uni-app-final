@@ -64,7 +64,7 @@
         <view
           class="material-icon pause"
           data-color="black"
-          data-icon="pause"
+          :data-icon="paused ? 'play' : 'pause'"
           @click="onClickPause"
         ></view>
         <view class="spacer"></view>
@@ -359,7 +359,6 @@ export default {
         });
     },
     turnBack() {
-      console.log(scene);
       scene.rotateY(Math.PI);
     },
     autoTurn() {
@@ -544,6 +543,7 @@ page {
       }
 
       @include material-icon("black", #707070, "pause", $material-icon-pause);
+      @include material-icon("black", #707070, "play", $material-icon-play-arrow);
       .pause {
         padding-top: 10rpx;
         flex: 5;
