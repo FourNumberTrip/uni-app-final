@@ -1,23 +1,31 @@
 <template>
   <view class="content">
-    <view class="overall-progressbar">
-      <view
-        class="overall-progressbar-parts"
-        v-for="(animation, index) in currentAnimations"
-        :key="index"
-      >
+    <view
+      :class="[
+        'top-part',
+        finished ? 'top-part-disappear-animation' : 'top-part-appear-animation',
+      ]"
+    >
+      <view class="overall-progressbar">
         <view
-          class="progress"
-          :style="{
-            width: `${Math.round(completedPercentages[index] * 100)}%`,
-          }"
-        ></view>
+          class="overall-progressbar-parts"
+          v-for="(animation, index) in currentAnimations"
+          :key="index"
+        >
+          <view
+            class="progress"
+            :style="{
+              width: `${Math.round(completedPercentages[index] * 100)}%`,
+            }"
+          ></view>
+        </view>
+      </view>
+      <view class="overall-timer-area">
+        <text class="overall-timer">{{ currentOverallTime }}</text>
+        <!-- <text class="overall-full-time">{{ totalTime }}</text> -->
       </view>
     </view>
-    <view class="overall-timer-area">
-      <text class="overall-timer">{{ currentOverallTime }}</text>
-      <!-- <text class="overall-full-time">{{ totalTime }}</text> -->
-    </view>
+
     <canvas
       class="webgl"
       type="webgl"
@@ -26,55 +34,69 @@
       @touchmove="onTX"
       @touchend="onTX"
     ></canvas>
-    <view class="timer-area">
-      <text class="timer">{{ Math.floor(currentPlayingTime) }}</text>
-      <text class="timer-total"
-        >/{{
-          `${Math.floor(currentAnimationDurations[currentAnimationIndex])}"`
-        }}</text
-      >
-    </view>
-    <view class="action-name-area">
-      <text class="action-name">{{
-        `${currentAnimationIndex + 1}/${currentAnimations.length} ${
-          animations[currentAnimationId].name
-        }`
-      }}</text>
-    </view>
-    <view class="control-area">
-      <view class="background-progress">
-        <view
-          class="progress"
-          :style="{
-            width: `${Math.round(
-              completedPercentages[currentAnimationIndex] * 100
-            )}%`,
-          }"
-        ></view>
+
+    <view
+      :class="[
+        'bottom-part',
+        finished
+          ? 'bottom-part-disappear-animation'
+          : 'bottom-part-appear-animation',
+      ]"
+    >
+      <view class="timer-area">
+        <text class="timer">{{ Math.floor(currentPlayingTime) }}</text>
+        <text class="timer-total"
+          >/{{
+            `${Math.floor(currentAnimationDurations[currentAnimationIndex])}"`
+          }}</text
+        >
       </view>
-      <view class="controls">
-        <view class="side-spacer"></view>
-        <view
-          class="material-icon previous"
-          data-color="black"
-          data-icon="skip-previous"
-          @click="onClickPrevious"
-        ></view>
-        <view class="spacer"></view>
-        <view
-          class="material-icon pause"
-          data-color="black"
-          :data-icon="paused ? 'play' : 'pause'"
-          @click="onClickPause"
-        ></view>
-        <view class="spacer"></view>
-        <view
-          class="material-icon next"
-          data-color="black"
-          data-icon="skip-next"
-          @click="onClickNext"
-        ></view>
-        <view class="side-spacer"></view>
+      <view class="action-name-area">
+        <text class="action-name">{{
+          `${currentAnimationIndex + 1}/${currentAnimations.length} ${
+            animations[currentAnimationId].name
+          }`
+        }}</text>
+      </view>
+      <view class="control-area">
+        <view class="background-progress">
+          <view
+            class="progress"
+            :style="{
+              width: `${Math.round(
+                completedPercentages[currentAnimationIndex] * 100
+              )}%`,
+            }"
+          ></view>
+        </view>
+        <view class="controls">
+          <view class="side-spacer"></view>
+          <view
+            class="material-icon previous"
+            :data-color="currentAnimationIndex > 0 ? 'gray' : 'lightgray'"
+            data-icon="skip-previous"
+            @click="onClickPrevious"
+          ></view>
+          <view class="spacer"></view>
+          <view
+            class="material-icon pause"
+            data-color="gray"
+            :data-icon="paused ? 'play' : 'pause'"
+            @click="onClickPause"
+          ></view>
+          <view class="spacer"></view>
+          <view
+            class="material-icon next"
+            :data-color="
+              currentAnimationIndex < currentAnimations.length - 1
+                ? 'gray'
+                : 'lightgray'
+            "
+            data-icon="skip-next"
+            @click="onClickNext"
+          ></view>
+          <view class="side-spacer"></view>
+        </view>
       </view>
     </view>
   </view>
@@ -95,6 +117,11 @@ import {
 import { WechatPlatform, PlatformManager } from "platformize-three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+
+// config
+
+// wait this amount of time before starting the timer
+const WAITING_TIME_BEFORE_ACTION = 5;
 
 // for animation control
 let clock = new Clock();
@@ -182,6 +209,10 @@ export default {
         },
       ],
       currentPlayingTime: 0,
+      savedMixerTime: 0,
+      waitingTime: WAITING_TIME_BEFORE_ACTION,
+      waiting: true,
+      finished: false,
     };
   },
   onLoad() {
@@ -235,16 +266,14 @@ export default {
   },
   methods: {
     togglePause() {
-      let cur_action = activeAction[this.currentAnimationId];
       if (this.paused) {
-        cur_action.paused = false;
         this.paused = false;
         // this controls the animation
         clock.start();
-      } else {
-        cur_action.paused = true;
-        this.paused = true;
 
+        this.setWaiting();
+      } else {
+        this.paused = true;
         clock.stop();
       }
     },
@@ -268,15 +297,27 @@ export default {
         activeAction[this.currentAnimationId].play();
       });
       mixer.time = 0;
+      this.currentPlayingTime = mixer.time;
+
+      this.setWaiting();
+    },
+    setWaiting() {
+      this.waitingTime = WAITING_TIME_BEFORE_ACTION;
+      this.waiting = true;
+      this.savedMixerTime = mixer.time;
     },
     onClickPause() {
       this.togglePause();
     },
     onClickPrevious() {
-      this.setAction(this.currentAnimationIndex - 1);
+      if (this.currentAnimationIndex > 0) {
+        this.setAction(this.currentAnimationIndex - 1);
+      }
     },
     onClickNext() {
-      this.setAction(this.currentAnimationIndex + 1);
+      if (this.currentAnimationIndex < this.currentAnimations.length - 1) {
+        this.setAction(this.currentAnimationIndex + 1);
+      }
     },
     load(url) {
       console.log("loading:");
@@ -348,9 +389,42 @@ export default {
               controls.update();
               renderer.render(scene, camera);
               if (mixer) {
-                mixer.update(clock.getDelta());
-                if (frameId % 20 == 0) {
-                  this.currentPlayingTime = mixer.time;
+                const clockDelta = clock.getDelta();
+                mixer.update(clockDelta);
+
+                if (this.waitingTime > 0) {
+                  this.waitingTime -= clockDelta;
+                }
+
+                if (frameId % 10 == 0) {
+                  if (this.waitingTime <= 0) {
+                    if (this.waiting) {
+                      this.waiting = false;
+                      mixer.time = this.savedMixerTime;
+                    } else {
+                      this.currentPlayingTime = mixer.time;
+
+                      if (
+                        this.currentPlayingTime >
+                        this.currentAnimationDurations[
+                          this.currentAnimationIndex
+                        ]
+                      ) {
+                        // if the current action is finished, then we proceed to the next one
+                        if (
+                          this.currentAnimationIndex + 1 <
+                          this.currentAnimations.length
+                        ) {
+                          this.setAction(this.currentAnimationIndex + 1);
+                          // if all the actions are finished
+                        } else {
+                          this.paused = true;
+                          clock.stop();
+                          this.finished = true;
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -401,165 +475,266 @@ page {
 
   background: #f5f3f6;
 
-  .overall-progressbar {
-    flex: 0;
-    margin-top: 5rpx;
-    height: 10rpx;
-    width: 99%;
-    border-radius: 5rpx;
-    border: 1rpx solid rgb(223, 223, 223);
-
-    display: flex;
-    flex-direction: row;
-    align-items: stretch;
-
-    .overall-progressbar-parts {
-      flex: 1;
-      margin: 0rpx 2rpx;
-      background: rgb(223, 223, 223);
-
-      .progress {
-        background: #808080;
-        border-radius: 5rpx;
-        transition: width 1s;
-        height: 100%;
-        float: left;
-      }
+  @keyframes top-part-appear-animation {
+    from {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0%);
+      opacity: 1;
     }
   }
 
-  .overall-timer-area {
-    flex: 0;
-    margin-top: 10rpx;
-    width: 100%;
-    color: #808080;
+  @keyframes top-part-disappear-animation {
+    from {
+      transform: translateY(0%);
+      opacity: 1;
+    }
+    to {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+  }
 
-    .overall-timer {
-      float: left;
-      font-size: 60rpx;
-      font-weight: bold;
-      margin-left: 20rpx;
+  .top-part-disappear-animation {
+    animation: top-part-disappear-animation 1s ease-in forwards;
+  }
+
+  .top-part-appear-animation {
+    animation: top-part-appear-animation 1s ease-out forwards;
+  }
+
+  .top-part {
+    flex: 0;
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    .overall-progressbar {
+      flex: 0;
+      margin-top: 5rpx;
+      height: 10rpx;
+      width: 99%;
+      border-radius: 5rpx;
+      border: 1rpx solid rgb(223, 223, 223);
+
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+
+      .overall-progressbar-parts {
+        flex: 1;
+        margin: 0rpx 2rpx;
+        background: rgb(223, 223, 223);
+
+        .progress {
+          background: #808080;
+          border-radius: 5rpx;
+          transition: width 1s;
+          height: 100%;
+          float: left;
+        }
+      }
     }
 
-    .overall-full-time {
-      float: right;
-      font-size: 60rpx;
-      font-weight: bold;
-      margin-right: 20rpx;
+    .overall-timer-area {
+      flex: 0;
+      margin-top: 10rpx;
+      width: 100%;
+      color: #808080;
+
+      .overall-timer {
+        float: left;
+        font-size: 60rpx;
+        font-weight: bold;
+        margin-left: 20rpx;
+      }
+
+      .overall-full-time {
+        float: right;
+        font-size: 60rpx;
+        font-weight: bold;
+        margin-right: 20rpx;
+      }
     }
   }
 
   .webgl {
-    flex: 10;
+    flex: 11;
     /*z-index: 0;*/
     width: 100%;
   }
 
-  .timer-area {
-    flex: 0;
-    width: 100%;
-    padding-left: 40rpx;
-    margin-bottom: 10rpx;
-    font-size: 80rpx;
-    font-weight: bold;
-
-    .timer {
-      float: left;
-      color: black;
+  @keyframes bottom-part-appear-animation {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
     }
-
-    .timer-total {
-      float: left;
-      color: #8b8b8b;
+    to {
+      transform: translateY(0%);
+      opacity: 1;
     }
   }
 
-  .action-name-area {
-    flex: 0;
-    width: 100%;
-    padding-left: 45rpx;
-    margin-bottom: 30rpx;
+  @keyframes bottom-part-disappear-animation {
+    from {
+      transform: translateY(0%);
+      opacity: 1;
+    }
+    to {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+  }
 
-    .action-name {
-      float: left;
-      font-size: 40rpx;
+  .bottom-part-disappear-animation {
+    animation: bottom-part-disappear-animation 1s ease-in forwards;
+  }
+
+  .bottom-part-appear-animation {
+    animation: bottom-part-appear-animation 1s ease-out forwards;
+  }
+
+  .bottom-part {
+    flex: 5;
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    .timer-area {
+      flex: 0;
+      width: 100%;
+      padding-left: 40rpx;
+      margin-bottom: 10rpx;
+      font-size: 80rpx;
       font-weight: bold;
-    }
-  }
 
-  .control-area {
-    flex: 2;
-    width: 93%;
-    margin-bottom: 30rpx;
-    position: relative;
-
-    .background-progress {
-      z-index: 0;
-      position: absolute;
-      width: 100%;
-      height: 100%;
-
-      border-radius: 400rpx;
-      box-shadow: rgba(100, 100, 111, 0.3) 0rpx 7rpx 20rpx 0rpx;
-      background: white;
-
-      overflow: hidden;
-
-      .progress {
-        transition: width 1s;
+      .timer {
         float: left;
-        height: 100%;
-        background: rgb(181, 222, 179);
+        color: black;
+      }
+
+      .timer-total {
+        float: left;
+        color: #8b8b8b;
       }
     }
 
-    .controls {
-      z-index: 1;
-      position: absolute;
+    .action-name-area {
+      flex: 0;
       width: 100%;
-      height: 100%;
+      padding-left: 45rpx;
+      margin-bottom: 30rpx;
 
-      display: flex;
-      flex-direction: row;
-      align-items: center;
+      .action-name {
+        float: left;
+        font-size: 40rpx;
+        font-weight: bold;
+      }
+    }
 
-      .side-spacer {
-        flex: 4;
+    .control-area {
+      flex: 1;
+      width: 93%;
+      margin-bottom: 30rpx;
+      position: relative;
+
+      .background-progress {
+        z-index: 0;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+
+        border-radius: 400rpx;
+        box-shadow: rgba(100, 100, 111, 0.3) 0rpx 7rpx 20rpx 0rpx;
+        background: white;
+
+        overflow: hidden;
+
+        .progress {
+          transition: width 1s;
+          float: left;
+          height: 100%;
+          background: rgb(181, 222, 179);
+        }
       }
 
-      .spacer {
-        flex: 6;
-      }
+      .controls {
+        z-index: 1;
+        position: absolute;
+        width: 100%;
+        height: 100%;
 
-      @include material-icon(
-        "black",
-        #707070,
-        "skip-previous",
-        $material-icon-skip-previous
-      );
-      .previous {
-        padding-top: 10rpx;
-        flex: 5;
-      }
+        display: flex;
+        flex-direction: row;
+        align-items: center;
 
-      @include material-icon("black", #707070, "pause", $material-icon-pause);
-      @include material-icon("black", #707070, "play", $material-icon-play-arrow);
-      .pause {
-        padding-top: 10rpx;
-        flex: 5;
-      }
+        .side-spacer {
+          flex: 4;
+        }
 
-      @include material-icon(
-        "black",
-        #707070,
-        "skip-next",
-        $material-icon-skip-next
-      );
-      .next {
-        padding-top: 10rpx;
-        flex: 5;
+        .spacer {
+          flex: 6;
+        }
+
+        @include material-icon(
+          "gray",
+          #707070,
+          "skip-previous",
+          $material-icon-skip-previous
+        );
+        @include material-icon(
+          "lightgray",
+          #bcbcbc,
+          "skip-previous",
+          $material-icon-skip-previous
+        );
+        .previous {
+          padding-top: 10rpx;
+          flex: 5;
+        }
+
+        @include material-icon("gray", #707070, "pause", $material-icon-pause);
+        @include material-icon(
+          "gray",
+          #707070,
+          "play",
+          $material-icon-play-arrow
+        );
+        .pause {
+          padding-top: 10rpx;
+          flex: 5;
+        }
+
+        @include material-icon(
+          "gray",
+          #707070,
+          "skip-next",
+          $material-icon-skip-next
+        );
+        @include material-icon(
+          "lightgray",
+          #bcbcbc,
+          "skip-next",
+          $material-icon-skip-next
+        );
+        .next {
+          padding-top: 10rpx;
+          flex: 5;
+        }
       }
     }
   }
+}
+
+.hidden {
+  display: none !important;
 }
 </style>
