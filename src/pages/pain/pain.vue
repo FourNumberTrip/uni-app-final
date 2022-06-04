@@ -24,6 +24,7 @@ import {
   Scene,
   sRGBEncoding,
   WebGL1Renderer,
+  Raycaster
 } from "three";
 
 import { WechatPlatform, PlatformManager } from "platformize-three";
@@ -42,6 +43,10 @@ let camera;
 let platform;
 // animations
 let activeAction = [];
+//选中模型
+let rayCaster;
+let INTERSECTED;
+let pointer;
 
 export default {
   data() {
@@ -93,9 +98,6 @@ export default {
       });
       mixer.time = 0;
     },
-    // onClickPause() {
-    //   this.togglePause();
-    // },
     load(url) {
       console.log("loading:");
       console.log(url);
@@ -109,6 +111,8 @@ export default {
             platform = new WechatPlatform(canvas);
             console.log(platform);
             PlatformManager.set(platform);
+
+            rayCaster = new Raycaster();
 
             renderer = new WebGL1Renderer({
               canvas,
@@ -170,6 +174,21 @@ export default {
                   }
                 }
               }
+              rayCaster.setFromCamera( pointer, camera );
+
+              const intersects = rayCaster.intersectObjects( scene.children, false );
+
+              if ( intersects.length > 0 ) {
+                if ( INTERSECTED != intersects[ 0 ].object ) {
+                  if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+                  INTERSECTED = intersects[ 0 ].object;
+                  INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+                  INTERSECTED.material.emissive.setHex( 0xff0000 );
+                }
+              } else {
+                if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+                INTERSECTED = null;
+              }
             };
             render();
           });
@@ -195,6 +214,8 @@ export default {
     // for three.js touch control
     onTX(e) {
       platform.dispatchTouchEvent(e);
+      pointer.x = ( e.clientX / window.innerWidth ) * 2 - 1;
+      pointer.y = - ( e.clientY / window.innerHeight ) * 2 + 1;
     },
   },
 };
