@@ -96,6 +96,11 @@ import { WechatPlatform, PlatformManager } from "platformize-three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
+// config
+
+// wait this amount of time before starting the timer
+const WAITING_TIME_BEFORE_ACTION = 5;
+
 // for animation control
 let clock = new Clock();
 // for animation
@@ -182,6 +187,10 @@ export default {
         },
       ],
       currentPlayingTime: 0,
+      savedMixerTime: 0,
+      waitingTime: WAITING_TIME_BEFORE_ACTION,
+      waiting: true,
+      finished: false,
     };
   },
   onLoad() {
@@ -235,16 +244,14 @@ export default {
   },
   methods: {
     togglePause() {
-      let cur_action = activeAction[this.currentAnimationId];
       if (this.paused) {
-        cur_action.paused = false;
         this.paused = false;
         // this controls the animation
         clock.start();
-      } else {
-        cur_action.paused = true;
-        this.paused = true;
 
+        this.setWaiting();
+      } else {
+        this.paused = true;
         clock.stop();
       }
     },
@@ -268,6 +275,14 @@ export default {
         activeAction[this.currentAnimationId].play();
       });
       mixer.time = 0;
+      this.currentPlayingTime = mixer.time;
+
+      this.setWaiting();
+    },
+    setWaiting() {
+      this.waitingTime = WAITING_TIME_BEFORE_ACTION;
+      this.waiting = true;
+      this.savedMixerTime = mixer.time;
     },
     onClickPause() {
       this.togglePause();
@@ -348,9 +363,42 @@ export default {
               controls.update();
               renderer.render(scene, camera);
               if (mixer) {
-                mixer.update(clock.getDelta());
-                if (frameId % 20 == 0) {
-                  this.currentPlayingTime = mixer.time;
+                const clockDelta = clock.getDelta();
+                mixer.update(clockDelta);
+
+                if (this.waitingTime > 0) {
+                  this.waitingTime -= clockDelta;
+                }
+
+                if (frameId % 10 == 0) {
+                  if (this.waitingTime <= 0) {
+                    if (this.waiting) {
+                      this.waiting = false;
+                      mixer.time = this.savedMixerTime;
+                    } else {
+                      this.currentPlayingTime = mixer.time;
+
+                      if (
+                        this.currentPlayingTime >
+                        this.currentAnimationDurations[
+                          this.currentAnimationIndex
+                        ]
+                      ) {
+                        // if the current action is finished, then we proceed to the next one
+                        if (
+                          this.currentAnimationIndex <=
+                          this.currentAnimations.length
+                        ) {
+                          this.setAction(this.currentAnimationIndex + 1);
+                          // if all the actions are finished
+                        } else {
+                          this.paused = true;
+                          clock.stop();
+                          this.finished = true;
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -543,7 +591,12 @@ page {
       }
 
       @include material-icon("black", #707070, "pause", $material-icon-pause);
-      @include material-icon("black", #707070, "play", $material-icon-play-arrow);
+      @include material-icon(
+        "black",
+        #707070,
+        "play",
+        $material-icon-play-arrow
+      );
       .pause {
         padding-top: 10rpx;
         flex: 5;
@@ -561,5 +614,9 @@ page {
       }
     }
   }
+}
+
+.hidden {
+  display: none !important;
 }
 </style>
