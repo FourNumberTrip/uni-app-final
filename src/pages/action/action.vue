@@ -442,6 +442,8 @@ export default {
 
 $appear-disappear-animation-duration: 0.8s;
 
+$background-color: #f5f3f6;
+
 page {
   height: 100%;
 }
@@ -454,7 +456,7 @@ page {
   justify-content: center;
   align-items: center;
 
-  background: #f5f3f6;
+  background: $background-color;
 
   .top-part {
     flex: 0;
