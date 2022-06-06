@@ -2,9 +2,9 @@
   <view class="content">
     <view class="list">
       <view
-        :class="['list-item', item.class]"
+        :class="['list-item', item.class, item.disappearClass]"
         @click="onListItemClick(index)"
-        v-for="(item, index) in items"
+        v-for="(item, index) in listItems"
         :key="index"
         :data-index="index"
       >
@@ -24,105 +24,87 @@ let observer;
 export default {
   data() {
     return {
-      items: [
+      listItems: [
         {
-          coverUrl: "/static/py.png",
+          coverUrl: "https://mp.muzi.fun/resources/py.png",
           title: "抛秧",
           description: "上身活动",
           animationSetId: 0,
           // for animation
           class: "list-item-out-bottom",
+          disappearClass: "",
         },
         {
-          coverUrl: "/static/cy.png",
+          coverUrl: "https://mp.muzi.fun/resources/cy.png",
           title: "插秧",
           description: "上身活动",
           animationSetId: 0,
           class: "list-item-out-bottom",
+          disappearClass: "",
         },
         {
-          coverUrl: "/static/logo.png",
+          coverUrl: "https://mp.muzi.fun/resources/logo.png",
           title: "上身活动",
           description: "上身活动",
           animationSetId: 0,
           class: "list-item-out-bottom",
+          disappearClass: "",
         },
         {
-          coverUrl: "/static/logo.png",
+          coverUrl: "https://mp.muzi.fun/resources/logo.png",
           title: "上身活动",
           description: "上身活动",
           animationSetId: 0,
           class: "list-item-out-bottom",
+          disappearClass: "",
         },
         {
-          coverUrl: "/static/logo.png",
+          coverUrl: "https://mp.muzi.fun/resources/logo.png",
           title: "上身活动",
           description: "上身活动",
           animationSetId: 0,
           class: "list-item-out-bottom",
+          disappearClass: "",
         },
         {
-          coverUrl: "/static/logo.png",
+          coverUrl: "https://mp.muzi.fun/resources/logo.png",
           title: "上身活动",
           description: "上身活动",
           animationSetId: 0,
           class: "list-item-out-bottom",
+          disappearClass: "",
         },
         {
-          coverUrl: "/static/logo.png",
+          coverUrl: "https://mp.muzi.fun/resources/logo.png",
           title: "上身活动",
           description: "上身活动",
           animationSetId: 0,
           class: "list-item-out-bottom",
+          disappearClass: "",
         },
         {
-          coverUrl: "/static/logo.png",
+          coverUrl: "https://mp.muzi.fun/resources/logo.png",
           title: "上身活动",
           description: "上身活动",
           animationSetId: 0,
           class: "list-item-out-bottom",
+          disappearClass: "",
         },
         {
-          coverUrl: "/static/logo.png",
+          coverUrl: "https://mp.muzi.fun/resources/logo.png",
           title: "上身活动",
           description: "上身活动",
           animationSetId: 0,
           class: "list-item-out-bottom",
+          disappearClass: "",
         },
         {
-          coverUrl: "/static/logo.png",
+          coverUrl: "https://mp.muzi.fun/resources/logo.png",
           title: "上身活动",
           description: "上身活动",
           animationSetId: 0,
           class: "list-item-out-bottom",
-        },
-        {
-          coverUrl: "/static/logo.png",
-          title: "上身活动",
-          description: "上身活动",
-          animationSetId: 0,
-          class: "list-item-out-bottom",
-        },
-        {
-          coverUrl: "/static/logo.png",
-          title: "上身活动",
-          description: "上身活动",
-          animationSetId: 0,
-          class: "list-item-out-bottom",
-        },
-        {
-          coverUrl: "/static/logo.png",
-          title: "上身活动",
-          description: "上身活动",
-          animationSetId: 0,
-          class: "list-item-out-bottom",
-        },
-        {
-          coverUrl: "/static/logo.png",
-          title: "上身活动",
-          description: "上身活动",
-          animationSetId: 0,
-          class: "list-item-out-bottom",
+          disappearClass: "",
         },
       ],
     };
@@ -140,7 +122,7 @@ export default {
       .observe(".list-item", (res) => {
         if (res.intersectionRatio > 0) {
           // appear
-          this.items[res.dataset.index].class = "";
+          this.listItems[res.dataset.index].class = "";
           // if (res.boundingClientRect.top < 0) {
           //   // appear from top
           // } else {
@@ -150,10 +132,10 @@ export default {
           // disappear
           if (res.boundingClientRect.top < 0) {
             // disappear to top
-            this.items[res.dataset.index].class = "list-item-out-top";
+            this.listItems[res.dataset.index].class = "list-item-out-top";
           } else {
             // disappear to bottom
-            this.items[res.dataset.index].class = "list-item-out-bottom";
+            this.listItems[res.dataset.index].class = "list-item-out-bottom";
           }
         }
       });
@@ -165,7 +147,21 @@ export default {
   },
   methods: {
     onListItemClick(index) {
-      this.items[index].class = "list-item-expanding";
+      for (let i = 0; i < this.listItems.length; i++) {
+        if (i === index) {
+          setTimeout(() => {
+            this.listItems[i].disappearClass =
+              i % 2 === 0
+                ? "list-item-fade-out-left"
+                : "list-item-fade-out-right";
+          }, 100);
+        } else {
+          this.listItems[i].disappearClass =
+            i % 2 === 0
+              ? "list-item-fade-out-left"
+              : "list-item-fade-out-right";
+        }
+      }
     },
   },
 };
@@ -184,6 +180,36 @@ $list-background-color: white;
     align-items: center;
     justify-content: center;
     width: 100%;
+
+    @keyframes list-item-fade-out-left {
+      from {
+        transform: translateX(0%);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(-100%);
+        opacity: 0;
+      }
+    }
+
+    @keyframes list-item-fade-out-right {
+      from {
+        transform: translateX(0%);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    }
+
+    .list-item-fade-out-left {
+      animation: list-item-fade-out-left 0.5s ease-out forwards;
+    }
+
+    .list-item-fade-out-right {
+      animation: list-item-fade-out-right 0.5s ease-out forwards;
+    }
 
     .list-item {
       position: relative;
@@ -244,38 +270,6 @@ $list-background-color: white;
       margin-bottom: 60rpx !important;
       opacity: 0;
     }
-  }
-}
-
-// list item expanding animation when transitioning to the next page
-@keyframes list-item-expanding-animation {
-  from {
-    z-index: 3;
-    scale: 0.96;
-  }
-  to {
-    z-index: 3;
-    scale: 10;
-  }
-}
-.list-item-expanding {
-  animation: list-item-expanding-animation 400ms linear forwards;
-
-  @keyframes list-item-content-hidden-animation {
-    from {
-      opacity: 1;
-    }
-
-    20% {
-      opacity: 0;
-    }
-
-    to {
-      opacity: 0;
-    }
-  }
-  .list-item-content {
-    animation: list-item-content-hidden-animation 400ms linear forwards;
   }
 }
 </style>

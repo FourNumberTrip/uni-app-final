@@ -27,7 +27,10 @@
     </view>
 
     <canvas
-      class="webgl"
+      :class="[
+        'webgl',
+        finished ? 'webgl-disappear-animation' : 'webgl-appear-animation',
+      ]"
       type="webgl"
       id="gl"
       @touchstart="onTX"
@@ -152,29 +155,7 @@ export default {
       cnt_turn: 0,
       paused: false,
       lowSpeed: false,
-      url: "https://threejs.org/examples/models/gltf/RobotExpressive/RobotExpressive.glb",
-      items: [
-        {
-          image: "/static/small.png",
-          title: "action1",
-          touchDown: false,
-        },
-        {
-          image: "/static/small.png",
-          title: "action2",
-          touchDown: false,
-        },
-        {
-          image: "/static/small.png",
-          title: "action3",
-          touchDown: false,
-        },
-        {
-          image: "/static/small.png",
-          title: "action4",
-          touchDown: false,
-        },
-      ],
+      url: "https://mp.muzi.fun/resources/RobotExpressive.glb",
       animations: [
         { name: "跳舞" },
         { name: "死亡" },
@@ -395,34 +376,32 @@ export default {
 
                 if (this.waitingTime > 0) {
                   this.waitingTime -= clockDelta;
-                }
+                } else {
+                  if (this.waiting) {
+                    this.waiting = false;
+                    mixer.time = this.savedMixerTime;
+                  } else {
+                    this.currentPlayingTime = mixer.time;
 
-                if (frameId % 10 == 0) {
-                  if (this.waitingTime <= 0) {
-                    if (this.waiting) {
-                      this.waiting = false;
-                      mixer.time = this.savedMixerTime;
-                    } else {
-                      this.currentPlayingTime = mixer.time;
-
+                    if (
+                      this.currentPlayingTime >
+                      this.currentAnimationDurations[this.currentAnimationIndex]
+                    ) {
+                      // if the current action is finished, then we proceed to the next one
                       if (
-                        this.currentPlayingTime >
-                        this.currentAnimationDurations[
-                          this.currentAnimationIndex
-                        ]
+                        this.currentAnimationIndex + 1 <
+                        this.currentAnimations.length
                       ) {
-                        // if the current action is finished, then we proceed to the next one
-                        if (
-                          this.currentAnimationIndex + 1 <
-                          this.currentAnimations.length
-                        ) {
-                          this.setAction(this.currentAnimationIndex + 1);
-                          // if all the actions are finished
-                        } else {
+                        this.setAction(this.currentAnimationIndex + 1);
+                        // if all the actions are finished
+                      } else if (!this.finished) {
+                        activeAction[this.currentAnimationId].paused = true;
+                        setTimeout(() => {
+                          activeAction[this.currentAnimationId].paused = false;
                           this.paused = true;
                           clock.stop();
-                          this.finished = true;
-                        }
+                        }, 1000);
+                        this.finished = true;
                       }
                     }
                   }
@@ -462,6 +441,8 @@ export default {
 <style lang="scss">
 @import "@/lib/material-icons.scss";
 
+$appear-disappear-animation-duration: 0.8s;
+
 page {
   height: 100%;
 }
@@ -499,11 +480,13 @@ page {
   }
 
   .top-part-disappear-animation {
-    animation: top-part-disappear-animation 1s ease-in forwards;
+    animation: top-part-disappear-animation $appear-disappear-animation-duration
+      ease-in forwards;
   }
 
   .top-part-appear-animation {
-    animation: top-part-appear-animation 1s ease-out forwards;
+    animation: top-part-appear-animation $appear-disappear-animation-duration
+      ease-out forwards;
   }
 
   .top-part {
@@ -564,9 +547,36 @@ page {
     }
   }
 
+  @keyframes webgl-appear-animation {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(0%);
+    }
+  }
+
+  @keyframes webgl-disappear-animation {
+    from {
+      transform: translateX(0%);
+    }
+    to {
+      transform: translateX(-100%);
+    }
+  }
+
+  .webgl-disappear-animation {
+    animation: webgl-disappear-animation $appear-disappear-animation-duration
+      ease-in forwards;
+  }
+
+  .webgl-appear-animation {
+    animation: webgl-appear-animation $appear-disappear-animation-duration
+      ease-out forwards;
+  }
+
   .webgl {
     flex: 11;
-    /*z-index: 0;*/
     width: 100%;
   }
 
@@ -593,11 +603,13 @@ page {
   }
 
   .bottom-part-disappear-animation {
-    animation: bottom-part-disappear-animation 1s ease-in forwards;
+    animation: bottom-part-disappear-animation
+      $appear-disappear-animation-duration ease-in forwards;
   }
 
   .bottom-part-appear-animation {
-    animation: bottom-part-appear-animation 1s ease-out forwards;
+    animation: bottom-part-appear-animation $appear-disappear-animation-duration
+      ease-out forwards;
   }
 
   .bottom-part {

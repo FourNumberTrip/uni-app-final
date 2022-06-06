@@ -42,19 +42,19 @@
 <script>
 const guides = [
   {
-    image: "/static/select-page.png",
+    image: "https://mp.muzi.fun/resources/select-page.png",
     text: "选择准备活动或者疼痛的部位",
   },
   {
-    image: "/static/list-page.png",
+    image: "https://mp.muzi.fun/resources/list-page.png",
     text: "选择从事的活动",
   },
   {
-    image: "/static/pain-page.png",
+    image: "https://mp.muzi.fun/resources/pain-page.png",
     text: "或者选择疼痛的部位",
   },
   {
-    image: "/static/action-page.png",
+    image: "https://mp.muzi.fun/resources/action-page.png",
     text: "学着一起做动作",
   },
 ];
