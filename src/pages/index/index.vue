@@ -15,6 +15,9 @@
     <navigator url="/pages/action/action" hover-class="navigator-hover">
       <button type="default">动画页面</button>
     </navigator>
+    <navigator url="/pages/complete/complete" hover-class="navigator-hover">
+      <button type="default">完成页面</button>
+    </navigator>
     <navigator url="/pages/merge/merge" hover-class="navigator-hover">
       <button type="default">合并页面</button>
     </navigator>
