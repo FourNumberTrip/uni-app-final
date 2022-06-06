@@ -1,17 +1,19 @@
 <template>
   <view class="content">
-    <view class="list">
-      <view
-        :class="['list-item', item.class, item.disappearClass]"
-        @click="onListItemClick(index)"
-        v-for="(item, index) in listItems"
-        :key="index"
-        :data-index="index"
-      >
-        <img class="image" :src="item.coverUrl" />
-        <view class="translucent-box">
-          <view class="title">
-            <text>{{ item.title }}</text>
+    <view class="list-content">
+      <view class="list">
+        <view
+          :class="['list-item', item.class, item.disappearClass]"
+          @click="onListItemClick(index)"
+          v-for="(item, index) in listItems"
+          :key="index"
+          :data-index="index"
+        >
+          <img class="image" :src="item.coverUrl" />
+          <view class="translucent-box">
+            <view class="title">
+              <text>{{ item.title }}</text>
+            </view>
           </view>
         </view>
       </view>
@@ -170,105 +172,117 @@ export default {
 <style lang="scss">
 $list-background-color: white;
 
+page {
+  height: 100%;
+  display: flex;
+}
+
 .content {
-  background: $list-background-color;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 
-  .list {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
+  .list-content {
+    flex: 1;
+    background: $list-background-color;
 
-    @keyframes list-item-fade-out-left {
-      from {
-        transform: translateX(0%);
-        opacity: 1;
-      }
-      to {
-        transform: translateX(-100%);
-        opacity: 0;
-      }
-    }
+    .list {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
 
-    @keyframes list-item-fade-out-right {
-      from {
-        transform: translateX(0%);
-        opacity: 1;
-      }
-      to {
-        transform: translateX(100%);
-        opacity: 0;
-      }
-    }
-
-    .list-item-fade-out-left {
-      animation: list-item-fade-out-left 0.5s ease-out forwards;
-    }
-
-    .list-item-fade-out-right {
-      animation: list-item-fade-out-right 0.5s ease-out forwards;
-    }
-
-    .list-item {
-      position: relative;
-      width: 320rpx;
-      height: 320rpx;
-      border-radius: 30rpx;
-      margin: 18rpx;
-      box-shadow: rgba(0, 0, 0, 0.19) 0rpx 10rpx 20rpx,
-        rgba(0, 0, 0, 0.23) 0rpx 6rpx 6rpx;
-
-      transition: margin-top 600ms, margin-bottom 600ms, opacity 600ms,
-        transform 200ms;
-
-      .image {
-        z-index: 0;
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        border-radius: 30rpx;
-      }
-
-      .translucent-box {
-        z-index: 1;
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        border-radius: 30rpx;
-        background: rgba(0, 0, 0, 0.25);
-
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-
-        .title {
-          padding-top: 150rpx;
-          font-size: 50rpx;
-          color: #ffffff;
+      @keyframes list-item-fade-out-left {
+        from {
+          transform: translateX(0%);
+          opacity: 1;
+        }
+        to {
+          transform: translateX(-100%);
+          opacity: 0;
         }
       }
-    }
 
-    .list-item:active {
-      pointer-events: none;
-      transform: scale(0.96);
-    }
+      @keyframes list-item-fade-out-right {
+        from {
+          transform: translateX(0%);
+          opacity: 1;
+        }
+        to {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+      }
 
-    .list-item:hover {
-      transform: scale(0.96);
-    }
+      .list-item-fade-out-left {
+        animation: list-item-fade-out-left 0.5s ease-out forwards;
+      }
 
-    .list-item-out-bottom {
-      margin-top: 60rpx !important;
-      opacity: 0;
-    }
+      .list-item-fade-out-right {
+        animation: list-item-fade-out-right 0.5s ease-out forwards;
+      }
 
-    .list-item-out-top {
-      margin-bottom: 60rpx !important;
-      opacity: 0;
+      .list-item {
+        position: relative;
+        width: 320rpx;
+        height: 320rpx;
+        border-radius: 30rpx;
+        margin: 18rpx;
+        box-shadow: rgba(0, 0, 0, 0.19) 0rpx 10rpx 20rpx,
+          rgba(0, 0, 0, 0.23) 0rpx 6rpx 6rpx;
+
+        transition: margin-top 600ms, margin-bottom 600ms, opacity 600ms,
+          transform 200ms;
+
+        .image {
+          z-index: 0;
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          border-radius: 30rpx;
+        }
+
+        .translucent-box {
+          z-index: 1;
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          border-radius: 30rpx;
+          background: rgba(0, 0, 0, 0.25);
+
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+
+          .title {
+            padding-top: 150rpx;
+            font-size: 50rpx;
+            color: #ffffff;
+          }
+        }
+      }
+
+      .list-item:active {
+        pointer-events: none;
+        transform: scale(0.96);
+      }
+
+      .list-item:hover {
+        transform: scale(0.96);
+      }
+
+      .list-item-out-bottom {
+        margin-top: 60rpx !important;
+        opacity: 0;
+      }
+
+      .list-item-out-top {
+        margin-bottom: 60rpx !important;
+        opacity: 0;
+      }
     }
   }
 }

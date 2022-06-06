@@ -1,17 +1,25 @@
 <template>
   <view class="content">
-    <view class="list">
-      <view
-        :class="['list-item', item._class, index === 0 ? 'list-item-fade-in-from-top' : 'list-item-fade-in-from-bottom']"
-        v-for="(item, index) in selectItems"
-        :key="item.title"
-        @click="onClick(index)"
-      >
-        <view class="list-item-content">
-          <image class="button-background-image" :src="item.image"> </image>
-          <view class="translucent-box">
-            <text class="button-title">{{ item.title }}</text>
-            <text class="button-description">{{ item.description }}</text>
+    <view class="select-content">
+      <view class="list">
+        <view
+          :class="[
+            'list-item',
+            item._class,
+            index === 0
+              ? 'list-item-fade-in-from-top'
+              : 'list-item-fade-in-from-bottom',
+          ]"
+          v-for="(item, index) in selectItems"
+          :key="item.title"
+          @click="onSelectButtonClick(index)"
+        >
+          <view class="list-item-content">
+            <image class="button-background-image" :src="item.image"> </image>
+            <view class="translucent-box">
+              <text class="button-title">{{ item.title }}</text>
+              <text class="button-description">{{ item.description }}</text>
+            </view>
           </view>
         </view>
       </view>
@@ -43,7 +51,7 @@ export default {
   },
   onLoad() {},
   methods: {
-    onClick(index) {
+    onSelectButtonClick(index) {
       console.log("onClick", index);
       this.selectItems[index]._class = "list-item-expand";
       this.selectItems[1 - index]._class = "list-item-shrink";
@@ -56,127 +64,133 @@ $select-background-color: #f3f5f8;
 
 page {
   height: 100%;
+  display: flex;
 }
 
 .content {
-  height: 100%;
+  flex: 1;
   display: flex;
   flex-direction: column;
-  background: $select-background-color;
 
-  .list {
+  .select-content {
     flex: 1;
     display: flex;
-    flex-direction: column;
+    background: $select-background-color;
 
-    .list-item:active {
-      pointer-events: none;
-      transform: scale(0.96);
-    }
-
-    .list-item:hover {
-      transform: scale(0.96);
-    }
-
-    .list-item-expand {
-      margin: 0rpx !important;
-      border-radius: 0rpx !important;
-      opacity: 0%;
-
-      .list-item-content {
-        .button-background-image {
-          border-radius: 0rpx !important;
-        }
-
-        .translucent-box {
-          border-radius: 0rpx !important;
-        }
-      }
-    }
-
-    .list-item-shrink {
-      flex: 0 !important;
-      margin: 0rpx !important;
-      border-radius: 0rpx !important;
-      opacity: 0%;
-    }
-
-    @keyframes list-item-fade-in-from-top {
-      from {
-        transform: translateY(-100%);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0%);
-        opacity: 1;
-      }
-    }
-
-    @keyframes list-item-fade-in-from-bottom {
-      from {
-        transform: translateY(100%);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0%);
-        opacity: 1;
-      }
-    }
-
-    .list-item-fade-in-from-top {
-      animation: list-item-fade-in-from-top 0.8s ease-out;
-    }
-
-    .list-item-fade-in-from-bottom {
-      animation: list-item-fade-in-from-bottom 0.8s ease-out;
-    }
-
-    .list-item {
+    .list {
       flex: 1;
       display: flex;
+      flex-direction: column;
 
-      transition: all 0.5s;
-      position: relative;
-      margin: 20rpx;
-      border-radius: 30rpx;
-      box-shadow: rgba(0, 0, 0, 0.19) 0rpx 20rpx 40rpx,
-        rgba(0, 0, 0, 0.23) 0rpx 12rpx 12rpx;
+      .list-item:active {
+        pointer-events: none;
+        transform: scale(0.96);
+      }
 
-      touch-action: manipulation;
+      .list-item:hover {
+        transform: scale(0.96);
+      }
 
-      .list-item-content {
-        flex: 1;
+      .list-item-expand {
+        margin: 0rpx !important;
+        border-radius: 0rpx !important;
+        opacity: 0%;
 
-        .button-background-image {
-          z-index: 0;
-          position: absolute;
-          width: 100%;
-          height: 100%;
-          border-radius: 30rpx;
-        }
-
-        .translucent-box {
-          z-index: 1;
-          position: absolute;
-          width: 100%;
-          height: 100%;
-          border-radius: 30rpx;
-          background: rgba(0, 0, 0, 0.7);
-
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-
-          .button-title {
-            font-size: 50rpx;
-            color: #ffffff;
+        .list-item-content {
+          .button-background-image {
+            border-radius: 0rpx !important;
           }
 
-          .button-description {
-            margin: 30rpx 60rpx 0 60rpx;
-            font-size: 30rpx;
-            color: #ffffff;
+          .translucent-box {
+            border-radius: 0rpx !important;
+          }
+        }
+      }
+
+      .list-item-shrink {
+        flex: 0 !important;
+        margin: 0rpx !important;
+        border-radius: 0rpx !important;
+        opacity: 0%;
+      }
+
+      @keyframes list-item-fade-in-from-top {
+        from {
+          transform: translateY(-100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0%);
+          opacity: 1;
+        }
+      }
+
+      @keyframes list-item-fade-in-from-bottom {
+        from {
+          transform: translateY(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0%);
+          opacity: 1;
+        }
+      }
+
+      .list-item-fade-in-from-top {
+        animation: list-item-fade-in-from-top 0.8s ease-out;
+      }
+
+      .list-item-fade-in-from-bottom {
+        animation: list-item-fade-in-from-bottom 0.8s ease-out;
+      }
+
+      .list-item {
+        flex: 1;
+        display: flex;
+
+        transition: all 0.5s;
+        position: relative;
+        margin: 20rpx;
+        border-radius: 30rpx;
+        box-shadow: rgba(0, 0, 0, 0.19) 0rpx 20rpx 40rpx,
+          rgba(0, 0, 0, 0.23) 0rpx 12rpx 12rpx;
+
+        touch-action: manipulation;
+
+        .list-item-content {
+          flex: 1;
+
+          .button-background-image {
+            z-index: 0;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 30rpx;
+          }
+
+          .translucent-box {
+            z-index: 1;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 30rpx;
+            background: rgba(0, 0, 0, 0.7);
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+
+            .button-title {
+              font-size: 50rpx;
+              color: #ffffff;
+            }
+
+            .button-description {
+              margin: 30rpx 60rpx 0 60rpx;
+              font-size: 30rpx;
+              color: #ffffff;
+            }
           }
         }
       }
