@@ -194,36 +194,6 @@ page {
       justify-content: center;
       width: 100%;
 
-      @keyframes list-item-fade-out-left {
-        from {
-          transform: translateX(0%);
-          opacity: 1;
-        }
-        to {
-          transform: translateX(-100%);
-          opacity: 0;
-        }
-      }
-
-      @keyframes list-item-fade-out-right {
-        from {
-          transform: translateX(0%);
-          opacity: 1;
-        }
-        to {
-          transform: translateX(100%);
-          opacity: 0;
-        }
-      }
-
-      .list-item-fade-out-left {
-        animation: list-item-fade-out-left 0.5s ease-out forwards;
-      }
-
-      .list-item-fade-out-right {
-        animation: list-item-fade-out-right 0.5s ease-out forwards;
-      }
-
       .list-item {
         position: relative;
         width: 320rpx;
@@ -235,6 +205,36 @@ page {
 
         transition: margin-top 600ms, margin-bottom 600ms, opacity 600ms,
           transform 200ms;
+
+        @keyframes list-item-fade-out-left {
+          from {
+            transform: translateX(0%);
+            opacity: 1;
+          }
+          to {
+            transform: translateX(-100%);
+            opacity: 0;
+          }
+        }
+
+        @keyframes list-item-fade-out-right {
+          from {
+            transform: translateX(0%);
+            opacity: 1;
+          }
+          to {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+        }
+
+        &.list-item-fade-out-left {
+          animation: list-item-fade-out-left 0.5s ease-out forwards;
+        }
+
+        &.list-item-fade-out-right {
+          animation: list-item-fade-out-right 0.5s ease-out forwards;
+        }
 
         .image {
           z-index: 0;

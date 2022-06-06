@@ -114,36 +114,6 @@ page {
         opacity: 0%;
       }
 
-      @keyframes list-item-fade-in-from-top {
-        from {
-          transform: translateY(-100%);
-          opacity: 0;
-        }
-        to {
-          transform: translateY(0%);
-          opacity: 1;
-        }
-      }
-
-      @keyframes list-item-fade-in-from-bottom {
-        from {
-          transform: translateY(100%);
-          opacity: 0;
-        }
-        to {
-          transform: translateY(0%);
-          opacity: 1;
-        }
-      }
-
-      .list-item-fade-in-from-top {
-        animation: list-item-fade-in-from-top 0.8s ease-out;
-      }
-
-      .list-item-fade-in-from-bottom {
-        animation: list-item-fade-in-from-bottom 0.8s ease-out;
-      }
-
       .list-item {
         flex: 1;
         display: flex;
@@ -156,6 +126,36 @@ page {
           rgba(0, 0, 0, 0.23) 0rpx 12rpx 12rpx;
 
         touch-action: manipulation;
+
+        @keyframes list-item-fade-in-from-top {
+          from {
+            transform: translateY(-100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0%);
+            opacity: 1;
+          }
+        }
+
+        @keyframes list-item-fade-in-from-bottom {
+          from {
+            transform: translateY(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0%);
+            opacity: 1;
+          }
+        }
+
+        &.list-item-fade-in-from-top {
+          animation: list-item-fade-in-from-top 0.8s ease-out;
+        }
+
+        &.list-item-fade-in-from-bottom {
+          animation: list-item-fade-in-from-bottom 0.8s ease-out;
+        }
 
         .list-item-content {
           flex: 1;
