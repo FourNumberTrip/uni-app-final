@@ -379,6 +379,7 @@ export default {
           uni.getSystemInfo({
             success: (res) => {
               renderer.setPixelRatio(res.pixelRatio);
+              console.log(res)
             },
           });
 

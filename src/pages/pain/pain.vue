@@ -6,6 +6,8 @@
         id="gl"
         @touchstart="onTX"
         @touchend="onTX"
+        @touchmove="onTX"
+        @click="move"
     ></canvas>
     <text @click="autoTurn">
       <text v-if="front">显示背面</text>
@@ -24,7 +26,11 @@ import {
   Scene,
   sRGBEncoding,
   WebGL1Renderer,
-  Raycaster
+  Raycaster,
+  Vector2,
+  Mesh,
+  BoxGeometry,
+  MeshLambertMaterial
 } from "three";
 
 import { WechatPlatform, PlatformManager } from "platformize-three";
@@ -46,7 +52,8 @@ let activeAction = [];
 //选中模型
 let rayCaster;
 let INTERSECTED;
-let pointer;
+let pointer=new Vector2();
+let jud=true;
 
 export default {
   data() {
@@ -88,15 +95,6 @@ export default {
     },
     resetControl() {
       controls.reset();
-    },
-    setAction(index) {
-      activeAction[this.currentAnimationId].stop();
-      this.currentAnimationIndex = index;
-      // make sure currentAnimationId is updated
-      this.$nextTick(() => {
-        activeAction[this.currentAnimationId].play();
-      });
-      mixer.time = 0;
     },
     load(url) {
       console.log("loading:");
@@ -142,15 +140,29 @@ export default {
                   // TODO CHANGE THIS
                   gltf.scene.position.y = -2.2;
                   scene.add(gltf.scene);
-                  // mixer = new AnimationMixer(gltf.scene);
-                  // for (const animation of gltf.animations) {
-                  //   activeAction.push(mixer.clipAction(animation));
-                  //   this.animationDurations.push(animation.duration);
-                  // }
-                  // activeAction[this.currentAnimationId].play();
                 });
               },
             });
+            const geometry = new BoxGeometry( 1, 1, 1 );
+            for ( let i = 0; i < 3; i ++ ) {
+
+              const object = new Mesh( geometry, new MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
+
+              object.position.x = Math.random() * 5.0-2.5;
+              object.position.y = Math.random() * 5.0-2.5;
+              object.position.z = Math.random() * 5.0-2.5;
+
+              // object.rotation.x = Math.random() * 2 * Math.PI;
+              // object.rotation.y = Math.random() * 2 * Math.PI;
+              // object.rotation.z = Math.random() * 2 * Math.PI;
+              //
+              // object.scale.x = Math.random() + 0.5;
+              // object.scale.y = Math.random() + 0.5;
+              // object.scale.z = Math.random() + 0.5;
+
+              scene.add( object );
+
+            }
             renderer.outputEncoding = sRGBEncoding;
             scene.add(new AmbientLight(0xffffff, 1.0));
             scene.add(new DirectionalLight(0xffffff, 1.0));
@@ -179,6 +191,11 @@ export default {
               const intersects = rayCaster.intersectObjects( scene.children, false );
 
               if ( intersects.length > 0 ) {
+                if(jud){
+                  console.log(intersects[0])
+                  jud=false
+                }
+
                 if ( INTERSECTED != intersects[ 0 ].object ) {
                   if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
                   INTERSECTED = intersects[ 0 ].object;
@@ -214,9 +231,16 @@ export default {
     // for three.js touch control
     onTX(e) {
       platform.dispatchTouchEvent(e);
-      pointer.x = ( e.clientX / window.innerWidth ) * 2 - 1;
-      pointer.y = - ( e.clientY / window.innerHeight ) * 2 + 1;
+      this.jud=true;//打印信息
     },
+    move(e){
+      uni.getSystemInfo({
+        success: (res) => {
+          pointer.x = (  e.touches[0].pageX/ res.windowWidth ) * 2 - 1;
+          pointer.y = - (  e.touches[0].pageY / res.windowHeight ) * 2 + 1;
+        },
+      });
+    }
   },
 };
 </script>
