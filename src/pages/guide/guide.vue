@@ -105,143 +105,50 @@ page {
   display: flex;
   flex-direction: column;
 
-  @mixin guide-content-animation-keyframes($index, $colorFrom, $colorTo) {
-    @if $index < $guide-pages {
-      @keyframes guide-content-animation-#{$index} {
-        0% {
-          background: $colorFrom;
-          animation-timing-function: steps(1, end);
-        }
-
-        50% {
-          background: $colorTo;
-        }
-
-        100% {
-          background: $colorTo;
-        }
-      }
-    } @else {
-      // for page transitioning
-      @keyframes guide-content-animation-#{$index} {
-        0% {
-          background: $colorFrom;
-          animation-timing-function: steps(1, end);
-        }
-
-        100% {
-          background: $colorFrom;
-        }
-      }
-    }
-  }
-
-  @for $i from 1 through $guide-pages {
-    @if $i % 2 == 1 {
-      @include guide-content-animation-keyframes($i, white, $theme-color);
-    } @else {
-      @include guide-content-animation-keyframes($i, $theme-color, white);
-    }
-    .guide-content-animation-#{$i} {
-      animation-name: guide-content-animation-#{$i};
-      animation-duration: $animation-duration;
-      animation-fill-mode: forwards;
-    }
-  }
-
   .guide-content {
     flex: 1;
     display: flex;
     flex-direction: column;
 
-    @mixin guide-area-animation-keyframes($index, $disappear-percentage) {
+    @mixin guide-content-animation-keyframes($index, $colorFrom, $colorTo) {
       @if $index < $guide-pages {
-        @if $index % 2 == 1 {
-          @keyframes guide-area-animation-#{$index} {
-            0% {
-              transform: translateX(0rpx);
-              opacity: 100%;
-              animation-timing-function: linear;
-              color: black;
-            }
-
-            #{$disappear-percentage} {
-              transform: translateX(-300rpx);
-              opacity: 0%;
-              color: black;
-            }
-
-            #{100% - $disappear-percentage} {
-              transform: translateX(300rpx);
-              opacity: 0%;
-              animation-timing-function: linear;
-              color: white;
-            }
-
-            100% {
-              transform: translateX(0rpx);
-              opacity: 100%;
-              color: white;
-            }
+        @keyframes guide-content-animation-#{$index} {
+          0% {
+            background: $colorFrom;
+            animation-timing-function: steps(1, end);
           }
-        } @else {
-          @keyframes guide-area-animation-#{$index} {
-            0% {
-              transform: translateX(0rpx);
-              opacity: 100%;
-              animation-timing-function: linear;
-              color: white;
-            }
 
-            #{$disappear-percentage} {
-              transform: translateX(-300rpx);
-              opacity: 0%;
-              color: white;
-            }
+          50% {
+            background: $colorTo;
+          }
 
-            #{100% - $disappear-percentage} {
-              transform: translateX(300rpx);
-              opacity: 0%;
-              animation-timing-function: linear;
-              color: black;
-            }
-
-            100% {
-              transform: translateX(0rpx);
-              opacity: 100%;
-              color: black;
-            }
+          100% {
+            background: $colorTo;
           }
         }
       } @else {
         // for page transitioning
-        @keyframes guide-area-animation-#{$index} {
+        @keyframes guide-content-animation-#{$index} {
           0% {
-            transform: translateX(0rpx);
-            opacity: 100%;
-            animation-timing-function: linear;
-            color: white;
-          }
-
-          #{$disappear-percentage} {
-            transform: translateX(-300rpx);
-            opacity: 0%;
-            color: white;
+            background: $colorFrom;
+            animation-timing-function: steps(1, end);
           }
 
           100% {
-            transform: translateX(-300rpx);
-            opacity: 0%;
+            background: $colorFrom;
           }
         }
       }
     }
 
     @for $i from 1 through $guide-pages {
-      @include guide-area-animation-keyframes($i, 14%);
-
-      .guide-area-animation-#{$i} {
-        animation-name: guide-area-animation-#{$i};
+      @if $i % 2 == 1 {
+        @include guide-content-animation-keyframes($i, white, $theme-color);
+      } @else {
+        @include guide-content-animation-keyframes($i, $theme-color, white);
+      }
+      &.guide-content-animation-#{$i} {
+        animation-name: guide-content-animation-#{$i};
         animation-duration: $animation-duration;
         animation-fill-mode: forwards;
       }
@@ -253,6 +160,99 @@ page {
       flex-direction: column;
       justify-content: center;
       align-items: center;
+
+      @mixin guide-area-animation-keyframes($index, $disappear-percentage) {
+        @if $index < $guide-pages {
+          @if $index % 2 == 1 {
+            @keyframes guide-area-animation-#{$index} {
+              0% {
+                transform: translateX(0rpx);
+                opacity: 100%;
+                animation-timing-function: linear;
+                color: black;
+              }
+
+              #{$disappear-percentage} {
+                transform: translateX(-300rpx);
+                opacity: 0%;
+                color: black;
+              }
+
+              #{100% - $disappear-percentage} {
+                transform: translateX(300rpx);
+                opacity: 0%;
+                animation-timing-function: linear;
+                color: white;
+              }
+
+              100% {
+                transform: translateX(0rpx);
+                opacity: 100%;
+                color: white;
+              }
+            }
+          } @else {
+            @keyframes guide-area-animation-#{$index} {
+              0% {
+                transform: translateX(0rpx);
+                opacity: 100%;
+                animation-timing-function: linear;
+                color: white;
+              }
+
+              #{$disappear-percentage} {
+                transform: translateX(-300rpx);
+                opacity: 0%;
+                color: white;
+              }
+
+              #{100% - $disappear-percentage} {
+                transform: translateX(300rpx);
+                opacity: 0%;
+                animation-timing-function: linear;
+                color: black;
+              }
+
+              100% {
+                transform: translateX(0rpx);
+                opacity: 100%;
+                color: black;
+              }
+            }
+          }
+        } @else {
+          // for page transitioning
+          @keyframes guide-area-animation-#{$index} {
+            0% {
+              transform: translateX(0rpx);
+              opacity: 100%;
+              animation-timing-function: linear;
+              color: white;
+            }
+
+            #{$disappear-percentage} {
+              transform: translateX(-300rpx);
+              opacity: 0%;
+              color: white;
+            }
+
+            100% {
+              transform: translateX(-300rpx);
+              opacity: 0%;
+            }
+          }
+        }
+      }
+
+      @for $i from 1 through $guide-pages {
+        @include guide-area-animation-keyframes($i, 14%);
+
+        &.guide-area-animation-#{$i} {
+          animation-name: guide-area-animation-#{$i};
+          animation-duration: $animation-duration;
+          animation-fill-mode: forwards;
+        }
+      }
 
       .image-container {
         flex: 4;
@@ -283,34 +283,6 @@ page {
       justify-content: center;
       align-items: center;
 
-      // this is for the latter half of the animation of the button
-      // we need to push the button to the right in a linear fasion
-      @mixin button-anchor-animation-keyframes($index) {
-        @keyframes button-anchor-animation-#{$index} {
-          0% {
-            margin-left: 0rpx;
-          }
-
-          50% {
-            margin-left: 0rpx;
-            animation-timing-function: ease-in;
-          }
-
-          100% {
-            margin-left: $guide-button-size * 2;
-          }
-        }
-      }
-
-      @for $i from 1 through $guide-pages {
-        @include button-anchor-animation-keyframes($i);
-        .button-anchor-animation-#{$i} {
-          animation-name: button-anchor-animation-#{$i};
-          animation-duration: $animation-duration;
-          animation-fill-mode: forwards;
-        }
-      }
-
       .button-anchor {
         display: flex;
         width: $guide-button-size;
@@ -318,70 +290,29 @@ page {
         justify-content: center;
         align-items: center;
 
-        @mixin button-animation-keyframes($index, $colorFrom, $colorTo) {
-          @if $index < $guide-pages {
-            @keyframes button-animation-#{$index} {
-              0% {
-                width: $guide-button-size;
-                height: $guide-button-size;
-                margin-left: 0rpx;
-                margin-right: 0rpx;
-                background: $colorFrom;
-                animation-timing-function: cubic-bezier(1, 0, 1, 0);
-              }
-
-              50% {
-                width: 200000rpx + $guide-button-size;
-                height: 200000rpx + $guide-button-size;
-                margin-left: 200000rpx;
-                margin-right: 0rpx;
-                background: $colorFrom;
-              }
-
-              50% {
-                width: 200000rpx + $guide-button-size;
-                height: 200000rpx + $guide-button-size;
-                margin-left: 0rpx;
-                margin-right: 200000rpx + $guide-button-size * 2;
-                background: $colorTo;
-                animation-timing-function: cubic-bezier(0, 1, 0, 1);
-              }
-
-              100% {
-                width: $guide-button-size;
-                height: $guide-button-size;
-                margin-left: 0rpx;
-                margin-right: $guide-button-size * 2;
-                background: $colorTo;
-              }
+        // this is for the latter half of the animation of the button
+        // we need to push the button to the right in a linear fasion
+        @mixin button-anchor-animation-keyframes($index) {
+          @keyframes button-anchor-animation-#{$index} {
+            0% {
+              margin-left: 0rpx;
             }
-          } @else {
-            @keyframes button-animation-#{$index} {
-              0% {
-                width: $guide-button-size;
-                height: $guide-button-size;
-                margin-right: 0rpx;
-                background: $colorFrom;
-                animation-timing-function: cubic-bezier(0.18, 0.55, 0.43, 0.81);
-              }
 
-              100% {
-                width: 4000rpx;
-                height: 4000rpx;
-                background: $colorFrom;
-              }
+            50% {
+              margin-left: 0rpx;
+              animation-timing-function: ease-in;
+            }
+
+            100% {
+              margin-left: $guide-button-size * 2;
             }
           }
         }
 
         @for $i from 1 through $guide-pages {
-          @if $i % 2 == 1 {
-            @include button-animation-keyframes($i, $theme-color, white);
-          } @else {
-            @include button-animation-keyframes($i, white, $theme-color);
-          }
-          .button-animation-#{$i} {
-            animation-name: button-animation-#{$i};
+          @include button-anchor-animation-keyframes($i);
+          &.button-anchor-animation-#{$i} {
+            animation-name: button-anchor-animation-#{$i};
             animation-duration: $animation-duration;
             animation-fill-mode: forwards;
           }
@@ -397,6 +328,80 @@ page {
           display: flex;
           justify-content: center;
           align-items: center;
+
+          @mixin button-animation-keyframes($index, $colorFrom, $colorTo) {
+            @if $index < $guide-pages {
+              @keyframes button-animation-#{$index} {
+                0% {
+                  width: $guide-button-size;
+                  height: $guide-button-size;
+                  margin-left: 0rpx;
+                  margin-right: 0rpx;
+                  background: $colorFrom;
+                  animation-timing-function: cubic-bezier(1, 0, 1, 0);
+                }
+
+                50% {
+                  width: 200000rpx + $guide-button-size;
+                  height: 200000rpx + $guide-button-size;
+                  margin-left: 200000rpx;
+                  margin-right: 0rpx;
+                  background: $colorFrom;
+                }
+
+                50% {
+                  width: 200000rpx + $guide-button-size;
+                  height: 200000rpx + $guide-button-size;
+                  margin-left: 0rpx;
+                  margin-right: 200000rpx + $guide-button-size * 2;
+                  background: $colorTo;
+                  animation-timing-function: cubic-bezier(0, 1, 0, 1);
+                }
+
+                100% {
+                  width: $guide-button-size;
+                  height: $guide-button-size;
+                  margin-left: 0rpx;
+                  margin-right: $guide-button-size * 2;
+                  background: $colorTo;
+                }
+              }
+            } @else {
+              @keyframes button-animation-#{$index} {
+                0% {
+                  width: $guide-button-size;
+                  height: $guide-button-size;
+                  margin-right: 0rpx;
+                  background: $colorFrom;
+                  animation-timing-function: cubic-bezier(
+                    0.18,
+                    0.55,
+                    0.43,
+                    0.81
+                  );
+                }
+
+                100% {
+                  width: 4000rpx;
+                  height: 4000rpx;
+                  background: $colorFrom;
+                }
+              }
+            }
+          }
+
+          @for $i from 1 through $guide-pages {
+            @if $i % 2 == 1 {
+              @include button-animation-keyframes($i, $theme-color, white);
+            } @else {
+              @include button-animation-keyframes($i, white, $theme-color);
+            }
+            &.button-animation-#{$i} {
+              animation-name: button-animation-#{$i};
+              animation-duration: $animation-duration;
+              animation-fill-mode: forwards;
+            }
+          }
 
           @mixin button-arrow-animation-keyframes(
             $index,
