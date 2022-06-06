@@ -456,38 +456,6 @@ page {
 
   background: #f5f3f6;
 
-  @keyframes top-part-appear-animation {
-    from {
-      transform: translateY(-100%);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0%);
-      opacity: 1;
-    }
-  }
-
-  @keyframes top-part-disappear-animation {
-    from {
-      transform: translateY(0%);
-      opacity: 1;
-    }
-    to {
-      transform: translateY(-100%);
-      opacity: 0;
-    }
-  }
-
-  .top-part-disappear-animation {
-    animation: top-part-disappear-animation $appear-disappear-animation-duration
-      ease-in forwards;
-  }
-
-  .top-part-appear-animation {
-    animation: top-part-appear-animation $appear-disappear-animation-duration
-      ease-out forwards;
-  }
-
   .top-part {
     flex: 0;
     width: 100%;
@@ -496,6 +464,38 @@ page {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+
+    @keyframes top-part-appear-animation {
+      from {
+        transform: translateY(-100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0%);
+        opacity: 1;
+      }
+    }
+
+    @keyframes top-part-disappear-animation {
+      from {
+        transform: translateY(0%);
+        opacity: 1;
+      }
+      to {
+        transform: translateY(-100%);
+        opacity: 0;
+      }
+    }
+
+    &.top-part-disappear-animation {
+      animation: top-part-disappear-animation
+        $appear-disappear-animation-duration ease-in forwards;
+    }
+
+    &.top-part-appear-animation {
+      animation: top-part-appear-animation $appear-disappear-animation-duration
+        ease-out forwards;
+    }
 
     .overall-progressbar {
       flex: 0;
@@ -546,69 +546,37 @@ page {
     }
   }
 
-  @keyframes webgl-appear-animation {
-    from {
-      transform: translateX(-100%);
-    }
-    to {
-      transform: translateX(0%);
-    }
-  }
-
-  @keyframes webgl-disappear-animation {
-    from {
-      transform: translateX(0%);
-    }
-    to {
-      transform: translateX(-100%);
-    }
-  }
-
-  .webgl-disappear-animation {
-    animation: webgl-disappear-animation $appear-disappear-animation-duration
-      ease-in forwards;
-  }
-
-  .webgl-appear-animation {
-    animation: webgl-appear-animation $appear-disappear-animation-duration
-      ease-out forwards;
-  }
-
   .webgl {
     flex: 11;
     width: 100%;
-  }
 
-  @keyframes bottom-part-appear-animation {
-    from {
-      transform: translateY(100%);
-      opacity: 0;
+    @keyframes webgl-appear-animation {
+      from {
+        transform: translateX(-100%);
+      }
+      to {
+        transform: translateX(0%);
+      }
     }
-    to {
-      transform: translateY(0%);
-      opacity: 1;
-    }
-  }
 
-  @keyframes bottom-part-disappear-animation {
-    from {
-      transform: translateY(0%);
-      opacity: 1;
+    @keyframes webgl-disappear-animation {
+      from {
+        transform: translateX(0%);
+      }
+      to {
+        transform: translateX(-100%);
+      }
     }
-    to {
-      transform: translateY(100%);
-      opacity: 0;
+
+    &.webgl-disappear-animation {
+      animation: webgl-disappear-animation $appear-disappear-animation-duration
+        ease-in forwards;
     }
-  }
 
-  .bottom-part-disappear-animation {
-    animation: bottom-part-disappear-animation
-      $appear-disappear-animation-duration ease-in forwards;
-  }
-
-  .bottom-part-appear-animation {
-    animation: bottom-part-appear-animation $appear-disappear-animation-duration
-      ease-out forwards;
+    &.webgl-appear-animation {
+      animation: webgl-appear-animation $appear-disappear-animation-duration
+        ease-out forwards;
+    }
   }
 
   .bottom-part {
@@ -619,6 +587,38 @@ page {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+
+    @keyframes bottom-part-appear-animation {
+      from {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0%);
+        opacity: 1;
+      }
+    }
+
+    @keyframes bottom-part-disappear-animation {
+      from {
+        transform: translateY(0%);
+        opacity: 1;
+      }
+      to {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+    }
+
+    &.bottom-part-disappear-animation {
+      animation: bottom-part-disappear-animation
+        $appear-disappear-animation-duration ease-in forwards;
+    }
+
+    &.bottom-part-appear-animation {
+      animation: bottom-part-appear-animation
+        $appear-disappear-animation-duration ease-out forwards;
+    }
 
     .timer-area {
       flex: 0;
