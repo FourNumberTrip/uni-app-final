@@ -6,7 +6,6 @@
         id="gl"
         @touchstart="onTX"
         @touchend="onTX"
-        @touchmove="onTX"
         @click="move"
     ></canvas>
     <text @click="autoTurn">
@@ -29,7 +28,11 @@ import {
   Raycaster,
   Vector2,
   Mesh,
-  BoxGeometry,
+  SphereGeometry,
+  ShaderMaterial,
+  BackSide,
+  AdditiveBlending,
+  Color,
   MeshLambertMaterial
 } from "three";
 
@@ -63,27 +66,13 @@ export default {
       cnt_turn: 0,
       paused: false,
       lowSpeed: false,
-      url: "https://threejs.org/examples/models/gltf/RobotExpressive/RobotExpressive.glb",
+      url: "https://mp.muzi.fun/resources/RobotExpressive.glb",
     };
   },
   mounted() {
     this.load(this.url);
   },
   methods: {
-    // togglePause() {
-    //   let cur_action = activeAction[this.currentAnimationId];
-    //   if (this.paused) {
-    //     cur_action.paused = false;
-    //     this.paused = false;
-    //     // this controls the animation
-    //     clock.start();
-    //   } else {
-    //     cur_action.paused = true;
-    //     this.paused = true;
-    //
-    //     clock.stop();
-    //   }
-    // },
     toggleSlowMotion() {
       if (this.lowSpeed) {
         mixer.timeScale = 1;
@@ -143,22 +132,32 @@ export default {
                 });
               },
             });
-            const geometry = new BoxGeometry( 1, 1, 1 );
-            for ( let i = 0; i < 3; i ++ ) {
 
-              const object = new Mesh( geometry, new MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
+            //关节位置小球
+            const geometry = new SphereGeometry( 1, 32, 32 );
+            const customMaterial = new ShaderMaterial(
+                {
+                  uniforms:
+                      {
+                        "c":   { type: "f", value: 0.1},
+                        "p":   { type: "f", value: 1.7 },
+                        glowColor: { type: "c", value: new Color(0xff0000) },
+                        viewVector: { type: "v3", value: camera.position }
+                      },
+                  // vertexShader:   document.getElementById( 'vertexShader'   ).textContent,
+                  // fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+                  side: BackSide,
+                  blending:AdditiveBlending,
+                  transparent: true
+                }   );
+
+            for ( let i = 0; i < 3; i ++ ) {
+              // const object = new Mesh( geometry, customMaterial);
+              const object = new Mesh( geometry, new MeshLambertMaterial( { color: Math.random() * 0xffffff } ));
 
               object.position.x = Math.random() * 5.0-2.5;
               object.position.y = Math.random() * 5.0-2.5;
               object.position.z = Math.random() * 5.0-2.5;
-
-              // object.rotation.x = Math.random() * 2 * Math.PI;
-              // object.rotation.y = Math.random() * 2 * Math.PI;
-              // object.rotation.z = Math.random() * 2 * Math.PI;
-              //
-              // object.scale.x = Math.random() + 0.5;
-              // object.scale.y = Math.random() + 0.5;
-              // object.scale.z = Math.random() + 0.5;
 
               scene.add( object );
 
