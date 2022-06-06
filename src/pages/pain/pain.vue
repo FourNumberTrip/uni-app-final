@@ -1,6 +1,6 @@
 <template>
 	<view class="content">
-		<image class="logo" src="/static/logo.png"></image>
+		<image class="logo" src="https://mp.muzi.fun/resources/logo.png"></image>
 		<view>
 			<text class="title">{{title}}</text>
 		</view>

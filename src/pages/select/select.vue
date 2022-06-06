@@ -2,8 +2,8 @@
   <view class="content">
     <view class="list">
       <view
-        :class="['list-item', item._class]"
-        v-for="(item, index) in items"
+        :class="['list-item', item._class, index === 0 ? 'list-item-fade-in-from-top' : 'list-item-fade-in-from-bottom']"
+        v-for="(item, index) in selectItems"
         :key="item.title"
         @click="onClick(index)"
       >
@@ -23,16 +23,16 @@
 export default {
   data() {
     return {
-      items: [
+      selectItems: [
         {
-          image: "/static/warm-up.jpg",
+          image: "https://mp.muzi.fun/resources/warm-up.jpg",
           title: "热身动作",
           description:
             "热身运动是热身运动是热身运动是热身运动是热身运动是热身运动是热身运动是热身运动是热身运动",
           _class: "",
         },
         {
-          image: "/static/pain-spots.jpg",
+          image: "https://mp.muzi.fun/resources/pain-spots.jpg",
           title: "疼痛缓解",
           description:
             "疼痛缓解是疼痛缓解是疼痛缓解是疼痛缓解是疼痛缓解是疼痛缓解是疼痛缓解是疼痛缓解是疼痛缓解",
@@ -45,8 +45,8 @@ export default {
   methods: {
     onClick(index) {
       console.log("onClick", index);
-      this.items[index]._class = "list-item-expand";
-      this.items[1 - index]._class = "list-item-shrink";
+      this.selectItems[index]._class = "list-item-expand";
+      this.selectItems[1 - index]._class = "list-item-shrink";
     },
   },
 };
@@ -99,6 +99,36 @@ page {
       margin: 0rpx !important;
       border-radius: 0rpx !important;
       opacity: 0%;
+    }
+
+    @keyframes list-item-fade-in-from-top {
+      from {
+        transform: translateY(-100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0%);
+        opacity: 1;
+      }
+    }
+
+    @keyframes list-item-fade-in-from-bottom {
+      from {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0%);
+        opacity: 1;
+      }
+    }
+
+    .list-item-fade-in-from-top {
+      animation: list-item-fade-in-from-top 0.8s ease-out;
+    }
+
+    .list-item-fade-in-from-bottom {
+      animation: list-item-fade-in-from-bottom 0.8s ease-out;
     }
 
     .list-item {
