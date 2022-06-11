@@ -115,7 +115,7 @@ export default {
               antialias: true,
               alpha: true,
             });
-            renderer.setClearColor(0x808080, 1);
+            renderer.setClearColor(0xc5bfbf, 1);
 
             camera = new PerspectiveCamera(
                 45,
@@ -183,12 +183,6 @@ export default {
               jointsBall[i]= new Mesh( geometry.clone () ,customMaterial.clone () );
               jointsBallGlow[i]= new Mesh( geometry,customMaterial.clone () );
 
-              // const object = new Mesh( geometry, new MeshLambertMaterial( { color: Math.random() * 0xffffff } ));
-
-              // object.position.x = Math.random() * 5.0-2.5;
-              // object.position.y = Math.random() * 5.0-2.5;
-              // object.position.z = Math.random() * 5.0-2.5;
-              // scene.add( object );
               jointsBall[i].position.x = Math.random() * 5.0-2.5;
               jointsBall[i].position.y = Math.random() * 5.0-2.5;
               jointsBall[i].position.z = Math.random() * 5.0-2.5;
