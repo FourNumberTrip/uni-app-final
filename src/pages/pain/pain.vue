@@ -31,9 +31,16 @@ import {
   SphereGeometry,
   ShaderMaterial,
   BackSide,
+  DoubleSide,
+    FrontSide,
   AdditiveBlending,
+    NormalBlending,
+  SubtractiveBlending,
+  MultiplyBlending,
   Color,
-  MeshLambertMaterial
+  MeshLambertMaterial,
+  Vector3,
+  MeshBasicMaterial
 } from "three";
 
 import { WechatPlatform, PlatformManager } from "platformize-three";
@@ -52,11 +59,13 @@ let camera;
 let platform;
 // animations
 let activeAction = [];
-//选中模型
+//选中模型部位
 let rayCaster;
 let INTERSECTED;
 let pointer=new Vector2();
-let jud=true;
+let jud=true;//辅助打印信息
+let jointsBall=[]
+let jointsBallGlow=[]
 
 export default {
   data() {
@@ -106,6 +115,7 @@ export default {
               antialias: true,
               alpha: true,
             });
+            renderer.setClearColor(0x808080, 1);
 
             camera = new PerspectiveCamera(
                 45,
@@ -134,34 +144,64 @@ export default {
             });
 
             //关节位置小球
-            const geometry = new SphereGeometry( 1, 32, 32 );
+            const geometry = new SphereGeometry( 1, 32, 16 );
+
             const customMaterial = new ShaderMaterial(
                 {
                   uniforms:
                       {
                         "c":   { type: "f", value: 0.1},
-                        "p":   { type: "f", value: 1.7 },
+                        "p":   { type: "f", value: 3 },
                         glowColor: { type: "c", value: new Color(0xff0000) },
                         viewVector: { type: "v3", value: camera.position }
                       },
-                  // vertexShader:   document.getElementById( 'vertexShader'   ).textContent,
-                  // fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
-                  side: BackSide,
+                  vertexShader:"uniform vec3 viewVector;\n" +
+                      "uniform float c;\n" +
+                      "uniform float p;\n" +
+                      "varying float intensity;\n" +
+                      "void main() \n" +
+                      "{\n" +
+                      "    vec3 vNormal = normalize( normalMatrix * normal );\n" +
+                      "\tvec3 vNormel = normalize( normalMatrix * viewVector );\n" +
+                      "\tintensity = pow( c - dot(vNormal, vNormel), p );\n" +
+                      "\t\n" +
+                      "    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );\n" +
+                      "}",
+                  fragmentShader:"uniform vec3 glowColor;\n" +
+                      "varying float intensity;\n" +
+                      "void main() \n" +
+                      "{\n" +
+                      "\tvec3 glow = glowColor * intensity;\n" +
+                      "    gl_FragColor = vec4( glow, 1.0 );\n" +
+                      "}",
+                  side: DoubleSide,
                   blending:AdditiveBlending,
-                  transparent: true
+                  transparent: true,
                 }   );
 
             for ( let i = 0; i < 3; i ++ ) {
-              // const object = new Mesh( geometry, customMaterial);
-              const object = new Mesh( geometry, new MeshLambertMaterial( { color: Math.random() * 0xffffff } ));
+              jointsBall[i]= new Mesh( geometry.clone () ,customMaterial.clone () );
+              jointsBallGlow[i]= new Mesh( geometry,customMaterial.clone () );
 
-              object.position.x = Math.random() * 5.0-2.5;
-              object.position.y = Math.random() * 5.0-2.5;
-              object.position.z = Math.random() * 5.0-2.5;
+              // const object = new Mesh( geometry, new MeshLambertMaterial( { color: Math.random() * 0xffffff } ));
 
-              scene.add( object );
+              // object.position.x = Math.random() * 5.0-2.5;
+              // object.position.y = Math.random() * 5.0-2.5;
+              // object.position.z = Math.random() * 5.0-2.5;
+              // scene.add( object );
+              jointsBall[i].position.x = Math.random() * 5.0-2.5;
+              jointsBall[i].position.y = Math.random() * 5.0-2.5;
+              jointsBall[i].position.z = Math.random() * 5.0-2.5;
+              // jointsBall[i].visble=false;
+              // scene.add( jointsBall[i] );
 
+              jointsBallGlow[i].position.x = jointsBall[i].position.x;
+              jointsBallGlow[i].position.y = jointsBall[i].position.y;
+              jointsBallGlow[i].position.z = jointsBall[i].position.z;
+              // jointsBall[i].scale.multiplyScalar(1.2)
+              scene.add( jointsBallGlow[i]);
             }
+
             renderer.outputEncoding = sRGBEncoding;
             scene.add(new AmbientLight(0xffffff, 1.0));
             scene.add(new DirectionalLight(0xffffff, 1.0));
@@ -185,6 +225,14 @@ export default {
                   }
                 }
               }
+              for ( let i = 0; i < 3; i ++ ) {
+                jointsBall[i].material.uniforms.viewVector.value =
+                    new Vector3().subVectors( camera.position, jointsBall[i].position );
+                jointsBallGlow[i].material.uniforms.viewVector.value =
+                    new Vector3().subVectors( camera.position, jointsBallGlow[i].position );
+              }
+
+              //获取鼠标指向的模型
               rayCaster.setFromCamera( pointer, camera );
 
               const intersects = rayCaster.intersectObjects( scene.children, false );
@@ -196,13 +244,14 @@ export default {
                 }
 
                 if ( INTERSECTED != intersects[ 0 ].object ) {
-                  if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+                  if ( INTERSECTED ) INTERSECTED.material.uniforms[ "p" ].value =3;
                   INTERSECTED = intersects[ 0 ].object;
-                  INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-                  INTERSECTED.material.emissive.setHex( 0xff0000 );
+                  // INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+                  INTERSECTED.material.uniforms[ "p" ].value =0;
                 }
               } else {
-                if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+                // if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+                if ( INTERSECTED ) INTERSECTED.material.uniforms[ "p" ].value =3;
                 INTERSECTED = null;
               }
             };
@@ -237,6 +286,7 @@ export default {
         success: (res) => {
           pointer.x = (  e.touches[0].pageX/ res.windowWidth ) * 2 - 1;
           pointer.y = - (  e.touches[0].pageY / res.windowHeight ) * 2 + 1;
+          console.log(pointer)
         },
       });
     }
