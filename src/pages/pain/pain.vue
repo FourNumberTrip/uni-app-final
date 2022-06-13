@@ -75,7 +75,8 @@ export default {
       cnt_turn: 0,
       paused: false,
       lowSpeed: false,
-      url: "https://mp.muzi.fun/resources/RobotExpressive.glb",
+      // url: "https://mp.muzi.fun/resources/RobotExpressive.glb",
+      url: "https://mp.muzi.fun/resources/final.glb",
     };
   },
   mounted() {
@@ -137,8 +138,11 @@ export default {
                 gltfLoader.parse(res.data, "", (gltf) => {
                   gltf.parser = null;
                   // TODO CHANGE THIS
-                  gltf.scene.position.y = -2.2;
+                  // gltf.scene.position.y = -2.2;
+                  gltf.scene.position.y = -3;
+                  gltf.scene.scale.multiplyScalar(4)
                   scene.add(gltf.scene);
+
                 });
               },
             });
