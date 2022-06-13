@@ -1,6 +1,6 @@
 <template>
   <view class="content">
-    <view class="complete-content">
+    <view class="complete-content" :style="{ display: currentPage == 'complete' ? 'flex' : 'none' }">
       <view class="top-placeholder"></view>
       <view class="checkmark-wrapper">
         <view class="checkmark checkmark-appear-animation"></view>
@@ -21,7 +21,9 @@
 <script>
 export default {
   data() {
-    return {};
+    return {
+      currentPage: "complete",
+    };
   },
   onLoad() {},
   methods: {},

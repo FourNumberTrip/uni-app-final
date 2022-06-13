@@ -1,6 +1,9 @@
 <template>
   <view class="content">
-    <view class="list-content">
+    <view
+      class="list-content"
+      :style="{ display: currentPage == 'list' ? 'flex' : 'none' }"
+    >
       <view class="list">
         <view
           :class="['list-item', item.class, item.disappearClass]"
@@ -26,6 +29,7 @@ let observer;
 export default {
   data() {
     return {
+      currentPage: "list",
       listItems: [
         {
           coverUrl: "https://mp.muzi.fun/resources/py.png",
@@ -164,6 +168,12 @@ export default {
               : "list-item-fade-out-right";
         }
       }
+
+      setTimeout(() => {
+        this.currentPage = "action";
+      }, 600);
+
+      // TODO set animation to selected list item
     },
   },
 };

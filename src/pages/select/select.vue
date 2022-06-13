@@ -1,6 +1,9 @@
 <template>
   <view class="content">
-    <view class="select-content">
+    <view
+      class="select-content"
+      :style="{ display: currentPage == 'select' ? 'flex' : 'none' }"
+    >
       <view class="list">
         <view
           :class="[
@@ -31,6 +34,7 @@
 export default {
   data() {
     return {
+      currentPage: "select",
       selectItems: [
         {
           image: "https://mp.muzi.fun/resources/warm-up.jpg",
@@ -52,7 +56,10 @@ export default {
   onLoad() {},
   methods: {
     onSelectButtonClick(index) {
-      console.log("onClick", index);
+      setTimeout(() => {
+        this.currentPage = ["list", "pain"][index];
+      }, 500);
+
       this.selectItems[index]._class = "list-item-expand";
       this.selectItems[1 - index]._class = "list-item-shrink";
     },
@@ -81,38 +88,6 @@ page {
       flex: 1;
       display: flex;
       flex-direction: column;
-
-      .list-item:active {
-        pointer-events: none;
-        transform: scale(0.96);
-      }
-
-      .list-item:hover {
-        transform: scale(0.96);
-      }
-
-      .list-item-expand {
-        margin: 0rpx !important;
-        border-radius: 0rpx !important;
-        opacity: 0%;
-
-        .list-item-content {
-          .button-background-image {
-            border-radius: 0rpx !important;
-          }
-
-          .translucent-box {
-            border-radius: 0rpx !important;
-          }
-        }
-      }
-
-      .list-item-shrink {
-        flex: 0 !important;
-        margin: 0rpx !important;
-        border-radius: 0rpx !important;
-        opacity: 0%;
-      }
 
       .list-item {
         flex: 1;
@@ -155,6 +130,38 @@ page {
 
         &.list-item-fade-in-from-bottom {
           animation: list-item-fade-in-from-bottom 0.8s ease-out;
+        }
+
+        &.list-item:active {
+          pointer-events: none;
+          transform: scale(0.96);
+        }
+
+        &.list-item:hover {
+          transform: scale(0.96);
+        }
+
+        &.list-item-expand {
+          margin: 0rpx !important;
+          border-radius: 0rpx !important;
+          opacity: 0%;
+
+          .list-item-content {
+            .button-background-image {
+              border-radius: 0rpx !important;
+            }
+
+            .translucent-box {
+              border-radius: 0rpx !important;
+            }
+          }
+        }
+
+        &.list-item-shrink {
+          flex: 0 !important;
+          margin: 0rpx !important;
+          border-radius: 0rpx !important;
+          opacity: 0%;
         }
 
         .list-item-content {
