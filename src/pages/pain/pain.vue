@@ -66,6 +66,7 @@ let pointer=new Vector2();
 let jud=true;//辅助打印信息
 let jointsBall=[]
 let jointsBallGlow=[]
+let totalNum
 
 export default {
   data() {
@@ -138,11 +139,9 @@ export default {
                 gltfLoader.parse(res.data, "", (gltf) => {
                   gltf.parser = null;
                   // TODO CHANGE THIS
-                  // gltf.scene.position.y = -2.2;
                   gltf.scene.position.y = -3;
-                  gltf.scene.scale.multiplyScalar(4)
+                  gltf.scene.scale.multiplyScalar(3.5)
                   scene.add(gltf.scene);
-
                 });
               },
             });
@@ -183,20 +182,73 @@ export default {
                   transparent: true,
                 }   );
 
-            for ( let i = 0; i < 3; i ++ ) {
-              jointsBall[i]= new Mesh( geometry.clone () ,customMaterial.clone () );
+            totalNum=16;
+            for ( let i = 0; i < totalNum; i ++ ) {
               jointsBallGlow[i]= new Mesh( geometry,customMaterial.clone () );
-
-              jointsBall[i].position.x = Math.random() * 5.0-2.5;
-              jointsBall[i].position.y = Math.random() * 5.0-2.5;
-              jointsBall[i].position.z = Math.random() * 5.0-2.5;
-              // jointsBall[i].visble=false;
-              // scene.add( jointsBall[i] );
-
-              jointsBallGlow[i].position.x = jointsBall[i].position.x;
-              jointsBallGlow[i].position.y = jointsBall[i].position.y;
-              jointsBallGlow[i].position.z = jointsBall[i].position.z;
-              // jointsBall[i].scale.multiplyScalar(1.2)
+              jointsBallGlow[i].scale.multiplyScalar(0.15)
+              jointsBallGlow[i].position.z=1.2
+              // jointsBall[i]= new Mesh( geometry.clone () ,customMaterial.clone () );
+              // jointsBall[i].position.x = Math.random() * 5.0-2.5;
+              // jointsBall[i].position.y = Math.random() * 5.0-2.5;
+              // jointsBall[i].position.z = Math.random() * 5.0-2.5;
+              // // jointsBall[i].visble=false;
+              // // scene.add( jointsBall[i] );
+              //
+              // jointsBallGlow[i].position.x = jointsBall[i].position.x;
+              // jointsBallGlow[i].position.y = jointsBall[i].position.y;
+              // jointsBallGlow[i].position.z = jointsBall[i].position.z;
+              // // jointsBall[i].scale.multiplyScalar(1.2)
+              // scene.add( jointsBallGlow[i]);
+            }
+            //0-腰部
+            jointsBallGlow[0].position.x = 0;
+            jointsBallGlow[0].position.y = 0.8;
+            //1-颈部
+            jointsBallGlow[1].position.x = 0;
+            jointsBallGlow[1].position.y = 2.2;
+            //2-肩部-左
+            jointsBallGlow[2].position.x = -0.45;
+            jointsBallGlow[2].position.y = 1.95;
+            //3-肩部-右
+            jointsBallGlow[3].position.x = 0.45;
+            jointsBallGlow[3].position.y = 1.95;
+            //4-髋关节-左
+            jointsBallGlow[4].position.x = -0.5;
+            jointsBallGlow[4].position.y = 0.3;
+            //5-髋关节-右
+            jointsBallGlow[5].position.x = 0.5;
+            jointsBallGlow[5].position.y = 0.3;
+            //6-踝关节-左
+            jointsBallGlow[6].position.x = -0.34;
+            jointsBallGlow[6].position.y = -2.3;
+            //7-踝关节-右
+            jointsBallGlow[7].position.x = 0.34;
+            jointsBallGlow[7].position.y = -2.3;
+            //8-膝关节-左
+            jointsBallGlow[8].position.x = -0.35;
+            jointsBallGlow[8].position.y = -1.2;
+            //9-膝关节-右
+            jointsBallGlow[9].position.x = 0.35;
+            jointsBallGlow[9].position.y = -1.2;
+            //10-大腿-左
+            jointsBallGlow[10].position.x = -0.35;
+            jointsBallGlow[10].position.y = -0.6;
+            //11-大腿-右侧
+            jointsBallGlow[11].position.x = 0.35;
+            jointsBallGlow[11].position.y = -0.6;
+            //12-小腿-左
+            jointsBallGlow[12].position.x = -0.35;
+            jointsBallGlow[12].position.y = -1.8;
+            //13-小腿-右
+            jointsBallGlow[13].position.x = 0.35;
+            jointsBallGlow[13].position.y = -1.8;
+            //14-肘关节-左
+            jointsBallGlow[14].position.x = -1.5;
+            jointsBallGlow[14].position.y = 1.8;
+            //15-肘关节-右
+            jointsBallGlow[15].position.x = 1.5;
+            jointsBallGlow[15].position.y = 1.8;
+            for ( let i = 0; i < totalNum; i ++ ) {
               scene.add( jointsBallGlow[i]);
             }
 
@@ -211,7 +263,9 @@ export default {
             });
 
             const render = () => {
-              if (this.turning) this.turn(0.01);
+              if (this.turning) {
+                this.turn(0.01);
+              }
               const frameId = canvas.requestAnimationFrame(render);
               if (!this.paused) {
                 controls.update();
@@ -223,9 +277,9 @@ export default {
                   }
                 }
               }
-              for ( let i = 0; i < 3; i ++ ) {
-                jointsBall[i].material.uniforms.viewVector.value =
-                    new Vector3().subVectors( camera.position, jointsBall[i].position );
+              for ( let i = 0; i < totalNum; i ++ ) {
+                // jointsBall[i].material.uniforms.viewVector.value =
+                //     new Vector3().subVectors( camera.position, jointsBall[i].position );
                 jointsBallGlow[i].material.uniforms.viewVector.value =
                     new Vector3().subVectors( camera.position, jointsBallGlow[i].position );
               }
@@ -263,6 +317,9 @@ export default {
       this.cnt_turn = 0;
       this.turning = true;
       this.front=!this.front;
+      for ( let i = 0; i < totalNum; i ++ ) {
+        scene.remove(jointsBallGlow[i])
+      }
     },
     turn(step) {
       controls.update();
@@ -271,6 +328,17 @@ export default {
       this.cnt_turn += 1;
       if (this.cnt_turn >= 1 / step) {
         this.turning = false;
+        this.addBalls()
+      }
+    },
+    addBalls(){
+      for(let i=0;i<totalNum;i++){
+        if(this.front){
+          jointsBallGlow[i].position.z=1.5
+        }else{
+          jointsBallGlow[i].position.z=-1.5
+        }
+        scene.add(jointsBallGlow[i])
       }
     },
 
