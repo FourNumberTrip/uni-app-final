@@ -1,6 +1,9 @@
 <template>
   <view class="content">
-    <view :class="['guide-content', `guide-content-animation-${guideStage}`]">
+    <view
+      :class="['guide-content', `guide-content-animation-${guideStage}`]"
+      :style="{ display: currentPage == 'guide' ? 'flex' : 'none' }"
+    >
       <view :class="['guide-area', `guide-area-animation-${guideStage}`]">
         <view class="image-container">
           <img class="image" :src="guide.image" alt="" />
@@ -66,6 +69,7 @@ const guides = [
 export default {
   data() {
     return {
+      currentPage: "guide",
       guideStage: 0,
       guide: guides[0],
     };
@@ -73,10 +77,16 @@ export default {
   onLoad() {},
   methods: {
     onGuideButtonClick() {
-      this.guideStage++;
-      setTimeout(() => {
-        this.guide = guides[this.guideStage];
-      }, 500);
+      if (this.guideStage < 4) {
+        this.guideStage++;
+        setTimeout(() => {
+          this.guide = guides[this.guideStage];
+        }, 500);
+      } else {
+        setTimeout(() => {
+          this.currentPage = "select";
+        }, 500);
+      }
     },
   },
 };
