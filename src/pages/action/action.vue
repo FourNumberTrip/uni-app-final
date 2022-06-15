@@ -1,6 +1,12 @@
 <template>
   <view class="content">
-    <view class="action-content">
+    <view
+      class="action-content"
+      :style="{
+        display: /^action|pain$/.test(currentPage) ? 'flex' : 'none',
+      }"
+    >
+      <!-- only if it's action page we display the top part and the bottom part -->
       <view
         :class="[
           'top-part',
@@ -8,6 +14,9 @@
             ? 'top-part-disappear-animation'
             : 'top-part-appear-animation',
         ]"
+        :style="{
+          display: currentPage === 'action' ? 'flex' : 'none',
+        }"
       >
         <view class="overall-progressbar">
           <view
@@ -48,6 +57,9 @@
             ? 'bottom-part-disappear-animation'
             : 'bottom-part-appear-animation',
         ]"
+        :style="{
+          display: currentPage === 'action' ? 'flex' : 'none',
+        }"
       >
         <view class="timer-area">
           <text class="timer">{{ Math.floor(currentPlayingTime) }}</text>
@@ -157,6 +169,8 @@ function secondsToTimeString(totalSeconds) {
 export default {
   data() {
     return {
+      currentPage: "action", // or might be "pain"
+
       turning: false,
       cnt_turn: 0,
       paused: false,
