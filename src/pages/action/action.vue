@@ -1,9 +1,10 @@
 <template>
   <view class="content">
+    <!-- for some reason, /^action|pain$/.test(currentPage) doesn't work -->
     <view
       class="action-content"
       :style="{
-        display: /^action|pain$/.test(currentPage) ? 'flex' : 'none',
+        display: currentPage === 'action' || currentPage === 'pain' ? 'flex' : 'none',
       }"
     >
       <!-- only if it's action page we display the top part and the bottom part -->
