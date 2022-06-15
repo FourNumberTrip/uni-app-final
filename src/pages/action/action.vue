@@ -60,7 +60,7 @@
         <view class="action-name-area">
           <text class="action-name">{{
             `${currentAnimationIndex + 1}/${currentAnimations.length} ${
-              animations[currentAnimationId].name
+              animationNameMap[currentAnimationId]
             }`
           }}</text>
         </view>
@@ -129,7 +129,6 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 // wait this amount of time before starting the timer
 const WAITING_TIME_BEFORE_ACTION = 5;
-
 // for transition the animation smoothly
 const FADING_DURATION = 0.2;
 
@@ -144,7 +143,7 @@ let scene;
 let camera;
 let platform;
 // animations
-let activeAction = [];
+let activeAction = {};
 
 // convert seconds to mm:ss format
 function secondsToTimeString(totalSeconds) {
@@ -163,43 +162,63 @@ export default {
       paused: false,
       lowSpeed: false,
       url: "https://mp.muzi.fun/resources/final.glb",
-      animations: [
-        { name: "跳舞" },
-        { name: "死亡" },
-        { name: "静止" },
-        { name: "跳跃" },
-        { name: "不好" },
-        { name: "打拳" },
-        { name: "跑步" },
-        { name: "坐着" },
-        { name: "站着" },
-        { name: "大拇指" },
-        { name: "走路" },
-        { name: "走路跳" },
-        { name: "挥手" },
-        { name: "好的" },
-      ],
-      animationDurations: [],
+      animationNameMap: {
+        101: "跳舞",
+        102: "死亡",
+        103: "静止",
+        104: "跳跃",
+        105: "不好",
+        106: "打拳",
+        107: "跑步",
+        108: "坐着",
+        109: "站着",
+        110: "大拇指",
+        111: "走路",
+        112: "走路跳",
+        113: "挥手",
+        114: "好的",
+        115: "跳舞",
+        116: "死亡",
+        117: "静止",
+        118: "跳跃",
+        119: "不好",
+        120: "打拳",
+        121: "跑步",
+        122: "坐着",
+        123: "站着",
+        124: "大拇指",
+        125: "走路",
+      },
 
+      // "index" means the index in the currentAnimations array
+      // and we have a computed value "currentAnimationIndex" to get the id (e.g. "101", "102")
       currentAnimationIndex: 0,
       currentAnimations: [
         {
-          id: 0,
+          id: "102",
           loopTimes: 8,
         },
         {
-          id: 2,
+          id: "107",
           loopTimes: 8,
         },
         {
-          id: 4,
+          id: "109",
           loopTimes: 8,
         },
       ],
+
+      // what displays on the screen
       currentPlayingTime: 0,
+
+      // for pausing
       savedMixerTime: 0,
+
+      // for waiting before counting up
       waitingTime: WAITING_TIME_BEFORE_ACTION,
       waiting: true,
+
+      // for fading in and out of the page
       finished: false,
     };
   },
@@ -221,7 +240,7 @@ export default {
     },
     currentAnimationDurations() {
       return this.currentAnimations.map(
-        (i) => this.animationDurations[i.id] * i.loopTimes
+        (i) => activeAction[i.id]._clip.duration * i.loopTimes
       );
     },
     completedPercentages() {
@@ -341,7 +360,7 @@ export default {
           );
 
           // TODO CHANGE THIS
-          camera.position.set(0, 0, 2.5);
+          camera.position.set(0, 0, 10);
           scene = new Scene();
           controls = new OrbitControls(camera, canvas);
           controls.enableDamping = true;
@@ -355,12 +374,12 @@ export default {
               gltfLoader.parse(res.data, "", (gltf) => {
                 gltf.parser = null;
                 // TODO CHANGE THIS
-                gltf.scene.position.y = -0.86;
+                gltf.scene.position.y = -3.4;
+                gltf.scene.scale.multiplyScalar(3.5);
                 scene.add(gltf.scene);
                 mixer = new AnimationMixer(gltf.scene);
                 for (const animation of gltf.animations) {
-                  activeAction.push(mixer.clipAction(animation));
-                  this.animationDurations.push(animation.duration);
+                  activeAction[animation.name] = mixer.clipAction(animation);
                 }
                 activeAction[this.currentAnimationId].play();
               });
@@ -380,9 +399,10 @@ export default {
           });
 
           const render = () => {
-            if (this.turning) this.turn(0.01);
             const frameId = canvas.requestAnimationFrame(render);
             if (!this.paused) {
+              if (this.turning) this.turn(0.01);
+
               controls.update();
               renderer.render(scene, camera);
               if (mixer) {
@@ -411,14 +431,18 @@ export default {
                         this.setAction(this.currentAnimationIndex + 1);
                         // if all the actions are finished
                       } else if (!this.finished) {
+                        // pause the animation
                         activeAction[this.currentAnimationId].paused = true;
+
+                        // pause the rendering of the model after the model fading out of the screen to save power
                         setTimeout(() => {
                           activeAction[this.currentAnimationId].paused = false;
-                          this.paused = true;
+                          this.togglePause();
                           clock.stop();
                         }, 1000);
-                        this.finished = true;
 
+                        // page turning
+                        this.finished = true;
                         setTimeout(() => {
                           this.currentPage = "complete";
                         }, 800);
