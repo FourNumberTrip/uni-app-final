@@ -130,6 +130,9 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 // wait this amount of time before starting the timer
 const WAITING_TIME_BEFORE_ACTION = 5;
 
+// for transition the animation smoothly
+const FADING_DURATION = 0.2;
+
 // for animation control
 let clock = new Clock();
 // for animation
@@ -159,7 +162,7 @@ export default {
       cnt_turn: 0,
       paused: false,
       lowSpeed: false,
-      url: "https://mp.muzi.fun/resources/RobotExpressive.glb",
+      url: "https://mp.muzi.fun/resources/final.glb",
       animations: [
         { name: "跳舞" },
         { name: "死亡" },
@@ -275,12 +278,18 @@ export default {
       controls.reset();
     },
     setAction(index) {
-      activeAction[this.currentAnimationId].stop();
+      const currentAction = activeAction[this.currentAnimationId];
       this.currentAnimationIndex = index;
       // make sure currentAnimationId is updated
       this.$nextTick(() => {
-        activeAction[this.currentAnimationId].play();
+        currentAction.fadeOut(FADING_DURATION);
+        const nextAction = activeAction[this.currentAnimationId];
+        nextAction.reset();
+        nextAction.fadeIn(FADING_DURATION);
+        nextAction.play();
       });
+
+      // ! this is currently also for the timer in the page
       mixer.time = 0;
       this.currentPlayingTime = mixer.time;
 
@@ -332,7 +341,7 @@ export default {
           );
 
           // TODO CHANGE THIS
-          camera.position.set(0, 0, 12);
+          camera.position.set(0, 0, 2.5);
           scene = new Scene();
           controls = new OrbitControls(camera, canvas);
           controls.enableDamping = true;
@@ -346,7 +355,7 @@ export default {
               gltfLoader.parse(res.data, "", (gltf) => {
                 gltf.parser = null;
                 // TODO CHANGE THIS
-                gltf.scene.position.y = -2.2;
+                gltf.scene.position.y = -0.86;
                 scene.add(gltf.scene);
                 mixer = new AnimationMixer(gltf.scene);
                 for (const animation of gltf.animations) {
@@ -359,7 +368,9 @@ export default {
           });
           renderer.outputEncoding = sRGBEncoding;
           scene.add(new AmbientLight(0xffffff, 1.0));
-          scene.add(new DirectionalLight(0xffffff, 1.0));
+          const directionalLight = new DirectionalLight(0xffffff, 1.0);
+          directionalLight.position.set(1, 2, 1);
+          scene.add(directionalLight);
           renderer.setSize(canvas.width, canvas.height);
           uni.getSystemInfo({
             success: (res) => {
