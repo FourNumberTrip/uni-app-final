@@ -35,70 +35,102 @@ export default {
     return {
       currentPage: "list",
 
+      // ! be aware that if you put an object in fill(), the array will full of the same object (references to the same object).
       listItemAnimationClasses: new Array(10).fill().map((_) => ({
         appearAnimationClass: "list-item-out-bottom",
         disappearAnimationClass: "",
       })),
       listItems: [
         {
-          coverUrl: "https://mp.muzi.fun/resources/py.png",
-          title: "抛秧",
-          description: "上身活动",
-          animationSetId: 0,
+          coverUrl: "https://mp.muzi.fun/resources/images/list/ym.webp",
+          title: "育苗",
+          animations: [
+            { id: "124", loopTimes: 8 },
+            { id: "120", loopTimes: 8 },
+          ],
         },
         {
-          coverUrl: "https://mp.muzi.fun/resources/cy.png",
+          coverUrl: "https://mp.muzi.fun/resources/images/list/cy.webp",
           title: "插秧",
-          description: "上身活动",
-          animationSetId: 0,
+          animations: [
+            { id: "119", loopTimes: 8 },
+            { id: "121", loopTimes: 8 },
+            { id: "118", loopTimes: 8 },
+            { id: "123", loopTimes: 8 },
+          ],
         },
         {
-          coverUrl: "https://mp.muzi.fun/resources/logo.png",
-          title: "上身活动",
-          description: "上身活动",
-          animationSetId: 0,
+          coverUrl: "https://mp.muzi.fun/resources/images/list/by.webp",
+          title: "拔秧",
+          animations: [
+            { id: "118", loopTimes: 8 },
+            { id: "121", loopTimes: 8 },
+            { id: "122", loopTimes: 8 },
+            { id: "123", loopTimes: 8 },
+          ],
         },
         {
-          coverUrl: "https://mp.muzi.fun/resources/logo.png",
-          title: "上身活动",
-          description: "上身活动",
-          animationSetId: 0,
+          coverUrl: "https://mp.muzi.fun/resources/images/list/py.webp",
+          title: "抛秧",
+          animations: [
+            { id: "124", loopTimes: 8 },
+            { id: "120", loopTimes: 8 },
+          ],
         },
         {
-          coverUrl: "https://mp.muzi.fun/resources/logo.png",
-          title: "上身活动",
-          description: "上身活动",
-          animationSetId: 0,
+          coverUrl: "https://mp.muzi.fun/resources/images/list/sg.webp",
+          title: "收割",
+          animations: [
+            { id: "119", loopTimes: 8 },
+            { id: "121", loopTimes: 8 },
+            { id: "118", loopTimes: 8 },
+            { id: "125", loopTimes: 8 },
+          ],
         },
         {
-          coverUrl: "https://mp.muzi.fun/resources/logo.png",
-          title: "上身活动",
-          description: "上身活动",
-          animationSetId: 0,
+          coverUrl: "https://mp.muzi.fun/resources/images/list/yz.webp",
+          title: "移栽",
+          animations: [
+            { id: "119", loopTimes: 8 },
+            { id: "121", loopTimes: 8 },
+            { id: "118", loopTimes: 8 },
+            { id: "123", loopTimes: 8 },
+          ],
         },
         {
-          coverUrl: "https://mp.muzi.fun/resources/logo.png",
-          title: "上身活动",
-          description: "上身活动",
-          animationSetId: 0,
+          coverUrl: "https://mp.muzi.fun/resources/images/list/dh.webp",
+          title: "点花",
+          animations: [
+            { id: "119", loopTimes: 8 },
+            { id: "122", loopTimes: 8 },
+            { id: "125", loopTimes: 8 },
+          ],
         },
         {
-          coverUrl: "https://mp.muzi.fun/resources/logo.png",
-          title: "上身活动",
-          description: "上身活动",
-          animationSetId: 0,
+          coverUrl: "https://mp.muzi.fun/resources/images/list/dm.webp",
+          title: "吊蔓",
+          animations: [
+            { id: "119", loopTimes: 8 },
+            { id: "122", loopTimes: 8 },
+            { id: "125", loopTimes: 8 },
+          ],
         },
         {
-          coverUrl: "https://mp.muzi.fun/resources/logo.png",
-          title: "上身活动",
-          description: "上身活动",
-          animationSetId: 0,
+          coverUrl: "https://mp.muzi.fun/resources/images/list/td.webp",
+          title: "挑担",
+          animations: [
+            { id: "119", loopTimes: 8 },
+            { id: "122", loopTimes: 8 },
+            { id: "125", loopTimes: 8 },
+          ],
         },
         {
-          coverUrl: "https://mp.muzi.fun/resources/logo.png",
-          title: "上身活动",
-          description: "上身活动",
-          animationSetId: 0,
+          coverUrl: "https://mp.muzi.fun/resources/images/list/psny.webp",
+          title: "喷洒农药",
+          animations: [
+            { id: "120", loopTimes: 8 },
+            { id: "125", loopTimes: 8 },
+          ],
         },
       ],
     };
@@ -114,7 +146,6 @@ export default {
         bottom: 0,
       })
       .observe(".list-item", (res) => {
-        console.log(res);
         if (res.intersectionRatio > 0) {
           // appear
           this.listItemAnimationClasses[
