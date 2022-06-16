@@ -381,8 +381,6 @@ export default {
           controls.enableDamping = true;
           uni.request({
             url: url,
-            // url: "https://threejs.org/examples/models/gltf/RobotExpressive/RobotExpressive.glb",
-            // url: "https://egg.moe/custom/untitled1.glb",
             responseType: "arraybuffer",
             success: (res) => {
               const gltfLoader = new GLTFLoader();
