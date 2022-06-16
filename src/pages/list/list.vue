@@ -6,7 +6,11 @@
     >
       <view class="list">
         <view
-          :class="['list-item', item.class, item.disappearClass]"
+          :class="[
+            'list-item',
+            listItemAnimationClasses[index].appearAnimationClass,
+            listItemAnimationClasses[index].disappearAnimationClass,
+          ]"
           @click="onListItemClick(index)"
           v-for="(item, index) in listItems"
           :key="index"
@@ -30,87 +34,71 @@ export default {
   data() {
     return {
       currentPage: "list",
+
+      listItemAnimationClasses: new Array(10).fill().map((_) => ({
+        appearAnimationClass: "list-item-out-bottom",
+        disappearAnimationClass: "",
+      })),
       listItems: [
         {
           coverUrl: "https://mp.muzi.fun/resources/py.png",
           title: "抛秧",
           description: "上身活动",
           animationSetId: 0,
-          // for animation
-          class: "list-item-out-bottom",
-          disappearClass: "",
         },
         {
           coverUrl: "https://mp.muzi.fun/resources/cy.png",
           title: "插秧",
           description: "上身活动",
           animationSetId: 0,
-          class: "list-item-out-bottom",
-          disappearClass: "",
         },
         {
           coverUrl: "https://mp.muzi.fun/resources/logo.png",
           title: "上身活动",
           description: "上身活动",
           animationSetId: 0,
-          class: "list-item-out-bottom",
-          disappearClass: "",
         },
         {
           coverUrl: "https://mp.muzi.fun/resources/logo.png",
           title: "上身活动",
           description: "上身活动",
           animationSetId: 0,
-          class: "list-item-out-bottom",
-          disappearClass: "",
         },
         {
           coverUrl: "https://mp.muzi.fun/resources/logo.png",
           title: "上身活动",
           description: "上身活动",
           animationSetId: 0,
-          class: "list-item-out-bottom",
-          disappearClass: "",
         },
         {
           coverUrl: "https://mp.muzi.fun/resources/logo.png",
           title: "上身活动",
           description: "上身活动",
           animationSetId: 0,
-          class: "list-item-out-bottom",
-          disappearClass: "",
         },
         {
           coverUrl: "https://mp.muzi.fun/resources/logo.png",
           title: "上身活动",
           description: "上身活动",
           animationSetId: 0,
-          class: "list-item-out-bottom",
-          disappearClass: "",
         },
         {
           coverUrl: "https://mp.muzi.fun/resources/logo.png",
           title: "上身活动",
           description: "上身活动",
           animationSetId: 0,
-          class: "list-item-out-bottom",
-          disappearClass: "",
         },
         {
           coverUrl: "https://mp.muzi.fun/resources/logo.png",
           title: "上身活动",
           description: "上身活动",
           animationSetId: 0,
-          class: "list-item-out-bottom",
-          disappearClass: "",
         },
         {
           coverUrl: "https://mp.muzi.fun/resources/logo.png",
           title: "上身活动",
           description: "上身活动",
           animationSetId: 0,
-          class: "list-item-out-bottom",
-          disappearClass: "",
         },
       ],
     };
@@ -126,9 +114,12 @@ export default {
         bottom: 0,
       })
       .observe(".list-item", (res) => {
+        console.log(res);
         if (res.intersectionRatio > 0) {
           // appear
-          this.listItems[res.dataset.index].class = "";
+          this.listItemAnimationClasses[
+            res.dataset.index
+          ].appearAnimationClass = "";
           // if (res.boundingClientRect.top < 0) {
           //   // appear from top
           // } else {
@@ -138,10 +129,14 @@ export default {
           // disappear
           if (res.boundingClientRect.top < 0) {
             // disappear to top
-            this.listItems[res.dataset.index].class = "list-item-out-top";
+            this.listItemAnimationClasses[
+              res.dataset.index
+            ].appearAnimationClass = "list-item-out-top";
           } else {
             // disappear to bottom
-            this.listItems[res.dataset.index].class = "list-item-out-bottom";
+            this.listItemAnimationClasses[
+              res.dataset.index
+            ].appearAnimationClass = "list-item-out-bottom";
           }
         }
       });
@@ -156,13 +151,13 @@ export default {
       for (let i = 0; i < this.listItems.length; i++) {
         if (i === index) {
           setTimeout(() => {
-            this.listItems[i].disappearClass =
+            this.listItemAnimationClasses[i].disappearAnimationClass =
               i % 2 === 0
                 ? "list-item-fade-out-left"
                 : "list-item-fade-out-right";
           }, 100);
         } else {
-          this.listItems[i].disappearClass =
+          this.listItemAnimationClasses[i].disappearAnimationClass =
             i % 2 === 0
               ? "list-item-fade-out-left"
               : "list-item-fade-out-right";
