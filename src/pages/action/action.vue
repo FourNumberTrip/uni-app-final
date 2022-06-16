@@ -177,7 +177,7 @@ export default {
       cnt_turn: 0,
       paused: false,
       lowSpeed: false,
-      url: "https://mp.muzi.fun/resources/final.glb",
+      url: "https://mp.muzi.fun/resources/models/final.glb",
       animationNameMap: {
         101: "双手护颈",
         102: "颈侧肌拉伸",

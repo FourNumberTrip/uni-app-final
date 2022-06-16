@@ -61,7 +61,7 @@ export default {
       cnt_turn: 0,
       paused: false,
       lowSpeed: false,
-      url: "https://mp.muzi.fun/resources/final.glb",
+      url: "https://mp.muzi.fun/resources/models/final.glb",
 
       balls: [
         { x: 0, y: 2.1, part: "neck" },
