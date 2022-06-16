@@ -36,25 +36,6 @@ import { WechatPlatform, PlatformManager } from "platformize-three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
-// config
-
-const BALLS = [
-  { x: 0, y: 0.8 },
-  { x: 0, y: 2.1 },
-  { x: -0.45, y: 1.8 },
-  { x: 0.45, y: 1.8 },
-  { x: -0.3, y: 0.3 },
-  { x: 0.3, y: 0.3 },
-  { x: -0.34, y: -2.3 },
-  { x: 0.34, y: -2.3 },
-  { x: -0.35, y: -1.2 },
-  { x: 0.35, y: -1.2 },
-  { x: -0.35, y: -0.6 },
-  { x: 0.35, y: -0.6 },
-  { x: -0.35, y: -1.8 },
-  { x: 0.35, y: -1.8 },
-];
-
 // for animation control
 let clock = new Clock();
 // for animation
@@ -81,6 +62,54 @@ export default {
       paused: false,
       lowSpeed: false,
       url: "https://mp.muzi.fun/resources/final.glb",
+
+      balls: [
+        { x: 0, y: 2.1, part: "neck" },
+        { x: -0.45, y: 1.8, part: "shoulders" },
+        { x: 0.45, y: 1.8, part: "shoulders" },
+        { x: -0.3, y: 0.3, part: "hips" },
+        { x: 0.3, y: 0.3, part: "hips" },
+        { x: -0.34, y: -2.3, part: "ankles" },
+        { x: 0.34, y: -2.3, part: "ankles" },
+        { x: -0.35, y: -1.2, part: "knees" },
+        { x: 0.35, y: -1.2, part: "knees" },
+        { x: -0.35, y: -0.6, part: "legs" },
+        { x: 0.35, y: -0.6, part: "legs" },
+        { x: -0.35, y: -1.8, part: "legs" },
+        { x: 0.35, y: -1.8, part: "legs" },
+      ],
+
+      jointAnimations: {
+        neck: [
+          { id: "101", loopTimes: 8 },
+          { id: "102", loopTimes: 8 },
+          { id: "103", loopTimes: 8 },
+        ],
+        shoulders: [
+          { id: "104", loopTimes: 8 },
+          { id: "105", loopTimes: 8 },
+          { id: "106", loopTimes: 8 },
+        ],
+        hips: [
+          { id: "107", loopTimes: 8 },
+          { id: "108", loopTimes: 8 },
+          { id: "109", loopTimes: 8 },
+        ],
+        ankles: [
+          { id: "110", loopTimes: 8 },
+          { id: "111", loopTimes: 8 },
+        ],
+        legs: [
+          { id: "112", loopTimes: 8 },
+          { id: "113", loopTimes: 8 },
+          { id: "114", loopTimes: 8 },
+        ],
+        knees: [
+          { id: "115", loopTimes: 8 },
+          { id: "116", loopTimes: 8 },
+          { id: "117", loopTimes: 8 },
+        ],
+      },
     };
   },
   mounted() {
@@ -186,10 +215,14 @@ export default {
             transparent: true,
           });
 
-          for (let i = 0; i < BALLS.length; i++) {
+          for (let i = 0; i < this.balls.length; i++) {
             jointsBallGlow[i] = new Mesh(geometry, customMaterial.clone());
             jointsBallGlow[i].scale.multiplyScalar(0.2);
-            jointsBallGlow[i].position.set(BALLS[i].x, BALLS[i].y, 1.5);
+            jointsBallGlow[i].position.set(
+              this.balls[i].x,
+              this.balls[i].y,
+              1.5
+            );
             scene.add(jointsBallGlow[i]);
           }
 
@@ -220,7 +253,7 @@ export default {
                 }
               }
             }
-            for (let i = 0; i < BALLS.length; i++) {
+            for (let i = 0; i < this.balls.length; i++) {
               jointsBallGlow[i].material.uniforms.viewVector.value =
                 new Vector3().subVectors(
                   camera.position,
@@ -265,7 +298,7 @@ export default {
       this.cnt_turn = 0;
       this.turning = true;
       this.front = !this.front;
-      for (let i = 0; i < BALLS.length; i++) {
+      for (let i = 0; i < this.balls.length; i++) {
         scene.remove(jointsBallGlow[i]);
       }
     },
@@ -280,7 +313,7 @@ export default {
       }
     },
     addBalls() {
-      for (let i = 0; i < BALLS.length; i++) {
+      for (let i = 0; i < this.balls.length; i++) {
         if (this.front) {
           jointsBallGlow[i].position.z = 1.5;
         } else {
