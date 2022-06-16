@@ -6,7 +6,11 @@
     >
       <view class="list">
         <view
-          :class="['list-item', item.class, item.disappearClass]"
+          :class="[
+            'list-item',
+            listItemAnimationClasses[index].appearAnimationClass,
+            listItemAnimationClasses[index].disappearAnimationClass,
+          ]"
           @click="onListItemClick(index)"
           v-for="(item, index) in listItems"
           :key="index"
@@ -30,87 +34,103 @@ export default {
   data() {
     return {
       currentPage: "list",
+
+      // ! be aware that if you put an object in fill(), the array will full of the same object (references to the same object).
+      listItemAnimationClasses: new Array(10).fill().map((_) => ({
+        appearAnimationClass: "list-item-out-bottom",
+        disappearAnimationClass: "",
+      })),
       listItems: [
         {
-          coverUrl: "https://mp.muzi.fun/resources/py.png",
-          title: "抛秧",
-          description: "上身活动",
-          animationSetId: 0,
-          // for animation
-          class: "list-item-out-bottom",
-          disappearClass: "",
+          coverUrl: "https://mp.muzi.fun/resources/images/list/ym.webp",
+          title: "育苗",
+          animations: [
+            { id: "124", loopTimes: 8 },
+            { id: "120", loopTimes: 8 },
+          ],
         },
         {
-          coverUrl: "https://mp.muzi.fun/resources/cy.png",
+          coverUrl: "https://mp.muzi.fun/resources/images/list/cy.webp",
           title: "插秧",
-          description: "上身活动",
-          animationSetId: 0,
-          class: "list-item-out-bottom",
-          disappearClass: "",
+          animations: [
+            { id: "119", loopTimes: 8 },
+            { id: "121", loopTimes: 8 },
+            { id: "118", loopTimes: 8 },
+            { id: "123", loopTimes: 8 },
+          ],
         },
         {
-          coverUrl: "https://mp.muzi.fun/resources/logo.png",
-          title: "上身活动",
-          description: "上身活动",
-          animationSetId: 0,
-          class: "list-item-out-bottom",
-          disappearClass: "",
+          coverUrl: "https://mp.muzi.fun/resources/images/list/by.webp",
+          title: "拔秧",
+          animations: [
+            { id: "118", loopTimes: 8 },
+            { id: "121", loopTimes: 8 },
+            { id: "122", loopTimes: 8 },
+            { id: "123", loopTimes: 8 },
+          ],
         },
         {
-          coverUrl: "https://mp.muzi.fun/resources/logo.png",
-          title: "上身活动",
-          description: "上身活动",
-          animationSetId: 0,
-          class: "list-item-out-bottom",
-          disappearClass: "",
+          coverUrl: "https://mp.muzi.fun/resources/images/list/py.webp",
+          title: "抛秧",
+          animations: [
+            { id: "124", loopTimes: 8 },
+            { id: "120", loopTimes: 8 },
+          ],
         },
         {
-          coverUrl: "https://mp.muzi.fun/resources/logo.png",
-          title: "上身活动",
-          description: "上身活动",
-          animationSetId: 0,
-          class: "list-item-out-bottom",
-          disappearClass: "",
+          coverUrl: "https://mp.muzi.fun/resources/images/list/sg.webp",
+          title: "收割",
+          animations: [
+            { id: "119", loopTimes: 8 },
+            { id: "121", loopTimes: 8 },
+            { id: "118", loopTimes: 8 },
+            { id: "125", loopTimes: 8 },
+          ],
         },
         {
-          coverUrl: "https://mp.muzi.fun/resources/logo.png",
-          title: "上身活动",
-          description: "上身活动",
-          animationSetId: 0,
-          class: "list-item-out-bottom",
-          disappearClass: "",
+          coverUrl: "https://mp.muzi.fun/resources/images/list/yz.webp",
+          title: "移栽",
+          animations: [
+            { id: "119", loopTimes: 8 },
+            { id: "121", loopTimes: 8 },
+            { id: "118", loopTimes: 8 },
+            { id: "123", loopTimes: 8 },
+          ],
         },
         {
-          coverUrl: "https://mp.muzi.fun/resources/logo.png",
-          title: "上身活动",
-          description: "上身活动",
-          animationSetId: 0,
-          class: "list-item-out-bottom",
-          disappearClass: "",
+          coverUrl: "https://mp.muzi.fun/resources/images/list/dh.webp",
+          title: "点花",
+          animations: [
+            { id: "119", loopTimes: 8 },
+            { id: "122", loopTimes: 8 },
+            { id: "125", loopTimes: 8 },
+          ],
         },
         {
-          coverUrl: "https://mp.muzi.fun/resources/logo.png",
-          title: "上身活动",
-          description: "上身活动",
-          animationSetId: 0,
-          class: "list-item-out-bottom",
-          disappearClass: "",
+          coverUrl: "https://mp.muzi.fun/resources/images/list/dm.webp",
+          title: "吊蔓",
+          animations: [
+            { id: "119", loopTimes: 8 },
+            { id: "122", loopTimes: 8 },
+            { id: "125", loopTimes: 8 },
+          ],
         },
         {
-          coverUrl: "https://mp.muzi.fun/resources/logo.png",
-          title: "上身活动",
-          description: "上身活动",
-          animationSetId: 0,
-          class: "list-item-out-bottom",
-          disappearClass: "",
+          coverUrl: "https://mp.muzi.fun/resources/images/list/td.webp",
+          title: "挑担",
+          animations: [
+            { id: "119", loopTimes: 8 },
+            { id: "122", loopTimes: 8 },
+            { id: "125", loopTimes: 8 },
+          ],
         },
         {
-          coverUrl: "https://mp.muzi.fun/resources/logo.png",
-          title: "上身活动",
-          description: "上身活动",
-          animationSetId: 0,
-          class: "list-item-out-bottom",
-          disappearClass: "",
+          coverUrl: "https://mp.muzi.fun/resources/images/list/psny.webp",
+          title: "喷洒农药",
+          animations: [
+            { id: "120", loopTimes: 8 },
+            { id: "125", loopTimes: 8 },
+          ],
         },
       ],
     };
@@ -128,7 +148,9 @@ export default {
       .observe(".list-item", (res) => {
         if (res.intersectionRatio > 0) {
           // appear
-          this.listItems[res.dataset.index].class = "";
+          this.listItemAnimationClasses[
+            res.dataset.index
+          ].appearAnimationClass = "";
           // if (res.boundingClientRect.top < 0) {
           //   // appear from top
           // } else {
@@ -138,10 +160,14 @@ export default {
           // disappear
           if (res.boundingClientRect.top < 0) {
             // disappear to top
-            this.listItems[res.dataset.index].class = "list-item-out-top";
+            this.listItemAnimationClasses[
+              res.dataset.index
+            ].appearAnimationClass = "list-item-out-top";
           } else {
             // disappear to bottom
-            this.listItems[res.dataset.index].class = "list-item-out-bottom";
+            this.listItemAnimationClasses[
+              res.dataset.index
+            ].appearAnimationClass = "list-item-out-bottom";
           }
         }
       });
@@ -156,13 +182,13 @@ export default {
       for (let i = 0; i < this.listItems.length; i++) {
         if (i === index) {
           setTimeout(() => {
-            this.listItems[i].disappearClass =
+            this.listItemAnimationClasses[i].disappearAnimationClass =
               i % 2 === 0
                 ? "list-item-fade-out-left"
                 : "list-item-fade-out-right";
           }, 100);
         } else {
-          this.listItems[i].disappearClass =
+          this.listItemAnimationClasses[i].disappearAnimationClass =
             i % 2 === 0
               ? "list-item-fade-out-left"
               : "list-item-fade-out-right";

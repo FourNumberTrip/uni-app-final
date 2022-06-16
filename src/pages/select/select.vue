@@ -37,14 +37,14 @@ export default {
       currentPage: "select",
       selectItems: [
         {
-          image: "https://mp.muzi.fun/resources/warm-up.jpg",
+          image: "https://mp.muzi.fun/resources/images/select/warm-up.webp",
           title: "热身动作",
           description:
             "热身运动是热身运动是热身运动是热身运动是热身运动是热身运动是热身运动是热身运动是热身运动",
           _class: "",
         },
         {
-          image: "https://mp.muzi.fun/resources/pain-spots.jpg",
+          image: "https://mp.muzi.fun/resources/images/select/pain-spots.webp",
           title: "疼痛缓解",
           description:
             "疼痛缓解是疼痛缓解是疼痛缓解是疼痛缓解是疼痛缓解是疼痛缓解是疼痛缓解是疼痛缓解是疼痛缓解",

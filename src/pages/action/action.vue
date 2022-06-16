@@ -1,6 +1,14 @@
 <template>
   <view class="content">
-    <view class="action-content">
+    <!-- for some reason, /^action|pain$/.test(currentPage) doesn't work -->
+    <view
+      class="action-content"
+      :style="{
+        display:
+          currentPage === 'action' || currentPage === 'pain' ? 'flex' : 'none',
+      }"
+    >
+      <!-- only if it's action page we display the top part and the bottom part -->
       <view
         :class="[
           'top-part',
@@ -8,6 +16,9 @@
             ? 'top-part-disappear-animation'
             : 'top-part-appear-animation',
         ]"
+        :style="{
+          display: currentPage === 'action' ? 'flex' : 'none',
+        }"
       >
         <view class="overall-progressbar">
           <view
@@ -48,6 +59,9 @@
             ? 'bottom-part-disappear-animation'
             : 'bottom-part-appear-animation',
         ]"
+        :style="{
+          display: currentPage === 'action' ? 'flex' : 'none',
+        }"
       >
         <view class="timer-area">
           <text class="timer">{{ Math.floor(currentPlayingTime) }}</text>
@@ -60,7 +74,7 @@
         <view class="action-name-area">
           <text class="action-name">{{
             `${currentAnimationIndex + 1}/${currentAnimations.length} ${
-              animations[currentAnimationId].name
+              animationNameMap[currentAnimationId]
             }`
           }}</text>
         </view>
@@ -129,6 +143,8 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 // wait this amount of time before starting the timer
 const WAITING_TIME_BEFORE_ACTION = 5;
+// for transition the animation smoothly
+const FADING_DURATION = 0.2;
 
 // for animation control
 let clock = new Clock();
@@ -141,7 +157,7 @@ let scene;
 let camera;
 let platform;
 // animations
-let activeAction = [];
+let activeAction = {};
 
 // convert seconds to mm:ss format
 function secondsToTimeString(totalSeconds) {
@@ -155,48 +171,70 @@ function secondsToTimeString(totalSeconds) {
 export default {
   data() {
     return {
+      currentPage: "action", // or might be "pain"
+
       turning: false,
       cnt_turn: 0,
       paused: false,
       lowSpeed: false,
-      url: "https://mp.muzi.fun/resources/RobotExpressive.glb",
-      animations: [
-        { name: "跳舞" },
-        { name: "死亡" },
-        { name: "静止" },
-        { name: "跳跃" },
-        { name: "不好" },
-        { name: "打拳" },
-        { name: "跑步" },
-        { name: "坐着" },
-        { name: "站着" },
-        { name: "大拇指" },
-        { name: "走路" },
-        { name: "走路跳" },
-        { name: "挥手" },
-        { name: "好的" },
-      ],
-      animationDurations: [],
+      url: "https://mp.muzi.fun/resources/models/final.glb",
+      animationNameMap: {
+        101: "双手护颈",
+        102: "颈侧肌拉伸",
+        103: "宝塔瞭望",
+        104: "手臂内旋",
+        105: "手臂外旋",
+        106: "手臂上举",
+        107: "站立提膝",
+        108: "站立外摆腿",
+        109: "带髋外展",
+        110: "站立提踝",
+        111: "提踝曲膝",
+        112: "骑士后扶脚",
+        113: "站立单脚向前",
+        114: "膝关节静靠",
+        115: "侧步蹲",
+        116: "半蹲",
+        117: "半盘腿触趾",
+        118: "侧展下拉",
+        119: "颈部活动",
+        120: "手臂环绕",
+        121: "双手并拢转体",
+        122: "平举扩胸",
+        123: "单腿后推",
+        124: "踢臀",
+        125: "肘部运动",
+      },
 
+      // "index" means the index in the currentAnimations array
+      // and we have a computed value "currentAnimationIndex" to get the id (e.g. "101", "102")
       currentAnimationIndex: 0,
       currentAnimations: [
         {
-          id: 0,
+          id: "102",
           loopTimes: 8,
         },
         {
-          id: 2,
+          id: "107",
           loopTimes: 8,
         },
         {
-          id: 4,
+          id: "109",
           loopTimes: 8,
         },
       ],
+
+      // what displays on the screen
       currentPlayingTime: 0,
+
+      // for pausing
       savedMixerTime: 0,
+
+      // for waiting before counting up
       waitingTime: WAITING_TIME_BEFORE_ACTION,
       waiting: true,
+
+      // for fading in and out of the page
       finished: false,
     };
   },
@@ -218,7 +256,7 @@ export default {
     },
     currentAnimationDurations() {
       return this.currentAnimations.map(
-        (i) => this.animationDurations[i.id] * i.loopTimes
+        (i) => activeAction[i.id]._clip.duration * i.loopTimes
       );
     },
     completedPercentages() {
@@ -275,12 +313,18 @@ export default {
       controls.reset();
     },
     setAction(index) {
-      activeAction[this.currentAnimationId].stop();
+      const currentAction = activeAction[this.currentAnimationId];
       this.currentAnimationIndex = index;
       // make sure currentAnimationId is updated
       this.$nextTick(() => {
-        activeAction[this.currentAnimationId].play();
+        currentAction.fadeOut(FADING_DURATION);
+        const nextAction = activeAction[this.currentAnimationId];
+        nextAction.reset();
+        nextAction.fadeIn(FADING_DURATION);
+        nextAction.play();
       });
+
+      // ! this is currently also for the timer in the page
       mixer.time = 0;
       this.currentPlayingTime = mixer.time;
 
@@ -332,26 +376,24 @@ export default {
           );
 
           // TODO CHANGE THIS
-          camera.position.set(0, 0, 12);
+          camera.position.set(0, 0, 10);
           scene = new Scene();
           controls = new OrbitControls(camera, canvas);
           controls.enableDamping = true;
           uni.request({
             url: url,
-            // url: "https://threejs.org/examples/models/gltf/RobotExpressive/RobotExpressive.glb",
-            // url: "https://egg.moe/custom/untitled1.glb",
             responseType: "arraybuffer",
             success: (res) => {
               const gltfLoader = new GLTFLoader();
               gltfLoader.parse(res.data, "", (gltf) => {
                 gltf.parser = null;
                 // TODO CHANGE THIS
-                gltf.scene.position.y = -2.2;
+                gltf.scene.position.y = -3.4;
+                gltf.scene.scale.multiplyScalar(3.5);
                 scene.add(gltf.scene);
                 mixer = new AnimationMixer(gltf.scene);
                 for (const animation of gltf.animations) {
-                  activeAction.push(mixer.clipAction(animation));
-                  this.animationDurations.push(animation.duration);
+                  activeAction[animation.name] = mixer.clipAction(animation);
                 }
                 activeAction[this.currentAnimationId].play();
               });
@@ -359,7 +401,9 @@ export default {
           });
           renderer.outputEncoding = sRGBEncoding;
           scene.add(new AmbientLight(0xffffff, 1.0));
-          scene.add(new DirectionalLight(0xffffff, 1.0));
+          const directionalLight = new DirectionalLight(0xffffff, 1.0);
+          directionalLight.position.set(1, 2, 1);
+          scene.add(directionalLight);
           renderer.setSize(canvas.width, canvas.height);
           uni.getSystemInfo({
             success: (res) => {
@@ -369,9 +413,10 @@ export default {
           });
 
           const render = () => {
-            if (this.turning) this.turn(0.01);
             const frameId = canvas.requestAnimationFrame(render);
             if (!this.paused) {
+              if (this.turning) this.turn(0.01);
+
               controls.update();
               renderer.render(scene, camera);
               if (mixer) {
@@ -400,14 +445,18 @@ export default {
                         this.setAction(this.currentAnimationIndex + 1);
                         // if all the actions are finished
                       } else if (!this.finished) {
+                        // pause the animation
                         activeAction[this.currentAnimationId].paused = true;
+
+                        // pause the rendering of the model after the model fading out of the screen to save power
                         setTimeout(() => {
                           activeAction[this.currentAnimationId].paused = false;
-                          this.paused = true;
+                          this.togglePause();
                           clock.stop();
                         }, 1000);
-                        this.finished = true;
 
+                        // page turning
+                        this.finished = true;
                         setTimeout(() => {
                           this.currentPage = "complete";
                         }, 800);
