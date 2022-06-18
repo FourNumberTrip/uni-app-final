@@ -15,8 +15,9 @@
 </template>
 
 <script>
-import * as poseDetection from "@tensorflow-models/pose-detection";
-import * as tf from "@tensorflow/tfjs-core";
+import { readFile, writeFile, removeFile } from "@/js/utils/file";
+import { getPoseDetector, wxFrameData2DetectorInput } from "@/js/utils/tfjs";
+import { requestFile } from '@/js/utils/network';
 
 const LINES = [
   // nose - left eye
@@ -63,54 +64,7 @@ export default {
     };
   },
   async onLoad() {
-    const fs = wx.getFileSystemManager();
-    // wrap fs.readFile into promise
-    const readFile = (filePath, encoding) => {
-      return new Promise((resolve, reject) => {
-        fs.readFile({
-          filePath,
-          encoding,
-          success: (res) => {
-            resolve(res.data);
-          },
-          fail: (err) => {
-            reject(err);
-          },
-        });
-      });
-    };
-
-    const writeFile = (filePath, data, encoding) => {
-      return new Promise((resolve, reject) => {
-        fs.writeFile({
-          filePath,
-          data,
-          encoding,
-          success: (res) => {
-            resolve(res);
-          },
-          fail: (err) => {
-            reject(err);
-          },
-        });
-      });
-    };
-
     // ! uncommment those to test when user haven't downloaded the model file
-
-    // const removeFile = (filePath) => {
-    //   return new Promise((resolve, reject) => {
-    //     fs.unlink({
-    //       filePath,
-    //       success: (res) => {
-    //         resolve(res);
-    //       },
-    //       fail: (err) => {
-    //         reject(err);
-    //       },
-    //     });
-    //   });
-    // };
 
     // await removeFile(`${wx.env.USER_DATA_PATH}/modelTopology.json`);
     // await removeFile(`${wx.env.USER_DATA_PATH}/weightSpecs.json`);
@@ -124,9 +78,11 @@ export default {
     // but not sure if wechat is happy about that
     try {
       modelTopology = JSON.parse(
+        // @ts-ignore
         await readFile(`${wx.env.USER_DATA_PATH}/modelTopology.json`, "utf8")
       );
       weightSpecs = JSON.parse(
+        // @ts-ignore
         await readFile(`${wx.env.USER_DATA_PATH}/weightSpecs.json`, "utf8")
       );
       weightData = await readFile(
@@ -134,21 +90,6 @@ export default {
         undefined
       );
     } catch (_) {
-      const requestFile = (url, responseType) => {
-        return new Promise((resolve, reject) => {
-          uni.request({
-            url: url,
-            responseType,
-            success: (res) => {
-              resolve(res.data);
-            },
-            fail: (err) => {
-              reject(err);
-            },
-          });
-        });
-      };
-
       [modelTopology, weightSpecs, weightData] = await Promise.all([
         requestFile(
           "https://mp.muzi.fun/resources/ml-models/movenet-lightning-int8/modelTopology.json",
@@ -178,22 +119,18 @@ export default {
 
       await writeFile(
         `${wx.env.USER_DATA_PATH}/weightData.bin`,
+        // @ts-ignore
         weightData,
         undefined
       );
     }
 
-    detector = await poseDetection.createDetector(
-      poseDetection.SupportedModels.MoveNet,
-      {
-        modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING,
-        modelUrl: tf.io.fromMemory({
-          modelTopology: modelTopology,
-          weightSpecs: weightSpecs,
-          weightData: weightData,
-        }),
-      }
-    );
+    detector = await getPoseDetector({
+      modelTopology: modelTopology,
+      weightSpecs: weightSpecs,
+      // @ts-ignore
+      weightData: weightData,
+    });
 
     const videoFileInfo = await wx.chooseMedia({
       count: 1,
@@ -203,17 +140,6 @@ export default {
     this.analyzeVideo(videoFileInfo);
   },
   methods: {
-    shareFile: function (filename) {
-      wx.shareFileMessage({
-        filePath: `${wx.env.USER_DATA_PATH}/${filename}`,
-        success: (res) => {
-          console.log(res);
-        },
-        fail: (err) => {
-          console.log(err);
-        },
-      });
-    },
     analyzeVideo: async function (videoFileInfo) {
       const canvas = await new Promise((resolve, _) => {
         wx.createSelectorQuery()
@@ -240,17 +166,10 @@ export default {
             break;
           }
         }
+
         const keypointsList = [];
         const estimateLoop = async (frameData) => {
-          const pixels = tf.slice(
-            tf.tensor3d(new Uint8Array(frameData.data), [
-              frameData.height,
-              frameData.width,
-              4,
-            ]),
-            [0, 0, 0],
-            [-1, -1, 3]
-          );
+          const pixels = wxFrameData2DetectorInput(frameData);
           const poses = await detector.estimatePoses(
             pixels,
             {},
@@ -444,6 +363,7 @@ export default {
 
       videoDecoder.start({
         source: videoFileInfo.tempFiles[0].tempFilePath,
+        // @ts-ignore
         abortAudio: true,
       });
     },
