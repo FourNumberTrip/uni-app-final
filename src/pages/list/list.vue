@@ -23,6 +23,15 @@
             </view>
           </view>
         </view>
+        <view
+          :class="['list-item', 'add-button', addButtonAnimationClass]"
+          @click="onAddButtonClick"
+        >
+          <view class="cross-container">
+            <view class="horizontal-line"> </view>
+            <view class="vertical-line"> </view>
+          </view>
+        </view>
       </view>
     </view>
   </view>
@@ -40,6 +49,7 @@ export default {
         appearAnimationClass: "list-item-out-bottom",
         disappearAnimationClass: "",
       })),
+      addButtonAnimationClass: "",
       listItems: [
         {
           coverUrl: "https://mp.muzi.fun/resources/images/list/ym.webp",
@@ -195,11 +205,24 @@ export default {
         }
       }
 
+      this.addButtonAnimationClass = "add-button-fade-out";
+
       setTimeout(() => {
         this.currentPage = "action";
       }, 600);
 
       // TODO set animation to selected list item
+    },
+    onAddButtonClick() {
+      wx.showModal({
+        title: "提示",
+        content: "请录制一段小于十秒的视频",
+        success: function (res) {
+          if (res.confirm) {
+            // !
+          }
+        },
+      });
     },
   },
 };
@@ -318,6 +341,58 @@ page {
       .list-item-out-top {
         margin-bottom: 60rpx !important;
         opacity: 0;
+      }
+
+      .add-button {
+        background: #dedede;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        @keyframes add-button-fade-out {
+          from {
+            transform: scale(1);
+            opacity: 1;
+          }
+
+          70% {
+            transform: scale(0.5);
+            opacity: 0;
+          }
+
+          to {
+            transform: scale(0);
+            opacity: 0;
+          }
+        }
+
+        &.add-button-fade-out {
+          animation: add-button-fade-out 0.5s ease-out forwards;
+        }
+
+        .cross-container {
+          height: 40%;
+          width: 40%;
+
+          display: flex;
+          justify-content: center;
+          align-items: center;
+
+          position: relative;
+
+          .horizontal-line {
+            position: absolute;
+            width: 100%;
+            height: 20rpx;
+            background: white;
+          }
+          .vertical-line {
+            position: absolute;
+            width: 20rpx;
+            height: 100%;
+            background: white;
+          }
+        }
       }
     }
   }
