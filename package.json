@@ -68,9 +68,9 @@
     "@dcloudio/uni-stat": "^2.0.1-34720220422002",
     "@mediapipe/pose": "^0.5.1635988162",
     "@tensorflow-models/pose-detection": "^2.0.0",
-    "@tensorflow/tfjs-backend-webgl": "3.5.0",
-    "@tensorflow/tfjs-converter": "3.5.0",
-    "@tensorflow/tfjs-core": "3.5.0",
+    "@tensorflow/tfjs-backend-webgl": "3.18.0",
+    "@tensorflow/tfjs-converter": "3.18.0",
+    "@tensorflow/tfjs-core": "3.18.0",
     "@vue/shared": "^3.0.0",
     "core-js": "^3.6.5",
     "fetch-wechat": "0.0.3",
@@ -82,6 +82,7 @@
     "vuex": "^3.2.0"
   },
   "devDependencies": {
+    "@babel/plugin-syntax-typescript": "^7.2.0",
     "@babel/runtime": "~7.12.0",
     "@dcloudio/types": "*",
     "@dcloudio/uni-automator": "^2.0.1-34720220422002",
@@ -99,6 +100,7 @@
     "@types/uni-app": "^1.4.4",
     "@types/wechat-miniprogram": "^3.4.1",
     "@vue/babel-preset-app": "^5.0.4",
+    "@vue/cli-plugin-typescript": "~4.5.11",
     "@vue/cli-plugin-babel": "~4.5.17",
     "@vue/cli-service": "~4.5.17",
     "autoprefixer": "^9.0.0",
@@ -112,6 +114,7 @@
     "sass": "^1.52.1",
     "sass-loader": "^13.0.0",
     "terser-webpack-plugin": "^4.2.3",
+    "typescript": "^3.0.0",
     "vue-template-compiler": "^2.6.11",
     "webpack-bundle-analyzer": "^4.5.0"
   },
