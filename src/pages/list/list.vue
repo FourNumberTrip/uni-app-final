@@ -217,9 +217,24 @@ export default {
       wx.showModal({
         title: "提示",
         content: "请录制一段小于十秒的视频",
-        success: function (res) {
+        success: async (res) => {
           if (res.confirm) {
-            // !
+            const videoFileInfo = await wx.chooseMedia({
+              count: 1,
+              mediaType: ["video"],
+            });
+
+            for (let i = 0; i < this.listItems.length; i++) {
+              this.listItemAnimationClasses[i].disappearAnimationClass =
+                i % 2 === 0
+                  ? "list-item-fade-out-left"
+                  : "list-item-fade-out-right";
+            }
+            this.addButtonAnimationClass = "add-button-fade-out";
+
+            setTimeout(() => {
+              this.currentPage = "add";
+            }, 600);
           }
         },
       });

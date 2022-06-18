@@ -9,6 +9,9 @@
     <navigator url="/pages/list/list" hover-class="navigator-hover">
       <button type="default">列表页面</button>
     </navigator>
+    <navigator url="/pages/add/add" hover-class="navigator-hover">
+      <button type="default">添加页面</button>
+    </navigator>
     <navigator url="/pages/pain/pain" hover-class="navigator-hover">
       <button type="default">疼痛选择页面</button>
     </navigator>

@@ -6,7 +6,7 @@
   "versionCode": "100",
   "transformPx": false,
   "mp-weixin": {
-    /* 微信小程序特有相关 */ "appid": "wxeeb3ea11c64a4050",
+    "appid": "wxeeb3ea11c64a4050",
     "setting": {
       "urlCheck": false
     },
