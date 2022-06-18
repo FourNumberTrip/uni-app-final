@@ -26,6 +26,9 @@
     },
     {
       "path": "pages/merge/merge"
+    },
+    {
+      "path": "pages/recoverAction/recoverAction"
     }
   ],
   "globalStyle": {

@@ -72,6 +72,7 @@
     "@tensorflow/tfjs-converter": "3.18.0",
     "@tensorflow/tfjs-core": "3.18.0",
     "@vue/shared": "^3.0.0",
+    "copy-webpack-plugin": "5.0.3",
     "core-js": "^3.6.5",
     "fetch-wechat": "0.0.3",
     "flyio": "^0.6.2",
