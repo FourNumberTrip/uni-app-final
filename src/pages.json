@@ -37,6 +37,12 @@
 			}
 		},
 		{
+			"path": "pages/recoverAction/recoverAction",
+			"style": {
+				"navigationBarTitleText": "uni-app"
+			}
+		},
+		{
 			"path": "pages/complete/complete",
 			"style": {
 				"navigationBarTitleText": "uni-app"
