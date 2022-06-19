@@ -1,5 +1,18 @@
 import { Keypoint } from "@tensorflow-models/pose-detection";
 
+const JOINTS_TO_ACTION: { [key: string]: string[] } = {
+  neck: ["101", "102", "103", "119"],
+  rightShoulder: ["104", "105", "106", "120", "122"],
+  leftShoulder: ["104", "105", "106", "120", "122"],
+  rightElbow: ["125"],
+  leftElbow: ["125"],
+  waist: ["118", "121"],
+  leftHip: ["107", "108", "109", "110"],
+  rightHip: ["107", "108", "109", "110"],
+  leftKnee: ["111", "112", "113", "114", "115", "116", "117"],
+  rightKnee: ["111", "112", "113", "114", "115", "116", "117"],
+};
+
 // joints[0] -> joints[1] is the first vector
 // joints[2] -> joints[3] is the second vecotr
 // we calculate the angle between these two vectors
@@ -27,14 +40,14 @@ const ANGLE_RULES = [
   {
     // right shoulder, right elbow, right elbow, right wrist
     joints: [6, 8, 8, 10],
-    weight: 1,
+    weight: 0.8,
     name: "rightElbow",
   },
   // left elbow
   {
     // left shoulder, left elbow, left elbow, left wrist
     joints: [5, 7, 7, 9],
-    weight: 1,
+    weight: 0.8,
     name: "leftElbow",
   },
   // waist
@@ -118,8 +131,7 @@ export function analyzeKeypointsList(keypointsList: Keypoint[][]) {
   // ! strain analysis
   // TODO
 
-  // generate report
-  return adjustedStd
+  const report = adjustedStd
     .map((std, index) => {
       return {
         name: ANGLE_RULES[index].name,
@@ -127,4 +139,13 @@ export function analyzeKeypointsList(keypointsList: Keypoint[][]) {
       };
     })
     .sort((a, b) => b.std - a.std);
+
+  return report
+    .filter((_, index) => index < 4)
+    .map((item) => ({
+      id: JOINTS_TO_ACTION[item.name][
+        Math.floor(Math.random() * JOINTS_TO_ACTION[item.name].length)
+      ],
+      loopTimes: 8,
+    }));
 }

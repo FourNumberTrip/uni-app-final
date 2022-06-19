@@ -8,6 +8,16 @@
           currentPage === 'action' || currentPage === 'pain' ? 'flex' : 'none',
       }"
     >
+      <view
+        class="pain-prompt"
+        :style="{
+          display: currentPage === 'pain' ? 'flex' : 'none',
+        }"
+      >
+        <view class="text-container">
+          <text class="text">请选择疼痛的部位</text>
+        </view>
+      </view>
       <!-- only if it's action page we display the top part and the bottom part -->
       <view
         :class="[
@@ -50,6 +60,7 @@
         @touchstart="onTX"
         @touchmove="onTX"
         @touchend="onTX"
+        @click="onClickModel"
       ></canvas>
 
       <view
@@ -126,18 +137,31 @@
 <script>
 import {
   AmbientLight,
+  AnimationAction,
   AnimationMixer,
   Clock,
   DirectionalLight,
   PerspectiveCamera,
   Scene,
   sRGBEncoding,
-  WebGL1Renderer,
+  WebGLRenderer,
+  Raycaster,
+  Vector2,
+  Mesh,
+  SphereGeometry,
+  ShaderMaterial,
+  DoubleSide,
+  AdditiveBlending,
+  Color,
+  Vector3,
 } from "three";
 
 import { WechatPlatform, PlatformManager } from "platformize-three";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+
+import { loadGLTF } from "@/ts/animation";
+import { requestFile } from "@/ts/utils/network";
+import { selectCanvas } from "@/ts/utils/canvas";
 
 // config
 
@@ -150,14 +174,30 @@ const FADING_DURATION = 0.2;
 let clock = new Clock();
 // for animation
 let mixer;
+/** @type { OrbitControls } */
 let controls;
+/** @type { WebGLRenderer } */
 let renderer;
+/** @type { WechatMiniprogram.Canvas } */
 let canvas;
+/** @type { Scene } */
 let scene;
 let camera;
 let platform;
 // animations
+/** @type { {[key: string]: AnimationAction} } */
 let activeAction = {};
+
+let canvasDimention = {
+  width: 0,
+  height: 0,
+};
+let rayCaster;
+let pointer;
+
+/** @type { DirectionalLight } */
+let directionalLight;
+let jointsBallGlow = [];
 
 // convert seconds to mm:ss format
 function secondsToTimeString(totalSeconds) {
@@ -171,7 +211,7 @@ function secondsToTimeString(totalSeconds) {
 export default {
   data() {
     return {
-      currentPage: "action", // or might be "pain"
+      currentPage: "pain", // or might be "pain"
 
       turning: false,
       cnt_turn: 0,
@@ -206,6 +246,54 @@ export default {
         125: "肘部运动",
       },
 
+      painReliefAnimations: {
+        neck: [
+          { id: "101", loopTimes: 8 },
+          { id: "102", loopTimes: 8 },
+          { id: "103", loopTimes: 8 },
+        ],
+        shoulders: [
+          { id: "104", loopTimes: 8 },
+          { id: "105", loopTimes: 8 },
+          { id: "106", loopTimes: 8 },
+        ],
+        hips: [
+          { id: "107", loopTimes: 8 },
+          { id: "108", loopTimes: 8 },
+          { id: "109", loopTimes: 8 },
+        ],
+        ankles: [
+          { id: "110", loopTimes: 8 },
+          { id: "111", loopTimes: 8 },
+        ],
+        legs: [
+          { id: "112", loopTimes: 8 },
+          { id: "113", loopTimes: 8 },
+          { id: "114", loopTimes: 8 },
+        ],
+        knees: [
+          { id: "115", loopTimes: 8 },
+          { id: "116", loopTimes: 8 },
+          { id: "117", loopTimes: 8 },
+        ],
+      },
+
+      balls: [
+        { x: 0, y: 2.1, joint: "neck" },
+        { x: -0.45, y: 1.8, joint: "shoulders" },
+        { x: 0.45, y: 1.8, joint: "shoulders" },
+        { x: -0.3, y: 0.3, joint: "hips" },
+        { x: 0.3, y: 0.3, joint: "hips" },
+        { x: -0.34, y: -2.3, joint: "ankles" },
+        { x: 0.34, y: -2.3, joint: "ankles" },
+        { x: -0.35, y: -1.2, joint: "knees" },
+        { x: 0.35, y: -1.2, joint: "knees" },
+        { x: -0.35, y: -0.6, joint: "legs" },
+        { x: 0.35, y: -0.6, joint: "legs" },
+        { x: -0.35, y: -1.8, joint: "legs" },
+        { x: 0.35, y: -1.8, joint: "legs" },
+      ],
+
       // "index" means the index in the currentAnimations array
       // and we have a computed value "currentAnimationIndex" to get the id (e.g. "101", "102")
       currentAnimationIndex: 0,
@@ -238,16 +326,30 @@ export default {
       finished: false,
     };
   },
-  onLoad() {
-    // this.load("https://egg.moe/custom/untitled1.glb")
-  },
-  mounted() {
+  async onLoad() {
     // this.screenHeight = uni.getSystemInfoSync().windowHeight;
-    this.load(this.url);
+    if (this.currentPage === "pain") {
+      this.currentAnimations = [
+        {
+          id: "still",
+          loopTimes: 100000,
+        },
+      ];
+    }
+
+    await this.load(this.url);
   },
+  async mounted() {},
   computed: {
     currentAnimationId() {
-      return this.currentAnimations[this.currentAnimationIndex].id;
+      /** @type { 
+          "101" | "102" | "103" | "104" | "105" 
+        | "106" | "107" | "108" | "109" | "110" 
+        | "111" | "112" | "113" | "114" | "115" 
+        | "116" | "117" | "118" | "119" | "120" 
+        | "121" | "122" | "123" | "124" | "125" | "still" } */
+      const id = this.currentAnimations[this.currentAnimationIndex].id;
+      return id;
     },
     completedAnimations() {
       return this.currentAnimations.map((_, index) => {
@@ -288,6 +390,62 @@ export default {
     },
   },
   methods: {
+    async initPainPage() {
+      this.stopAllActions();
+      this.currentAnimations = [
+        {
+          id: "still",
+          loopTimes: 100000,
+        },
+      ];
+      this.setAction(0);
+
+      this.addBalls();
+      directionalLight.intensity = 0.2;
+      controls.reset();
+      controls.enabled = false;
+
+      this.$nextTick(async () => {
+        console.log(canvas);
+      });
+    },
+    async initActionPage(animations) {
+      this.stopAllActions();
+      this.currentAnimations = animations;
+      this.setAction(0);
+
+      this.removeBalls();
+      directionalLight.intensity = 1;
+      controls.enabled = true;
+      this.currentPlayingTime = 0;
+      this.savedMixerTime = 0;
+      this.waitingTime = WAITING_TIME_BEFORE_ACTION;
+      this.waiting = true;
+
+      this.$nextTick(async () => {
+        console.log(canvas);
+      });
+    },
+    stopAllActions() {
+      for (let action of Object.values(activeAction)) {
+        action.fadeOut(FADING_DURATION);
+      }
+    },
+    addBalls() {
+      if (!scene.getObjectByName("ball0")) {
+        for (let i = 0; i < this.balls.length; i++) {
+          jointsBallGlow[i].position.z = 1.5;
+          scene.add(jointsBallGlow[i]);
+        }
+      }
+    },
+    removeBalls() {
+      if (scene.getObjectByName("ball0")) {
+        for (let i = 0; i < this.balls.length; i++) {
+          scene.remove(jointsBallGlow[i]);
+        }
+      }
+    },
     togglePause() {
       if (this.paused) {
         this.paused = false;
@@ -314,6 +472,7 @@ export default {
     },
     setAction(index) {
       const currentAction = activeAction[this.currentAnimationId];
+      console.log(currentAction);
       this.currentAnimationIndex = index;
       // make sure currentAnimationId is updated
       this.$nextTick(() => {
@@ -348,127 +507,201 @@ export default {
         this.setAction(this.currentAnimationIndex + 1);
       }
     },
-    load(url) {
-      console.log("loading:");
-      console.log(url);
-      uni
-        .createSelectorQuery()
-        .select("#gl")
-        .node()
-        .exec((res) => {
-          canvas = res[0].node;
-
-          platform = new WechatPlatform(canvas);
-          console.log(platform);
-          PlatformManager.set(platform);
-
-          renderer = new WebGL1Renderer({
-            canvas,
-            antialias: true,
-            alpha: true,
+    async selectCanvas(selector) {
+      return await new Promise((resolve) => {
+        wx.createSelectorQuery()
+          .select(selector)
+          .node()
+          .exec((res) => {
+            resolve(res[0].node);
           });
+      });
+    },
+    async load(url) {
+      canvas = await this.selectCanvas("#gl");
+      canvasDimention.width = canvas.width;
+      canvasDimention.height = canvas.height;
 
-          camera = new PerspectiveCamera(
-            45,
-            canvas.width / canvas.height,
-            0.1,
-            2000
-          );
+      platform = new WechatPlatform(canvas);
+      PlatformManager.set(platform);
 
-          // TODO CHANGE THIS
-          camera.position.set(0, 0, 10);
-          scene = new Scene();
-          controls = new OrbitControls(camera, canvas);
-          controls.enableDamping = true;
-          uni.request({
-            url: url,
-            responseType: "arraybuffer",
-            success: (res) => {
-              const gltfLoader = new GLTFLoader();
-              gltfLoader.parse(res.data, "", (gltf) => {
-                gltf.parser = null;
-                // TODO CHANGE THIS
-                gltf.scene.position.y = -3.4;
-                gltf.scene.scale.multiplyScalar(3.5);
-                scene.add(gltf.scene);
-                mixer = new AnimationMixer(gltf.scene);
-                for (const animation of gltf.animations) {
-                  activeAction[animation.name] = mixer.clipAction(animation);
-                }
-                activeAction[this.currentAnimationId].play();
-              });
-            },
-          });
-          renderer.outputEncoding = sRGBEncoding;
-          scene.add(new AmbientLight(0xffffff, 1.0));
-          const directionalLight = new DirectionalLight(0xffffff, 1.0);
-          directionalLight.position.set(1, 2, 1);
-          scene.add(directionalLight);
-          renderer.setSize(canvas.width, canvas.height);
-          uni.getSystemInfo({
-            success: (res) => {
-              renderer.setPixelRatio(res.pixelRatio);
-              console.log(res);
-            },
-          });
+      renderer = new WebGLRenderer({
+        canvas,
+        antialias: true,
+        alpha: true,
+      });
+      // ! set the alpha value to 0 when transition to action page
+      renderer.setClearColor(0xf5f3f6, 1);
 
-          const render = () => {
-            const frameId = canvas.requestAnimationFrame(render);
-            if (!this.paused) {
-              if (this.turning) this.turn(0.01);
+      rayCaster = new Raycaster();
 
-              controls.update();
-              renderer.render(scene, camera);
-              if (mixer) {
-                const clockDelta = clock.getDelta();
-                mixer.update(clockDelta);
+      camera = new PerspectiveCamera(
+        45,
+        canvas.width / canvas.height,
+        0.1,
+        2000
+      );
 
-                if (this.waitingTime > 0) {
-                  this.waitingTime -= clockDelta;
-                } else {
-                  if (this.waiting) {
-                    this.waiting = false;
-                    mixer.time = this.savedMixerTime;
-                  } else {
-                    this.currentPlayingTime = mixer.time;
+      camera.position.set(0, 0, 10);
+      scene = new Scene();
+      controls = new OrbitControls(camera, canvas);
+      controls.enableDamping = true;
+      const gltfData = await requestFile(url, "arraybuffer");
+      const gltf = await loadGLTF(gltfData);
+      gltf.parser = null;
+      gltf.scene.position.y = -3;
+      gltf.scene.scale.multiplyScalar(3.5);
+      scene.add(gltf.scene);
+      mixer = new AnimationMixer(gltf.scene);
+      for (const animation of gltf.animations) {
+        activeAction[animation.name] = mixer.clipAction(animation);
+      }
 
-                    // ! this is where animation finishes
-                    if (
-                      this.currentPlayingTime >
-                      this.currentAnimationDurations[this.currentAnimationIndex]
-                    ) {
-                      // if the current action is finished, then we proceed to the next one
-                      if (
-                        this.currentAnimationIndex + 1 <
-                        this.currentAnimations.length
-                      ) {
-                        this.setAction(this.currentAnimationIndex + 1);
-                        // if all the actions are finished
-                      } else if (!this.finished) {
-                        // pause the animation
-                        activeAction[this.currentAnimationId].paused = true;
+      //关节位置小球
+      const geometry = new SphereGeometry(0.2, 32, 16);
 
-                        // pause the rendering of the model after the model fading out of the screen to save power
-                        setTimeout(() => {
-                          activeAction[this.currentAnimationId].paused = false;
-                          this.togglePause();
-                          clock.stop();
-                        }, 1000);
+      const customMaterial = new ShaderMaterial({
+        uniforms: {
+          c: { type: "f", value: 0.1 },
+          p: { type: "f", value: 3 },
+          glowColor: { type: "c", value: new Color(0xff0000) },
+          viewVector: { type: "v3", value: camera.position },
+        },
+        vertexShader:
+          "uniform vec3 viewVector;\n" +
+          "uniform float c;\n" +
+          "uniform float p;\n" +
+          "varying float intensity;\n" +
+          "void main() \n" +
+          "{\n" +
+          "    vec3 vNormal = normalize( normalMatrix * normal );\n" +
+          "\tvec3 vNormel = normalize( normalMatrix * viewVector );\n" +
+          "\tintensity = pow( c - dot(vNormal, vNormel), p );\n" +
+          "\t\n" +
+          "    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );\n" +
+          "}",
+        fragmentShader:
+          "uniform vec3 glowColor;\n" +
+          "varying float intensity;\n" +
+          "void main() \n" +
+          "{\n" +
+          "\tvec3 glow = glowColor * intensity;\n" +
+          "    gl_FragColor = vec4( glow, 1.0 );\n" +
+          "}",
+        side: DoubleSide,
+        blending: AdditiveBlending,
+        transparent: true,
+      });
 
-                        // page turning
-                        this.finished = true;
-                        setTimeout(() => {
-                          this.currentPage = "complete";
-                        }, 800);
-                      }
-                    }
+      for (let i = 0; i < this.balls.length; i++) {
+        const ball = new Mesh(geometry, customMaterial.clone());
+        ball.position.set(this.balls[i].x, this.balls[i].y, 1.5);
+        ball.name = "ball" + i;
+        jointsBallGlow.push(ball);
+        scene.add(ball);
+      }
+
+      renderer.outputEncoding = sRGBEncoding;
+      scene.add(new AmbientLight(0xffffff, 1.0));
+      directionalLight = new DirectionalLight(0xffffff, 1.0);
+      directionalLight.position.set(1, 2, 1);
+      scene.add(directionalLight);
+      renderer.setSize(canvas.width, canvas.height);
+      uni.getSystemInfo({
+        success: (res) => {
+          renderer.setPixelRatio(res.pixelRatio);
+        },
+      });
+
+      const render = () => {
+        const frameId = canvas.requestAnimationFrame(render);
+        if (!this.paused) {
+          if (this.turning) this.turn(0.01);
+
+          controls.update();
+          renderer.render(scene, camera);
+          for (let i = 0; i < this.balls.length; i++) {
+            jointsBallGlow[i].material.uniforms.viewVector.value =
+              new Vector3().subVectors(
+                camera.position,
+                jointsBallGlow[i].position
+              );
+          }
+
+          if (this.currentPage === "pain" && pointer) {
+            //获取鼠标指向的模型
+            rayCaster.setFromCamera(pointer, camera);
+            pointer = null;
+
+            const intersects = rayCaster.intersectObjects(
+              scene.children,
+              false
+            );
+            if (intersects.length > 0) {
+              const ballIndex = parseInt(intersects[0].object.name.slice(4));
+              const jointName = this.balls[ballIndex].joint;
+              this.currentPage = "action";
+              activeAction["still"].fadeOut(FADING_DURATION);
+              this.initActionPage(this.painReliefAnimations[jointName]);
+            }
+          }
+
+          if (mixer) {
+            const clockDelta = clock.getDelta();
+            mixer.update(clockDelta);
+
+            if (this.waitingTime > 0) {
+              this.waitingTime -= clockDelta;
+            } else {
+              if (this.waiting) {
+                this.waiting = false;
+                mixer.time = this.savedMixerTime;
+              } else {
+                this.currentPlayingTime = mixer.time;
+
+                // ! this is where animation finishes
+                if (
+                  this.currentPlayingTime >
+                  this.currentAnimationDurations[this.currentAnimationIndex]
+                ) {
+                  // if the current action is finished, then we proceed to the next one
+                  if (
+                    this.currentAnimationIndex + 1 <
+                    this.currentAnimations.length
+                  ) {
+                    this.setAction(this.currentAnimationIndex + 1);
+                    // if all the actions are finished
+                  } else if (!this.finished) {
+                    // pause the animation
+                    activeAction[this.currentAnimationId].paused = true;
+
+                    // pause the rendering of the model after the model fading out of the screen to save power
+                    setTimeout(() => {
+                      activeAction[this.currentAnimationId].paused = false;
+                      this.togglePause();
+                      clock.stop();
+                    }, 1000);
+
+                    // page turning
+                    this.finished = true;
+                    setTimeout(() => {
+                      this.currentPage = "complete";
+                    }, 800);
                   }
                 }
               }
             }
-          };
-          render();
-        });
+          }
+        }
+      };
+
+      if (this.currentPage == "pain") {
+        this.initPainPage();
+      } else {
+        this.initActionPage();
+      }
+
+      render();
     },
     turnBack() {
       scene.rotateY(Math.PI);
@@ -491,6 +724,19 @@ export default {
     // for three.js touch control
     onTX(e) {
       platform.dispatchTouchEvent(e);
+    },
+
+    onClickModel(e) {
+      const touchCanvasX = e.target.x - e.target.offsetLeft;
+      const touchCanvasY = e.target.y - e.target.offsetTop;
+      uni.getSystemInfo({
+        success: (res) => {
+          pointer = new Vector2(
+            (touchCanvasX / canvasDimention.width) * 2 - 1,
+            -(touchCanvasY / canvasDimention.height) * 2 + 1
+          );
+        },
+      });
     },
   },
 };
@@ -522,6 +768,23 @@ page {
     align-items: center;
 
     background: $background-color;
+
+    .pain-prompt {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+
+      .text-container {
+        margin-top: 20px;
+        .text {
+          font-size: 60rpx;
+          font-weight: bold;
+          color: #333;
+        }
+      }
+    }
 
     .top-part {
       flex: 1;

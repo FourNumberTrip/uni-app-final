@@ -35,7 +35,11 @@ const LINES = [
   [14, 16],
 ];
 
-export async function drawPose(canvas: WechatMiniprogram.Canvas, frameData: WechatMiniprogram.FrameDataOptions, keypoints: Keypoint[]) {
+export async function drawPose(
+  canvas: WechatMiniprogram.Canvas,
+  frameData: WechatMiniprogram.FrameDataOptions,
+  keypoints: Keypoint[]
+) {
   const canvasCtx: WechatMiniprogram.CanvasContext = canvas.getContext("2d");
 
   // draw image and pose on canvas

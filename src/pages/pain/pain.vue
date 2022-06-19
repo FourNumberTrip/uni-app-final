@@ -63,21 +63,7 @@ export default {
       lowSpeed: false,
       url: "https://mp.muzi.fun/resources/models/final.glb",
 
-      balls: [
-        { x: 0, y: 2.1, part: "neck" },
-        { x: -0.45, y: 1.8, part: "shoulders" },
-        { x: 0.45, y: 1.8, part: "shoulders" },
-        { x: -0.3, y: 0.3, part: "hips" },
-        { x: 0.3, y: 0.3, part: "hips" },
-        { x: -0.34, y: -2.3, part: "ankles" },
-        { x: 0.34, y: -2.3, part: "ankles" },
-        { x: -0.35, y: -1.2, part: "knees" },
-        { x: 0.35, y: -1.2, part: "knees" },
-        { x: -0.35, y: -0.6, part: "legs" },
-        { x: 0.35, y: -0.6, part: "legs" },
-        { x: -0.35, y: -1.8, part: "legs" },
-        { x: 0.35, y: -1.8, part: "legs" },
-      ],
+      
 
       jointAnimations: {
         neck: [
@@ -329,6 +315,7 @@ export default {
       this.jud = true; //打印信息
     },
     move(e) {
+      console.log(e)
       uni.getSystemInfo({
         success: (res) => {
           pointer.x = (e.touches[0].pageX / res.windowWidth) * 2 - 1;
