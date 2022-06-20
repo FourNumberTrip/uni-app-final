@@ -25,17 +25,18 @@
       "path": "pages/complete/complete"
     },
     {
-      "path": "pages/merge/merge"
+      "path": "pages/merge/merge",
+      "style": {
+        "disableScroll": true
+      }
     },
     {
       "path": "pages/recoverAction/recoverAction"
     }
   ],
   "globalStyle": {
-    "navigationBarTextStyle": "black",
-    "navigationBarTitleText": "",
+    "navigationStyle": "custom",
     "pageOrientation": "portrait",
-    "navigationBarBackgroundColor": "#F8F8F8",
     "backgroundColor": "#F8F8F8"
   }
 }
