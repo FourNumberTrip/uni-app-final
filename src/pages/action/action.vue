@@ -180,6 +180,7 @@ let renderer;
 let canvas;
 /** @type { Scene } */
 let scene;
+/** @type { PerspectiveCamera } */
 let camera;
 let platform;
 // animations
@@ -392,7 +393,7 @@ export default {
     },
   },
   methods: {
-    initPainPage() {
+    async initPainPage() {
       this.addBalls();
       directionalLight.intensity = 0.2;
       controls.reset();
@@ -412,8 +413,12 @@ export default {
         nextAction.fadeIn(FADING_DURATION);
         nextAction.play();
       });
+
+      setTimeout(() => {
+        this.resetCanvasSize();
+      }, 100);
     },
-    initActionPage(animations) {
+    async initActionPage(animations) {
       this.removeBalls();
       directionalLight.intensity = 1;
       controls.enabled = true;
@@ -431,6 +436,10 @@ export default {
         nextAction.fadeIn(FADING_DURATION);
         nextAction.play();
       });
+
+      setTimeout(() => {
+        this.resetCanvasSize();
+      }, 100);
     },
     addBalls() {
       if (!scene.getObjectByName("ball0")) {
@@ -517,6 +526,25 @@ export default {
             resolve(res[0].node);
           });
       });
+    },
+    async getCanvasInfo(selector) {
+      return await new Promise((resolve) => {
+        wx.createSelectorQuery()
+          .select(selector)
+          .boundingClientRect((rect) => {
+            resolve(rect);
+          })
+          .exec();
+      });
+    },
+    async resetCanvasSize() {
+      const canvasInfo = await this.getCanvasInfo("#gl");
+      canvasDimention.width = canvasInfo.width;
+      canvasDimention.height = canvasInfo.height;
+
+      camera.aspect = canvasInfo.width / canvasInfo.height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(canvasInfo.width, canvasInfo.height);
     },
     async load(url) {
       canvas = await this.selectCanvas("#gl");
@@ -699,7 +727,7 @@ export default {
       if (this.currentPage == "pain") {
         this.initPainPage();
       } else {
-        this.initActionPage();
+        this.initActionPage(this.currentAnimations);
       }
 
       render();
