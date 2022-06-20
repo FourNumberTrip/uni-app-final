@@ -84,7 +84,7 @@
         </view>
         <view class="action-name-area">
           <text class="action-name">{{
-            `${currentAnimationIndex + 1}/${currentAnimations.length} ${
+            `${currentAnimationIndex + 1}/${currentAnimationCount} ${
               animationNameMap[currentAnimationId]
             }`
           }}</text>
@@ -119,7 +119,7 @@
             <view
               class="material-icon next"
               :data-color="
-                currentAnimationIndex < currentAnimations.length - 1
+                currentAnimationIndex < currentAnimationCount - 1
                   ? 'gray'
                   : 'lightgray'
               "
@@ -153,7 +153,6 @@ import {
   DoubleSide,
   AdditiveBlending,
   Color,
-  Vector3,
 } from "three";
 
 import { WechatPlatform, PlatformManager } from "platformize-three";
@@ -161,7 +160,6 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 import { loadGLTF } from "@/ts/animation";
 import { requestFile } from "@/ts/utils/network";
-import { selectCanvas } from "@/ts/utils/canvas";
 
 // config
 
@@ -341,13 +339,17 @@ export default {
   },
   async mounted() {},
   computed: {
+    // WTF VUE why do I need this
+    currentAnimationCount() {
+      return this.currentAnimations.length;
+    },
     currentAnimationId() {
       /** @type { 
           "101" | "102" | "103" | "104" | "105" 
         | "106" | "107" | "108" | "109" | "110" 
         | "111" | "112" | "113" | "114" | "115" 
         | "116" | "117" | "118" | "119" | "120" 
-        | "121" | "122" | "123" | "124" | "125" | "still" } */
+        | "121" | "122" | "123" | "124" | "125" } */
       const id = this.currentAnimations[this.currentAnimationIndex].id;
       return id;
     },
@@ -390,30 +392,28 @@ export default {
     },
   },
   methods: {
-    async initPainPage() {
-      this.stopAllActions();
+    initPainPage() {
+      this.addBalls();
+      directionalLight.intensity = 0.2;
+      controls.reset();
+      controls.enabled = false;
+
+      const currentAction = activeAction[this.currentAnimationId];
       this.currentAnimations = [
         {
           id: "still",
           loopTimes: 100000,
         },
       ];
-      this.setAction(0);
-
-      this.addBalls();
-      directionalLight.intensity = 0.2;
-      controls.reset();
-      controls.enabled = false;
-
-      this.$nextTick(async () => {
-        console.log(canvas);
+      this.$nextTick(() => {
+        currentAction.fadeOut(FADING_DURATION);
+        const nextAction = activeAction[this.currentAnimationId];
+        nextAction.reset();
+        nextAction.fadeIn(FADING_DURATION);
+        nextAction.play();
       });
     },
-    async initActionPage(animations) {
-      this.stopAllActions();
-      this.currentAnimations = animations;
-      this.setAction(0);
-
+    initActionPage(animations) {
       this.removeBalls();
       directionalLight.intensity = 1;
       controls.enabled = true;
@@ -422,14 +422,15 @@ export default {
       this.waitingTime = WAITING_TIME_BEFORE_ACTION;
       this.waiting = true;
 
-      this.$nextTick(async () => {
-        console.log(canvas);
+      const currentAction = activeAction[this.currentAnimationId];
+      this.currentAnimations = animations;
+      this.$nextTick(() => {
+        currentAction.fadeOut(FADING_DURATION);
+        const nextAction = activeAction[this.currentAnimationId];
+        nextAction.reset();
+        nextAction.fadeIn(FADING_DURATION);
+        nextAction.play();
       });
-    },
-    stopAllActions() {
-      for (let action of Object.values(activeAction)) {
-        action.fadeOut(FADING_DURATION);
-      }
     },
     addBalls() {
       if (!scene.getObjectByName("ball0")) {
@@ -620,13 +621,13 @@ export default {
 
           controls.update();
           renderer.render(scene, camera);
-          for (let i = 0; i < this.balls.length; i++) {
-            jointsBallGlow[i].material.uniforms.viewVector.value =
-              new Vector3().subVectors(
-                camera.position,
-                jointsBallGlow[i].position
-              );
-          }
+          // for (let i = 0; i < this.balls.length; i++) {
+          //   jointsBallGlow[i].material.uniforms.viewVector.value =
+          //     new Vector3().subVectors(
+          //       camera.position,
+          //       jointsBallGlow[i].position
+          //     );
+          // }
 
           if (this.currentPage === "pain" && pointer) {
             //获取鼠标指向的模型
