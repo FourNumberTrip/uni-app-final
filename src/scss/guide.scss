@@ -15,7 +15,16 @@ $guide-pages: 4;
   flex-direction: column;
 
   @mixin guide-content-animation-keyframes($index, $colorFrom, $colorTo) {
-    @if $index < $guide-pages {
+    @if $index == 0 {
+      @keyframes guide-content-animation-#{$index} {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+    } @else if $index < $guide-pages {
       @keyframes guide-content-animation-#{$index} {
         0% {
           background: $colorFrom;
@@ -45,7 +54,7 @@ $guide-pages: 4;
     }
   }
 
-  @for $i from 1 through $guide-pages {
+  @for $i from 0 through $guide-pages {
     @if $i % 2 == 1 {
       @include guide-content-animation-keyframes($i, white, $theme-color);
     } @else {

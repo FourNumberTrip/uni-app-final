@@ -3,14 +3,22 @@
     <view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view>
     <view class="nav-bar">
       <view class="nav-bar-box">
-        <view class="nav-bar-back-box" @click="navigateBack">
+        <view
+          v-if="currentPage !== 'select' && currentPage !== 'add'"
+          class="nav-bar-back-box"
+          @click="navigateBack"
+        >
           <view
             :class="['back-arrow', 'material-icon']"
             data-color="black"
             data-icon="chevron-left"
           ></view>
         </view>
-        <view class="nav-bar-help-box">
+        <view
+          v-if="currentPage === 'select'"
+          class="nav-bar-help-box"
+          @click="onHelpButtonClick"
+        >
           <view
             :class="['help', 'material-icon']"
             data-color="black"
@@ -452,14 +460,14 @@ export default {
           image: "https://mp.muzi.fun/resources/images/select/warm-up.webp",
           title: "热身动作",
           description:
-            "热身运动是热身运动是热身运动是热身运动是热身运动是热身运动是热身运动是热身运动是热身运动",
+            "热身运动可以增加您的活动能力，并且可以防止拉伤和抽筋等急性伤害。如果在列表内没有找到您的活动，可以点击列表最下方的添加按钮进行录制添加。",
           _class: "",
         },
         {
           image: "https://mp.muzi.fun/resources/images/select/pain-spots.webp",
           title: "疼痛缓解",
           description:
-            "疼痛缓解是疼痛缓解是疼痛缓解是疼痛缓解是疼痛缓解是疼痛缓解是疼痛缓解是疼痛缓解是疼痛缓解",
+            "如果您在农务活动中发生扭伤，抽筋等急性伤害，可以通过做一些疼痛缓解动作来解决。",
           _class: "",
         },
       ],
@@ -799,7 +807,25 @@ export default {
           this.currentPage = lastPage;
           this.leavingCompletePage = false;
         }, 1200);
+      } else if (this.currentPage === "guide") {
+        this.guideStage = 4;
+        setTimeout(() => {
+          this.guideStage = 0;
+          this.currentPage = lastPage;
+        }, 400);
       }
+    },
+
+    onHelpButtonClick() {
+      setTimeout(() => {
+        this.selectItems[0]._class = "";
+        this.selectItems[1]._class = "";
+        this.currentPage = "guide";
+      }, 500);
+
+      this.selectItems[0]._class = "list-item-expand";
+      this.selectItems[1]._class = "list-item-shrink";
+      this.pageStack.push("select");
     },
 
     // ! guide
@@ -813,6 +839,7 @@ export default {
       } else {
         this.guideStage++;
         setTimeout(() => {
+          this.guideStage = 0;
           this.currentPage = "select";
         }, 500);
       }

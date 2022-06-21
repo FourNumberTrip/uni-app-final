@@ -18,6 +18,10 @@ plugin.configPlugin({
   canvas: wx.createOffscreenCanvas(),
 });
 
+wx.cloud.init({
+  env: "wunong",
+});
+
 Vue.config.productionTip = false;
 
 App.mpType = "app";
