@@ -1,37 +1,10 @@
 {
   "pages": [
     {
-      "path": "pages/index/index"
-    },
-    {
-      "path": "pages/guide/guide"
-    },
-    {
-      "path": "pages/select/select"
-    },
-    {
-      "path": "pages/list/list"
-    },
-    {
-      "path": "pages/add/add"
-    },
-    {
-      "path": "pages/pain/pain"
-    },
-    {
-      "path": "pages/action/action"
-    },
-    {
-      "path": "pages/complete/complete"
-    },
-    {
       "path": "pages/merge/merge",
       "style": {
         "disableScroll": true
       }
-    },
-    {
-      "path": "pages/recoverAction/recoverAction"
     }
   ],
   "globalStyle": {

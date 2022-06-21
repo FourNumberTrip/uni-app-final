@@ -302,6 +302,22 @@
         </view>
         <view class="bottom-placeholder"></view>
       </view>
+      <view
+        class="add-content"
+        :style="{ display: currentPage == 'add' ? 'flex' : 'none' }"
+      >
+        <view :class="['canvas-container', canvasContainerAnimationClass]">
+          <canvas type="2d" id="canvas" class="canvas"></canvas>
+          <view v-if="analyzeProgress > 0" class="progress-bar">
+            <view
+              class="progress"
+              :style="{
+                width: `${Math.round(analyzeProgress * 100)}%`,
+              }"
+            ></view>
+          </view>
+        </view>
+      </view>
     </view>
   </view>
 </template>
@@ -332,6 +348,12 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 import { loadGLTF } from "@/ts/animation";
 import { requestFile } from "@/ts/utils/network";
+import { Keypoint } from "@tensorflow-models/pose-detection";
+import { analyzeKeypointsList } from "@/ts/pose-analysis";
+import { getPoseDetector, estimateFrame } from "@/ts/pose-detection";
+import { VideoDecoder } from "@/ts/video-decoder";
+import { drawPose } from "@/ts/utils/canvas";
+import { sleep } from "@/ts/utils/misc";
 
 // ! action & pain
 
@@ -645,6 +667,11 @@ export default {
       // ! complete
 
       leavingCompletePage: false,
+
+      // ! add
+
+      canvasContainerAnimationClass: "",
+      analyzeProgress: 0,
     };
   },
   created() {
@@ -875,6 +902,13 @@ export default {
               count: 1,
               mediaType: ["video"],
             });
+            const activityName = (
+              await wx.showModal({
+                title: "给您的视频取一个好记名字吧",
+                showCancel: false,
+                editable: true,
+              })
+            ).content;
 
             for (let i = 0; i < this.listItems.length; i++) {
               this.listItemAnimationClasses[i].disappearAnimationClass =
@@ -886,7 +920,39 @@ export default {
 
             setTimeout(() => {
               this.currentPage = "add";
+              this.listItemAnimationClasses = new Array(10).fill().map((_) => ({
+                appearAnimationClass: "list-item-out-bottom",
+                disappearAnimationClass: "",
+              }));
+              this.addButtonAnimationClass = "";
+              wx.showLoading({
+                title: "加载中",
+              });
             }, 600);
+
+            const animationList = await this.add(videoFileInfo);
+
+            this.listItems.unshift({
+              // ! TODO upload this image to cloud and replace url
+              coverUrl: videoFileInfo.tempFiles[0].thumbTempFilePath,
+              title: activityName,
+              animations: animationList,
+            });
+
+            wx.showToast({
+              title: "分析完成",
+              icon: "success",
+              duration: 2000,
+            });
+
+            await sleep(2000);
+
+            this.canvasContainerAnimationClass =
+              "canvas-container-disappear-animation";
+            setTimeout(() => {
+              this.canvasContainerAnimationClass = "";
+              this.currentPage = "list";
+            }, 500);
           }
         },
       });
@@ -895,6 +961,13 @@ export default {
     // ! action & pain
 
     async initPainPage(canvasSizeResettingDelay = 100) {
+      if (!this.loaded) {
+        await wx.showLoading({
+          title: "加载模型中",
+        });
+        await loadPromise;
+        await wx.hideLoading();
+      }
       this.addBalls();
       directionalLight.intensity = 0.2;
       controls.reset();
@@ -925,6 +998,14 @@ export default {
       }, canvasSizeResettingDelay);
     },
     async initActionPage(animations, canvasSizeResettingDelay = 100) {
+      if (!this.loaded) {
+        await wx.showLoading({
+          title: "加载模型中",
+        });
+        await loadPromise;
+        await wx.hideLoading();
+      }
+
       this.removeBalls();
       directionalLight.intensity = 1;
       controls.enabled = true;
@@ -1256,6 +1337,36 @@ export default {
     onClickCompleteBack() {
       this.navigateBack();
     },
+
+    // ! add
+
+    async add(videoFileInfo) {
+      const videoDuration = videoFileInfo.tempFiles[0].duration * 1000;
+      const canvas = await this.selectCanvas("#canvas");
+      const detector = await getPoseDetector();
+      const videoDecoder = new VideoDecoder(
+        videoFileInfo.tempFiles[0].tempFilePath
+      );
+
+      let firstFrame = true;
+      /** @type { Keypoint[][] } */
+      const keypointsList = [];
+      for await (const frame of videoDecoder.getFrames()) {
+        const keypoints = await estimateFrame(detector, frame);
+        keypointsList.push(keypoints);
+
+        await drawPose(canvas, frame, keypoints);
+        this.analyzeProgress = frame.pkPts / videoDuration;
+
+        if (firstFrame) {
+          firstFrame = false;
+          wx.hideLoading();
+        }
+      }
+      this.analyzeProgress = 1;
+
+      return analyzeKeypointsList(keypointsList);
+    },
   },
 };
 </script>
@@ -1334,7 +1445,9 @@ page {
           $material-icon-chevron-left
         );
         .back-arrow {
-          width: 80rpx;
+          opacity: 0.5;
+          padding-top: 8rpx;
+          width: 73rpx;
         }
       }
 
@@ -1344,10 +1457,11 @@ page {
         float: right;
         margin-right: 200rpx;
 
-        @include material-icon("black", #979697, "help", $material-icon-help);
+        @include material-icon("black", #000000, "help", $material-icon-help);
         .help {
-          padding-top: 1rpx;
-          width: 78rpx;
+          opacity: 0.24;
+          padding-top: 8rpx;
+          width: 73rpx;
         }
       }
     }
@@ -2546,6 +2660,55 @@ page {
 
       .bottom-placeholder {
         flex: 2;
+      }
+    }
+
+    .add-content {
+      flex: 1;
+      display: flex;
+
+      .canvas-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+
+        @keyframes canvas-container-disappear-animation {
+          from {
+            opacity: 1;
+          }
+
+          to {
+            opacity: 0;
+          }
+        }
+
+        &.canvas-container-disappear-animation {
+          animation: canvas-container-disappear-animation 0.5s ease-in-out
+            forwards;
+        }
+
+        .canvas {
+          flex: 18;
+          width: 100%;
+        }
+
+        .progress-bar {
+          flex: 1;
+          width: 100%;
+          border-radius: 5rpx;
+          border: 1rpx solid rgb(223, 223, 223);
+          margin: 5rpx 5rpx;
+
+          .progress {
+            background: #808080;
+            border-radius: 5rpx;
+            transition: width 1s;
+            height: 100%;
+            float: left;
+          }
+        }
       }
     }
   }
