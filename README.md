@@ -17,7 +17,7 @@ pnpm env use --global 16
 3. 安装vue-cli
 
 ``` powershell
-pnpm install -g @vue/cli
+pnpm install -g @vue/cli@4
 ```
 
 ## 安装包
