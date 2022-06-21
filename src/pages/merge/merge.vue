@@ -140,7 +140,12 @@
         }"
       >
         <view
-          class="pain-prompt"
+          :class="[
+            'pain-prompt',
+            finished
+              ? 'pain-prompt-disappear-animation'
+              : 'pain-prompt-appear-animation',
+          ]"
           :style="{
             display: currentPage === 'pain' ? 'flex' : 'none',
           }"
@@ -360,7 +365,7 @@ import { sleep } from "@/ts/utils/misc";
 // config
 
 // wait this amount of time before starting the timer
-const WAITING_TIME_BEFORE_ACTION = 2;
+const WAITING_TIME_BEFORE_ACTION = 10;
 // for transition the animation smoothly
 const FADING_DURATION = 0.5;
 
@@ -589,14 +594,14 @@ export default {
         123: "单腿后推",
         124: "踢臀",
         125: "肘部运动",
-        still: "静止",
+        still: "加载中...",
       },
 
       painReliefAnimations: {
         neck: [
-          { id: "101", loopTimes: 1 },
-          { id: "102", loopTimes: 1 },
-          { id: "103", loopTimes: 1 },
+          { id: "101", loopTimes: 8 },
+          { id: "102", loopTimes: 8 },
+          { id: "103", loopTimes: 8 },
         ],
         shoulders: [
           { id: "104", loopTimes: 8 },
@@ -1266,10 +1271,12 @@ export default {
             if (intersects.length > 0) {
               const ballIndex = parseInt(intersects[0].object.name.slice(4));
               const jointName = this.balls[ballIndex].joint;
-              this.currentPage = "action";
-              activeAction["still"].fadeOut(FADING_DURATION);
-              this.initActionPage(this.painReliefAnimations[jointName]);
-
+              this.finished = true;
+              setTimeout(() => {
+                this.currentPage = "action";
+                this.initActionPage(this.painReliefAnimations[jointName]);
+              }, 800);
+              activeAction["still"].stop();
               this.pageStack.push("pain");
             }
           }

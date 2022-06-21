@@ -21,6 +21,36 @@ $appear-disappear-animation-duration: 0.8s;
     justify-content: center;
     align-items: center;
 
+    @keyframes pain-prompt-appear-animation {
+      from {
+        transform: translateY(-100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0%);
+        opacity: 1;
+      }
+    }
+
+    @keyframes pain-prompt-disappear-animation {
+      from {
+        transform: translateY(0%);
+        opacity: 1;
+      }
+      to {
+        transform: translateY(-100%);
+        opacity: 0;
+      }
+    }
+
+    &.pain-prompt-disappear-animation {
+      animation: pain-prompt-disappear-animation $appear-disappear-animation-duration ease-in forwards;
+    }
+
+    &.pain-prompt-appear-animation {
+      animation: pain-prompt-appear-animation $appear-disappear-animation-duration ease-out forwards;
+    }
+
     .text-container {
       margin-top: 20px;
       .text {
