@@ -1,0 +1,175 @@
+@import "./general.scss";
+
+$check-height: 200rpx;
+$check-width: calc($check-height/2);
+$check-left: calc($check-height/3) + calc($check-height/6);
+$check-thickness: 20px;
+$check-color: rgb(37, 255, 37);
+
+$complete-animation-duration: 0.8s;
+
+.complete-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  background: $background-color;
+
+  .top-placeholder {
+    flex: 2;
+  }
+
+  .checkmark-wrapper {
+    flex: 1;
+    width: $check-height;
+    position: relative;
+
+    .checkmark {
+      @keyframes checkmark-appear-animation {
+        0% {
+          height: 0;
+          width: 0;
+        }
+        50% {
+          height: 0;
+          width: $check-width;
+        }
+        100% {
+          height: $check-height;
+          width: $check-width;
+        }
+      }
+
+      @keyframes checkmark-disappear-animation {
+        0% {
+          height: $check-height;
+          width: $check-width;
+        }
+        50% {
+          height: 0;
+          width: $check-width;
+        }
+        99% {
+          height: 0;
+          width: 0;
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+
+      &.checkmark-appear-animation:after {
+        animation-duration: $complete-animation-duration;
+        animation-timing-function: ease;
+        animation-name: checkmark-appear-animation;
+        transform: scaleX(-1) rotate(135deg);
+      }
+
+      &.checkmark-disappear-animation:after {
+        animation-duration: $complete-animation-duration;
+        animation-timing-function: ease;
+        animation-name: checkmark-disappear-animation;
+        animation-fill-mode: forwards;
+        transform: scaleX(-1) rotate(135deg);
+      }
+
+      &:after {
+        height: $check-height;
+        width: $check-width;
+        transform-origin: left top;
+        border-right: $check-thickness solid $check-color;
+        border-top: $check-thickness solid $check-color;
+        content: "";
+        position: absolute;
+      }
+    }
+  }
+
+  .buttons {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+
+    .button {
+      width: 240rpx;
+      height: 100rpx;
+      background: white;
+      border-radius: 50rpx;
+      box-shadow: rgba(0, 0, 0, 0.19) 0rpx 6rpx 30rpx, rgba(0, 0, 0, 0.2) 0rpx 6rpx 6rpx;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      // font-weight: bold;
+      font-size: 50rpx;
+    }
+
+    .restart-button {
+      margin-right: 100rpx;
+
+      @keyframes restart-button-appear-animation {
+        from {
+          transform: translateX(-700rpx);
+        }
+        to {
+          transform: translateX(0);
+        }
+      }
+
+      @keyframes restart-button-disappear-animation {
+        from {
+          transform: translateX(0);
+        }
+        to {
+          transform: translateX(-700rpx);
+        }
+      }
+
+      &.restart-button-appear-animation {
+        animation: restart-button-appear-animation $complete-animation-duration ease-in-out forwards;
+      }
+
+      &.restart-button-disappear-animation {
+        animation: restart-button-disappear-animation $complete-animation-duration ease-in-out forwards;
+      }
+    }
+
+    .back-button {
+      @keyframes back-button-appear-animation {
+        from {
+          transform: translateX(700rpx);
+        }
+        to {
+          transform: translateX(0);
+        }
+      }
+
+      @keyframes back-button-disappear-animation {
+        from {
+          transform: translateX(0);
+        }
+        to {
+          transform: translateX(700rpx);
+        }
+      }
+
+      &.back-button-appear-animation {
+        animation: back-button-appear-animation $complete-animation-duration ease-in-out forwards;
+      }
+
+      &.back-button-disappear-animation {
+        animation: back-button-disappear-animation $complete-animation-duration ease-in-out forwards;
+      }
+    }
+  }
+
+  .bottom-placeholder {
+    flex: 2;
+  }
+}

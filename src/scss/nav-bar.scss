@@ -1,0 +1,43 @@
+@import "@/lib/material-icons.scss";
+
+.nav-bar {
+  position: relative;
+  z-index: 10;
+
+  flex-grow: 0;
+  height: 80rpx;
+  width: 100%;
+
+  .nav-bar-box {
+    height: 80rpx;
+    width: 100%;
+
+    .nav-bar-back-box {
+      height: 80rpx;
+      width: 80rpx;
+      float: left;
+      margin-left: 10rpx;
+
+      @include material-icon("black", #000000, "chevron-left", $material-icon-chevron-left);
+      .back-arrow {
+        opacity: 0.5;
+        padding-top: 8rpx;
+        width: 73rpx;
+      }
+    }
+
+    .nav-bar-help-box {
+      height: 80rpx;
+      width: 80rpx;
+      float: right;
+      margin-right: 200rpx;
+
+      @include material-icon("black", #000000, "help", $material-icon-help);
+      .help {
+        opacity: 0.24;
+        padding-top: 8rpx;
+        width: 73rpx;
+      }
+    }
+  }
+}
