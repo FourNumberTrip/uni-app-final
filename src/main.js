@@ -19,7 +19,7 @@ plugin.configPlugin({
 });
 
 wx.cloud.init({
-  env: "wunong",
+  env: "wunong-8gv2gdnhe01614cd",
 });
 
 Vue.config.productionTip = false;

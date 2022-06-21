@@ -367,6 +367,7 @@ import { getPoseDetector, estimateFrame } from "@/ts/pose-detection";
 import { VideoDecoder } from "@/ts/video-decoder";
 import { drawPose } from "@/ts/utils/canvas";
 import { sleep } from "@/ts/utils/misc";
+import { addUserActivities, getUserActivities } from "@/ts/utils/wx-database";
 
 // ! action & pain
 
@@ -467,7 +468,7 @@ export default {
           image: "https://mp.muzi.fun/resources/images/select/pain-spots.webp",
           title: "疼痛缓解",
           description:
-            "如果您在农务活动中发生扭伤，抽筋等急性伤害，可以通过做一些疼痛缓解动作来解决。",
+            "如果您在农务活动中发生扭伤，抽筋等急性伤害，可以通过做一些疼痛缓解动作来缓解。",
           _class: "",
         },
       ],
@@ -689,20 +690,25 @@ export default {
   created() {
     this.statusBarHeight = uni.getSystemInfoSync().statusBarHeight;
   },
-  onLoad() {
+  async onLoad() {
     loadPromise = this.load(this.url);
-    // ! be aware that if you put an object in fill(), the array will full of the same object (references to the same object).
+
+    const userActivities = await getUserActivities();
+    for (const activity of userActivities) {
+      this.listItems.unshift(activity);
+    }
     this.listItemAnimationClasses = new Array(this.listItems.length)
       .fill()
       .map((_) => ({
         appearAnimationClass: "list-item-out-bottom",
         disappearAnimationClass: "",
       }));
+    this.$nextTick(() => {
+      // for scroll in animation
+      this.observeListItems();
+    });
   },
-  onReady() {
-    // for scroll in animation
-    this.observeListItems();
-  },
+  onReady() {},
   computed: {
     // WTF VUE why do I need this
     currentAnimationCount() {
@@ -977,12 +983,15 @@ export default {
 
             const animationList = await this.add(videoFileInfo);
 
-            this.listItems.unshift({
+            const uploadedActivityInfo = await addUserActivities({
               // ! TODO upload this image to cloud and replace url
               coverUrl: videoFileInfo.tempFiles[0].thumbTempFilePath,
               title: activityName,
               animations: animationList,
             });
+
+            this.listItems.unshift(uploadedActivityInfo);
+            console.log(await getUserActivities());
 
             // the length changed
             this.listItemAnimationClasses = new Array(this.listItems.length)
