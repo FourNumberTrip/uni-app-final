@@ -397,6 +397,8 @@ let jointsBallGlow = [];
 /** @type { Promise<void> } */
 let loadPromise;
 
+let observer;
+
 // convert seconds to mm:ss format
 function secondsToTimeString(totalSeconds) {
   let minutes = Math.floor(totalSeconds / 60);
@@ -459,11 +461,8 @@ export default {
 
       // ! list
 
-      // ! be aware that if you put an object in fill(), the array will full of the same object (references to the same object).
-      listItemAnimationClasses: new Array(10).fill().map((_) => ({
-        appearAnimationClass: "list-item-out-bottom",
-        disappearAnimationClass: "",
-      })),
+      /** @type { { appearAnimationClass: string, disappearAnimationClass: string }[] } */
+      listItemAnimationClasses: [],
       addButtonAnimationClass: "",
       listItems: [
         {
@@ -679,43 +678,17 @@ export default {
   },
   onLoad() {
     loadPromise = this.load(this.url);
+    // ! be aware that if you put an object in fill(), the array will full of the same object (references to the same object).
+    this.listItemAnimationClasses = new Array(this.listItems.length)
+      .fill()
+      .map((_) => ({
+        appearAnimationClass: "list-item-out-bottom",
+        disappearAnimationClass: "",
+      }));
   },
   onReady() {
     // for scroll in animation
-    const observer = uni.createIntersectionObserver(this, {
-      observeAll: true,
-    });
-    observer
-      .relativeToViewport({
-        bottom: 0,
-      })
-      // make sure to only observe the items in list page not select page
-      .observe(".list-content .list .list-item", (res) => {
-        // this is because we use list-item class for the add button
-        if (res.dataset.index === undefined) {
-          return;
-        }
-
-        if (res.intersectionRatio > 0) {
-          // appear
-          this.listItemAnimationClasses[
-            res.dataset.index
-          ].appearAnimationClass = "";
-        } else {
-          // disappear
-          if (res.boundingClientRect.top < 0) {
-            // disappear to top
-            this.listItemAnimationClasses[
-              res.dataset.index
-            ].appearAnimationClass = "list-item-out-top";
-          } else {
-            // disappear to bottom
-            this.listItemAnimationClasses[
-              res.dataset.index
-            ].appearAnimationClass = "list-item-out-bottom";
-          }
-        }
-      });
+    this.observeListItems();
   },
   computed: {
     // WTF VUE why do I need this
@@ -803,10 +776,12 @@ export default {
 
         setTimeout(() => {
           this.currentPage = lastPage;
-          this.listItemAnimationClasses = new Array(10).fill().map((_) => ({
-            appearAnimationClass: "list-item-out-bottom",
-            disappearAnimationClass: "",
-          }));
+          this.listItemAnimationClasses = new Array(this.listItems.length)
+            .fill()
+            .map((_) => ({
+              appearAnimationClass: "list-item-out-bottom",
+              disappearAnimationClass: "",
+            }));
           this.addButtonAnimationClass = "";
         }, 500);
       } else if (this.currentPage === "complete") {
@@ -860,6 +835,48 @@ export default {
 
     // ! list
 
+    observeListItems() {
+      if (observer) {
+        observer.disconnect();
+      }
+      observer = uni.createIntersectionObserver(this, {
+        observeAll: true,
+      });
+      observer
+        .relativeToViewport({
+          bottom: 0,
+        })
+        // make sure to only observe the items in list page not select page
+        .observe(".list-content .list .list-item", (res) => {
+          console.log(res);
+
+          // this is because we use list-item class for the add button
+          if (res.dataset.index === undefined) {
+            return;
+          }
+
+          if (res.intersectionRatio > 0) {
+            // appear
+            this.listItemAnimationClasses[
+              res.dataset.index
+            ].appearAnimationClass = "";
+          } else {
+            // disappear
+            if (res.boundingClientRect.top < 0) {
+              // disappear to top
+              this.listItemAnimationClasses[
+                res.dataset.index
+              ].appearAnimationClass = "list-item-out-top";
+            } else {
+              // disappear to bottom
+              this.listItemAnimationClasses[
+                res.dataset.index
+              ].appearAnimationClass = "list-item-out-bottom";
+            }
+          }
+        });
+    },
+
     onListItemClick(index) {
       for (let i = 0; i < this.listItems.length; i++) {
         if (i === index) {
@@ -881,10 +898,12 @@ export default {
 
       setTimeout(() => {
         this.currentPage = "action";
-        this.listItemAnimationClasses = new Array(10).fill().map((_) => ({
-          appearAnimationClass: "list-item-out-bottom",
-          disappearAnimationClass: "",
-        }));
+        this.listItemAnimationClasses = new Array(this.listItems.length)
+          .fill()
+          .map((_) => ({
+            appearAnimationClass: "list-item-out-bottom",
+            disappearAnimationClass: "",
+          }));
         this.addButtonAnimationClass = "";
       }, 500);
 
@@ -920,10 +939,6 @@ export default {
 
             setTimeout(() => {
               this.currentPage = "add";
-              this.listItemAnimationClasses = new Array(10).fill().map((_) => ({
-                appearAnimationClass: "list-item-out-bottom",
-                disappearAnimationClass: "",
-              }));
               this.addButtonAnimationClass = "";
               wx.showLoading({
                 title: "加载中",
@@ -939,6 +954,14 @@ export default {
               animations: animationList,
             });
 
+            // the length changed
+            this.listItemAnimationClasses = new Array(this.listItems.length)
+              .fill()
+              .map((_) => ({
+                appearAnimationClass: "list-item-out-bottom",
+                disappearAnimationClass: "",
+              }));
+
             wx.showToast({
               title: "分析完成",
               icon: "success",
@@ -946,6 +969,9 @@ export default {
             });
 
             await sleep(2000);
+
+            // the dom must haved changed after 2s
+            this.observeListItems();
 
             this.canvasContainerAnimationClass =
               "canvas-container-disappear-animation";
