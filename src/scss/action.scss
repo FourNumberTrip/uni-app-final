@@ -179,9 +179,10 @@ $appear-disappear-animation-duration: 0.8s;
   }
 
   .bottom-part {
-    flex: 5;
+    flex-grow: 0;
     width: 100%;
 
+    height: 400rpx;
     display: flex;
     flex-direction: column;
     justify-content: center;
