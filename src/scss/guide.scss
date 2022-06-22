@@ -1,11 +1,13 @@
 @import "@/lib/material-icons.scss";
+@import "./general.scss";
 
 $animation-duration: 0.8s;
 $guide-button-size: 130rpx;
 $guide-button-arrow-size: 0.5;
 $guide-content-ratio: 7 2 2;
 
-$theme-color: #000000;
+$theme-color: #b5deb3;
+
 // should be actually number of pages - 1
 $guide-pages: 4;
 
@@ -56,9 +58,9 @@ $guide-pages: 4;
 
   @for $i from 0 through $guide-pages {
     @if $i % 2 == 1 {
-      @include guide-content-animation-keyframes($i, white, $theme-color);
+      @include guide-content-animation-keyframes($i, $background-color, $theme-color);
     } @else {
-      @include guide-content-animation-keyframes($i, $theme-color, white);
+      @include guide-content-animation-keyframes($i, $theme-color, $background-color);
     }
     &.guide-content-animation-#{$i} {
       animation-name: guide-content-animation-#{$i};
@@ -95,13 +97,13 @@ $guide-pages: 4;
               transform: translateX(300rpx);
               opacity: 0%;
               animation-timing-function: linear;
-              color: white;
+              color: black;
             }
 
             100% {
               transform: translateX(0rpx);
               opacity: 100%;
-              color: white;
+              color: black;
             }
           }
         } @else {
@@ -110,13 +112,13 @@ $guide-pages: 4;
               transform: translateX(0rpx);
               opacity: 100%;
               animation-timing-function: linear;
-              color: white;
+              color: black;
             }
 
             #{$disappear-percentage} {
               transform: translateX(-300rpx);
               opacity: 0%;
-              color: white;
+              color: black;
             }
 
             #{100% - $disappear-percentage} {
@@ -140,13 +142,13 @@ $guide-pages: 4;
             transform: translateX(0rpx);
             opacity: 100%;
             animation-timing-function: linear;
-            color: white;
+            color: black;
           }
 
           #{$disappear-percentage} {
             transform: translateX(-300rpx);
             opacity: 0%;
-            color: white;
+            color: black;
           }
 
           100% {
@@ -300,9 +302,9 @@ $guide-pages: 4;
 
         @for $i from 1 through $guide-pages {
           @if $i % 2 == 1 {
-            @include button-animation-keyframes($i, $theme-color, white);
+            @include button-animation-keyframes($i, $theme-color, $background-color);
           } @else {
-            @include button-animation-keyframes($i, white, $theme-color);
+            @include button-animation-keyframes($i, $background-color, $theme-color);
           }
           &.button-animation-#{$i} {
             animation-name: button-animation-#{$i};

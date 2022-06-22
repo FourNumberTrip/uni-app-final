@@ -210,12 +210,12 @@
         <view
           :class="[
             'bottom-part',
-            finished
+            finished || resting
               ? 'bottom-part-disappear-animation'
               : 'bottom-part-appear-animation',
           ]"
           :style="{
-            display: currentPage === 'action' ? 'flex' : 'none',
+            display: currentPage === 'action' && !resting ? 'flex' : 'none',
           }"
         >
           <view class="action-status">
@@ -243,7 +243,7 @@
               :style="{
                 visibility: waiting && waitingTime <= 4 ? 'visible' : 'hidden',
               }"
-              >{{ Math.ceil(waitingTime) }}</view
+              >{{ Math.max(1, Math.ceil(waitingTime)) }}</view
             >
           </view>
 
@@ -286,6 +286,36 @@
               ></view>
               <view class="side-spacer"></view>
             </view>
+          </view>
+        </view>
+        <view
+          :class="[
+            'rest',
+            finished || !resting
+              ? 'rest-disappear-animation'
+              : 'rest-appear-animation',
+          ]"
+          :style="{
+            display: currentPage === 'action' && resting ? 'flex' : 'none',
+          }"
+        >
+          <view class="countdown-wrapper">
+            <canvas
+              type="2d"
+              class="countdown-canvas"
+              id="countdown-canvas"
+            ></canvas>
+            <view class="countdown-text">{{
+              Math.max(0, Math.ceil(this.restingTime))
+            }}</view>
+          </view>
+          <view class="options">
+            <view
+              :class="['button', 'extend', extended ? 'disabled' : '']"
+              @click="onClickExtendRest()"
+              >{{ extended ? "已延长" : "延长20秒" }}</view
+            >
+            <view class="button skip" @click="onClickSkipRest()">结束休息</view>
           </view>
         </view>
       </view>
@@ -377,7 +407,7 @@ import { Keypoint } from "@tensorflow-models/pose-detection";
 import { analyzeKeypointsList } from "@/ts/pose-analysis";
 import { getPoseDetector, estimateFrame } from "@/ts/pose-detection";
 import { VideoDecoder } from "@/ts/video-decoder";
-import { drawPose } from "@/ts/utils/canvas";
+import { drawPose, drawProgress } from "@/ts/utils/canvas";
 import { sleep } from "@/ts/utils/misc";
 import { addUserActivities, getUserActivities } from "@/ts/utils/wx-database";
 
@@ -689,6 +719,11 @@ export default {
       // for fading in and out of the page
       finished: false,
 
+      resting: false,
+      restingTime: 0,
+      DEFAULT_REST_TIME: 20,
+      extended: false,
+
       // ! complete
 
       leavingCompletePage: false,
@@ -770,7 +805,12 @@ export default {
       const currentOverallSeconds =
         this.currentAnimationDurations
           .filter((_, index) => this.completedAnimations[index])
-          .reduce((a, b) => a + b, 0) + this.currentPlayingTime;
+          .reduce((a, b) => a + b, 0) +
+        // this makes sure overall timer won't be running when resting
+        Math.min(
+          this.currentAnimationDurations[this.currentAnimationIndex],
+          this.currentPlayingTime
+        );
       return secondsToTimeString(currentOverallSeconds);
     },
   },
@@ -829,6 +869,7 @@ export default {
         this.guideStage = 4;
         setTimeout(() => {
           this.guideStage = 0;
+          this.guide = guides[this.guideStage];
           this.currentPage = lastPage;
         }, 400);
       }
@@ -858,6 +899,7 @@ export default {
         this.guideStage++;
         setTimeout(() => {
           this.guideStage = 0;
+          this.guide = guides[this.guideStage];
           this.currentPage = "select";
         }, 500);
       }
@@ -1092,6 +1134,9 @@ export default {
       this.waiting = true;
       this.paused = false;
       this.finished = false;
+      this.resting = false;
+      this.restingTime = 0;
+      this.extended = false;
       clock.start();
 
       const currentAction = activeAction[this.currentAnimationId];
@@ -1173,6 +1218,15 @@ export default {
       if (this.currentAnimationIndex < this.currentAnimations.length - 1) {
         this.setAction(this.currentAnimationIndex + 1);
       }
+    },
+    onClickExtendRest() {
+      if (!this.extended) {
+        this.extended = true;
+        this.restingTime += this.DEFAULT_REST_TIME;
+      }
+    },
+    onClickSkipRest() {
+      this.restingTime = 0;
     },
     async selectCanvas(selector) {
       return await new Promise((resolve) => {
@@ -1299,6 +1353,7 @@ export default {
         },
       });
 
+      let countdownCanvas = await this.selectCanvas("#countdown-canvas");
       const render = () => {
         const frameId = canvas.requestAnimationFrame(render);
         if (!this.paused) {
@@ -1352,7 +1407,40 @@ export default {
                     this.currentAnimationIndex + 1 <
                     this.currentAnimations.length
                   ) {
-                    this.setAction(this.currentAnimationIndex + 1);
+                    // ! when one action finishes
+                    if (this.restingTime <= 0) {
+                      if (this.resting) {
+                        // we finished resting
+                        // run the html element animation
+                        // set resting property to false
+                        activeAction[this.currentAnimationId].paused = false;
+                        this.setAction(this.currentAnimationIndex + 1);
+                        setTimeout(() => {
+                          this.restingTime = 0;
+                          this.extended = false;
+                          this.resting = false;
+                        }, 500);
+                      } else {
+                        // we just started resting, so we need to run the html element animation
+                        // then we set resting property to true
+                        this.restingTime = this.DEFAULT_REST_TIME;
+                        setTimeout(() => {
+                          activeAction[this.currentAnimationId].paused = true;
+                          this.resting = true;
+                        }, 500);
+                      }
+                    } else {
+                      // we are in the middle of resting
+                      // reduce this.resting by clockDelta
+                      this.restingTime -= clockDelta;
+                      drawProgress(
+                        countdownCanvas,
+                        this.restingTime /
+                          (this.DEFAULT_REST_TIME + this.extended
+                            ? this.DEFAULT_REST_TIME
+                            : 0)
+                      );
+                    }
                     // if all the actions are finished
                   } else if (!this.finished) {
                     // pause the animation

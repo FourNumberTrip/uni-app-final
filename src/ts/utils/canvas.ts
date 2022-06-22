@@ -35,6 +35,39 @@ const LINES = [
   [14, 16],
 ];
 
+export function drawProgress(
+  canvas: WechatMiniprogram.Canvas,
+  progress: number
+) {
+  const ctx = canvas.getContext("2d");
+  const posX = canvas.width / 2;
+  const posY = canvas.height / 2;
+  const degrees = Math.max(1, progress * 360);
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // background
+  ctx.beginPath();
+  ctx.arc(posX, posY, 40, (Math.PI / 180) * 270, (Math.PI / 180) * (270 + 360));
+  ctx.strokeStyle = "#e1e1e1";
+  ctx.lineWidth = 10;
+  ctx.lineCap = "round";
+  ctx.stroke();
+
+  // progress
+  ctx.beginPath();
+  ctx.arc(
+    posX,
+    posY,
+    40,
+    (Math.PI / 180) * 270,
+    (Math.PI / 180) * (270 + degrees)
+  );
+  ctx.strokeStyle = "#b5deb3";
+  ctx.lineWidth = 10;
+  ctx.lineCap = "round";
+  ctx.stroke();
+}
+
 export async function drawPose(
   canvas: WechatMiniprogram.Canvas,
   frameData: WechatMiniprogram.FrameDataOptions,
