@@ -217,35 +217,67 @@ $appear-disappear-animation-duration: 0.8s;
       animation: bottom-part-appear-animation $appear-disappear-animation-duration ease-out forwards;
     }
 
-    .timer-area {
+    .action-status {
       flex: 0;
       width: 100%;
-      padding-left: 40rpx;
-      margin-bottom: 10rpx;
-      font-size: 80rpx;
-      font-weight: bold;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
 
-      .timer {
-        float: left;
-        color: black;
+      .timer-n-progress {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+
+        .timer-area {
+          flex: 0;
+          width: 100%;
+          display: flex;
+          flex-direction: row;
+          justify-content: flex-start;
+          align-items: center;
+
+          padding-left: 40rpx;
+          margin-bottom: 10rpx;
+          font-size: 80rpx;
+          font-weight: bold;
+          white-space: nowrap;
+
+          .timer {
+            float: left;
+            color: black;
+          }
+
+          .timer-total {
+            float: left;
+            color: #8b8b8b;
+          }
+        }
+
+        .action-name-area {
+          flex: 0;
+          width: 100%;
+          padding-left: 45rpx;
+          margin-bottom: 30rpx;
+
+          .action-name {
+            float: left;
+            font-size: 40rpx;
+            font-weight: bold;
+          }
+        }
       }
 
-      .timer-total {
-        float: left;
-        color: #8b8b8b;
-      }
-    }
+      .countdown {
+        flex: 2;
+        font-size: 150rpx;
 
-    .action-name-area {
-      flex: 0;
-      width: 100%;
-      padding-left: 45rpx;
-      margin-bottom: 30rpx;
-
-      .action-name {
-        float: left;
-        font-size: 40rpx;
-        font-weight: bold;
+        display: flex;
+        justify-content: center;
+        align-items: center;
       }
     }
 

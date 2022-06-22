@@ -218,23 +218,35 @@
             display: currentPage === 'action' ? 'flex' : 'none',
           }"
         >
-          <view class="timer-area">
-            <text class="timer">{{ Math.floor(currentPlayingTime) }}</text>
-            <text class="timer-total"
-              >/{{
-                `${Math.floor(
-                  currentAnimationDurations[currentAnimationIndex]
-                )}"`
-              }}</text
+          <view class="action-status">
+            <view class="timer-n-progress">
+              <view class="timer-area">
+                <text class="timer">{{ Math.floor(currentPlayingTime) }}</text>
+                <text class="timer-total"
+                  >/{{
+                    `${Math.floor(
+                      currentAnimationDurations[currentAnimationIndex]
+                    )}"`
+                  }}</text
+                >
+              </view>
+              <view class="action-name-area">
+                <text class="action-name">{{
+                  `${currentAnimationIndex + 1}/${currentAnimationCount} ${
+                    animationNameMap[currentAnimationId]
+                  }`
+                }}</text>
+              </view>
+            </view>
+            <view
+              class="countdown"
+              :style="{
+                visibility: waiting && waitingTime <= 4 ? 'visible' : 'hidden',
+              }"
+              >{{ Math.ceil(waitingTime) }}</view
             >
           </view>
-          <view class="action-name-area">
-            <text class="action-name">{{
-              `${currentAnimationIndex + 1}/${currentAnimationCount} ${
-                animationNameMap[currentAnimationId]
-              }`
-            }}</text>
-          </view>
+
           <view class="control-area">
             <view class="background-progress">
               <view
@@ -639,19 +651,19 @@ export default {
       },
 
       balls: [
-        { x: 0, y: 2.1, joint: "neck" },
-        { x: -0.45, y: 1.8, joint: "shoulders" },
-        { x: 0.45, y: 1.8, joint: "shoulders" },
+        { x: 0, y: 2.0, joint: "neck" },
+        { x: -0.45, y: 1.7, joint: "shoulders" },
+        { x: 0.45, y: 1.7, joint: "shoulders" },
         { x: -0.3, y: 0.3, joint: "hips" },
         { x: 0.3, y: 0.3, joint: "hips" },
-        { x: -0.34, y: -2.3, joint: "ankles" },
-        { x: 0.34, y: -2.3, joint: "ankles" },
-        { x: -0.35, y: -1.2, joint: "knees" },
-        { x: 0.35, y: -1.2, joint: "knees" },
-        { x: -0.35, y: -0.6, joint: "legs" },
-        { x: 0.35, y: -0.6, joint: "legs" },
-        { x: -0.35, y: -1.8, joint: "legs" },
-        { x: 0.35, y: -1.8, joint: "legs" },
+        { x: -0.35, y: -0.4, joint: "legs" },
+        { x: 0.35, y: -0.4, joint: "legs" },
+        { x: -0.32, y: -1.0, joint: "knees" },
+        { x: 0.32, y: -1.0, joint: "knees" },
+        { x: -0.35, y: -1.5, joint: "legs" },
+        { x: 0.35, y: -1.5, joint: "legs" },
+        { x: -0.32, y: -2.3, joint: "ankles" },
+        { x: 0.32, y: -2.3, joint: "ankles" },
       ],
 
       // "index" means the index in the currentAnimations array
