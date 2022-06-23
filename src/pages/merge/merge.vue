@@ -444,6 +444,7 @@ import {
   removeUserActivity,
   updateUserActivity,
 } from "@/ts/utils/wx-database";
+import { readFile, writeFile } from "@/ts/utils/file";
 
 // ! action & pain
 
@@ -1366,7 +1367,18 @@ export default {
       scene = new Scene();
       controls = new OrbitControls(camera, canvas);
       controls.enableDamping = true;
-      const gltfData = await requestFile(url, "arraybuffer");
+
+      let gltfData;
+      try {
+        gltfData = await readFile(
+          `${wx.env.USER_DATA_PATH}/final.glb`,
+          undefined
+        );
+      } catch (e) {
+        gltfData = await requestFile(url, "arraybuffer");
+        writeFile(`${wx.env.USER_DATA_PATH}/final.glb`, gltfData, undefined);
+      }
+
       const gltf = await loadGLTF(gltfData);
       gltf.parser = null;
       gltf.scene.position.y = -3;
@@ -1418,7 +1430,6 @@ export default {
         ball.position.set(this.balls[i].x, this.balls[i].y, 1.5);
         ball.name = "ball" + i;
         jointsBallGlow.push(ball);
-        scene.add(ball);
       }
 
       renderer.outputEncoding = sRGBEncoding;
@@ -1548,6 +1559,7 @@ export default {
       render();
 
       this.loaded = true;
+      console.log("loaded")
     },
 
     // for three.js touch control
