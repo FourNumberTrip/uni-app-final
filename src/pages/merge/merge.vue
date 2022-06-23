@@ -115,6 +115,7 @@
               listItemAnimationClasses[index].disappearAnimationClass,
             ]"
             @click="onListItemClick(index)"
+            @longpress="onListItemLongPress(index)"
             v-for="(item, index) in listItems"
             :key="index"
             :data-index="index"
@@ -374,6 +375,34 @@
         </view>
       </view>
     </view>
+    <view
+      class="popup"
+      :style="{
+        height: `calc(100vh - ${statusBarHeight}px - 80rpx)`,
+        top: `calc(${statusBarHeight}px + 80rpx)`,
+        opacity: isPopupVisible ? '1' : '0',
+        'pointer-events': isPopupVisible ? 'auto' : 'none',
+      }"
+      @click="onPopupBackgroundClick"
+    >
+      <view class="edit-box" @click.stop="">
+        <view class="title">修改活动</view>
+        <input
+          type="text"
+          placeholder="点击修改标题"
+          class="input"
+          v-model="selectedItemTitle"
+        />
+        <view class="button-container">
+          <view class="button delete-button" @click.stop="onRemoveButtonClick"
+            >删除</view
+          >
+          <view class="button confirm-button" @click.stop="onConfirmButtonClick"
+            >确定</view
+          >
+        </view>
+      </view>
+    </view>
   </view>
 </template>
 
@@ -409,7 +438,12 @@ import { getPoseDetector, estimateFrame } from "@/ts/pose-detection";
 import { VideoDecoder } from "@/ts/video-decoder";
 import { drawPose, drawProgress } from "@/ts/utils/canvas";
 import { sleep } from "@/ts/utils/misc";
-import { addUserActivities, getUserActivities } from "@/ts/utils/wx-database";
+import {
+  addUserActivities,
+  getUserActivities,
+  removeUserActivity,
+  updateUserActivity,
+} from "@/ts/utils/wx-database";
 
 // ! action & pain
 
@@ -492,6 +526,12 @@ export default {
 
       statusBarHeight: 0,
       pageStack: [],
+
+      // ! pop up
+
+      isPopupVisible: false,
+      selectedItemIndex: 0,
+      selectedItemTitle: "",
 
       // ! guide
       guideStage: 0,
@@ -872,6 +912,8 @@ export default {
           this.guide = guides[this.guideStage];
           this.currentPage = lastPage;
         }, 400);
+      } else if (this.isPopupVisible) {
+        this.isPopupVisible = false;
       }
     },
 
@@ -885,6 +927,35 @@ export default {
       this.selectItems[0]._class = "list-item-expand";
       this.selectItems[1]._class = "list-item-shrink";
       this.pageStack.push("select");
+    },
+
+    // ! popup
+
+    async onRemoveButtonClick() {
+      wx.showLoading({
+        title: "删除中",
+      });
+      await removeUserActivity(
+        this.listItems.splice(this.currentAnimationIndex, 1)[0]._id
+      );
+      wx.hideLoading();
+      this.isPopupVisible = false;
+    },
+    async onConfirmButtonClick() {
+      if (
+        this.selectedItemTitle !== this.listItems[this.selectedItemIndex].title
+      ) {
+        wx.showLoading({
+          title: "修改中",
+        });
+        this.listItems[this.selectedItemIndex].title = this.selectedItemTitle;
+        await updateUserActivity(this.listItems[this.selectedItemIndex]);
+        wx.hideLoading();
+      }
+      this.isPopupVisible = false;
+    },
+    onPopupBackgroundClick() {
+      this.isPopupVisible = false;
     },
 
     // ! guide
@@ -1001,6 +1072,15 @@ export default {
       this.initActionPage(animations, 510);
       this.pageStack.push("list");
     },
+
+    onListItemLongPress(index) {
+      if (this.listItems[index]._id) {
+        this.selectedItemIndex = index;
+        this.selectedItemTitle = this.listItems[index].title;
+        this.isPopupVisible = true;
+      }
+    },
+
     onAddButtonClick() {
       wx.showModal({
         title: "提示",
@@ -1578,5 +1658,7 @@ page {
 
     @import "@/scss/add.scss";
   }
+
+  @import "@/scss/popup.scss";
 }
 </style>

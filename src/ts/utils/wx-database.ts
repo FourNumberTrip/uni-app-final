@@ -4,6 +4,7 @@ export async function addUserActivities(activity: {
   coverUrl: string;
   title: string;
   animations: { id: string; loopTimes: string }[];
+  _id: string;
 }) {
   // upload image to cloud
   const fileID = (
@@ -13,13 +14,15 @@ export async function addUserActivities(activity: {
     })
   ).fileID;
 
-  await db.collection("user_activities").add({
-    data: {
-      coverFileID: fileID,
-      title: activity.title,
-      animations: activity.animations,
-    },
-  });
+  const _id = (
+    await db.collection("user_activities").add({
+      data: {
+        coverFileID: fileID,
+        title: activity.title,
+        animations: activity.animations,
+      },
+    })
+  )._id;
 
   const coverUrl = (
     await wx.cloud.getTempFileURL({
@@ -31,6 +34,7 @@ export async function addUserActivities(activity: {
     coverUrl,
     title: activity.title,
     animations: activity.animations,
+    _id,
   };
 }
 
@@ -46,7 +50,28 @@ export async function getUserActivities() {
         ).fileList[0].tempFileURL,
         title: activity.title,
         animations: activity.animations,
+        _id: activity._id,
       };
     })
   );
+}
+
+export async function removeUserActivity(_id: string) {
+  await db.collection("user_activities").doc(_id).remove();
+}
+
+export async function updateUserActivity(activity: {
+  _id: string;
+  coverUrl: string;
+  title: string;
+  animations: { id: string; loopTimes: string }[];
+}) {
+  await db
+    .collection("user_activities")
+    .doc(activity._id)
+    .update({
+      data: {
+        title: activity.title,
+      },
+    });
 }

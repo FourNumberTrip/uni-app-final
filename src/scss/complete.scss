@@ -98,7 +98,6 @@ $complete-animation-duration: 0.8s;
     .button {
       width: 240rpx;
       height: 100rpx;
-      background: white;
       border-radius: 50rpx;
       box-shadow: rgba(0, 0, 0, 0.19) 0rpx 6rpx 30rpx, rgba(0, 0, 0, 0.2) 0rpx 6rpx 6rpx;
 
@@ -112,6 +111,7 @@ $complete-animation-duration: 0.8s;
 
     .restart-button {
       margin-right: 100rpx;
+      background: #c7f1c5;
 
       @keyframes restart-button-appear-animation {
         from {
@@ -141,6 +141,8 @@ $complete-animation-duration: 0.8s;
     }
 
     .back-button {
+      background: #eef1f7;
+
       @keyframes back-button-appear-animation {
         from {
           transform: translateX(700rpx);
