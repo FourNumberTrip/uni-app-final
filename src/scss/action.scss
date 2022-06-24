@@ -138,12 +138,20 @@ $appear-disappear-animation-duration: 0.8s;
         margin-left: 20rpx;
       }
 
-      .overall-full-time {
+      @include material-icon("gray", #838383, "refresh", $material-icon-refresh);
+      .reset-camera-button {
+        height: 80rpx;
+        width: 80rpx;
         float: right;
-        font-size: 60rpx;
-        font-weight: bold;
         margin-right: 20rpx;
       }
+
+      // .overall-full-time {
+      //   float: right;
+      //   font-size: 60rpx;
+      //   font-weight: bold;
+      //   margin-right: 20rpx;
+      // }
     }
   }
 

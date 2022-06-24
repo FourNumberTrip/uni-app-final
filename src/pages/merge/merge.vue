@@ -192,6 +192,13 @@
           <view class="overall-timer-area">
             <text class="overall-timer">{{ currentOverallTime }}</text>
             <!-- <text class="overall-full-time">{{ totalTime }}</text> -->
+            <view
+              v-if="currentPage === 'action' && modelTouched"
+              class="reset-camera-button material-icon"
+              data-color="gray"
+              data-icon="refresh"
+              @click="onClickResetCamera"
+            ></view>
           </view>
         </view>
 
@@ -764,6 +771,7 @@ export default {
       restingTime: 0,
       DEFAULT_REST_TIME: 20,
       extended: false,
+      modelTouched: false,
 
       // ! complete
 
@@ -910,7 +918,6 @@ export default {
         this.guideStage = 4;
         setTimeout(() => {
           this.guideStage = 0;
-          this.guide = guides[this.guideStage];
           this.currentPage = lastPage;
         }, 400);
       } else if (this.isPopupVisible) {
@@ -925,6 +932,8 @@ export default {
         this.currentPage = "guide";
       }, 500);
 
+      this.guideStage = 0;
+      this.guide = guides[0];
       this.selectItems[0]._class = "list-item-expand";
       this.selectItems[1]._class = "list-item-shrink";
       this.pageStack.push("select");
@@ -971,7 +980,6 @@ export default {
         this.guideStage++;
         setTimeout(() => {
           this.guideStage = 0;
-          this.guide = guides[this.guideStage];
           this.currentPage = "select";
         }, 500);
       }
@@ -1209,6 +1217,7 @@ export default {
       this.removeBalls();
       directionalLight.intensity = 1;
       controls.enabled = true;
+      controls.reset();
       this.currentPlayingTime = 0;
       this.savedMixerTime = 0;
       this.waitingTime = WAITING_TIME_BEFORE_ACTION;
@@ -1218,6 +1227,7 @@ export default {
       this.resting = false;
       this.restingTime = 0;
       this.extended = false;
+      this.modelTouched = false;
       clock.start();
 
       const currentAction = activeAction[this.currentAnimationId];
@@ -1366,7 +1376,7 @@ export default {
       camera.position.set(0, 0, 10);
       scene = new Scene();
       controls = new OrbitControls(camera, canvas);
-      controls.enableDamping = true;
+      controls.enableDamping = false;
 
       let gltfData;
       try {
@@ -1380,9 +1390,11 @@ export default {
       }
 
       const gltf = await loadGLTF(gltfData);
-      gltf.parser = null;
       gltf.scene.position.y = -3;
       gltf.scene.scale.multiplyScalar(3.5);
+      gltf.scene.traverse(function (obj) {
+        obj.frustumCulled = false;
+      });
       scene.add(gltf.scene);
       mixer = new AnimationMixer(gltf.scene);
       for (const animation of gltf.animations) {
@@ -1559,12 +1571,18 @@ export default {
       render();
 
       this.loaded = true;
-      console.log("loaded")
+      console.log("loaded");
     },
 
     // for three.js touch control
     onTX(e) {
       platform.dispatchTouchEvent(e);
+      this.modelTouched = true;
+    },
+
+    onClickResetCamera() {
+      controls.reset();
+      this.modelTouched = false;
     },
 
     onClickModel(e) {
