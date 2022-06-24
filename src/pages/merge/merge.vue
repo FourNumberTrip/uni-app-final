@@ -1134,7 +1134,6 @@ export default {
             });
 
             this.listItems.unshift(uploadedActivityInfo);
-            console.log(await getUserActivities());
 
             // the length changed
             this.listItemAnimationClasses = new Array(this.listItems.length)
@@ -1275,7 +1274,6 @@ export default {
     },
     setAction(index) {
       const currentAction = activeAction[this.currentAnimationId];
-      console.log(currentAction);
       this.currentAnimationIndex = index;
       // make sure currentAnimationId is updated
       this.$nextTick(() => {
@@ -1571,7 +1569,6 @@ export default {
       render();
 
       this.loaded = true;
-      console.log("loaded");
     },
 
     // for three.js touch control
