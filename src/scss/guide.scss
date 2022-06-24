@@ -98,13 +98,13 @@ $guide-pages: 4;
               transform: translateX(300rpx);
               opacity: 0%;
               animation-timing-function: linear;
-              color: black;
+              color: white;
             }
 
             100% {
               transform: translateX(0rpx);
               opacity: 100%;
-              color: black;
+              color: white;
             }
           }
         } @else {
@@ -113,13 +113,13 @@ $guide-pages: 4;
               transform: translateX(0rpx);
               opacity: 100%;
               animation-timing-function: linear;
-              color: black;
+              color: white;
             }
 
             #{$disappear-percentage} {
               transform: translateX(-300rpx);
               opacity: 0%;
-              color: black;
+              color: white;
             }
 
             #{100% - $disappear-percentage} {
@@ -143,13 +143,13 @@ $guide-pages: 4;
             transform: translateX(0rpx);
             opacity: 100%;
             animation-timing-function: linear;
-            color: black;
+            color: white;
           }
 
           #{$disappear-percentage} {
             transform: translateX(-300rpx);
             opacity: 0%;
-            color: black;
+            color: white;
           }
 
           100% {
