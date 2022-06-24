@@ -1,3 +1,5 @@
+import { readFile } from "./file";
+
 const db = wx.cloud.database();
 
 export async function addUserActivities(activity: {
@@ -74,4 +76,17 @@ export async function updateUserActivity(activity: {
         title: activity.title,
       },
     });
+}
+
+export async function downloadFromCloudStorage(
+  fileID: string,
+  encoding: "utf-8" | "utf8" | undefined
+) {
+  const tempFilePath = (
+    await wx.cloud.downloadFile({
+      fileID,
+    })
+  ).tempFilePath;
+
+  return await readFile(tempFilePath, encoding);
 }

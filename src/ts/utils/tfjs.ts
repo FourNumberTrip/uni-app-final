@@ -1,6 +1,7 @@
 import * as tf from "@tensorflow/tfjs-core";
 import { readFile, writeFile } from "./file";
 import { requestFile } from "./network";
+import { downloadFromCloudStorage } from "./wx-database";
 
 export type ModelArtifacts = {
   modelTopology: {};
@@ -9,24 +10,24 @@ export type ModelArtifacts = {
 };
 
 export async function downloadModel(): Promise<ModelArtifacts> {
-  const [modelTopology, weightSpecs, weightData] = await Promise.all([
-    requestFile(
-      "https://mp.muzi.fun/resources/ml-models/movenet-lightning-int8/modelTopology.json",
-      "text"
-    ) as Promise<{}>,
-    requestFile(
-      "https://mp.muzi.fun/resources/ml-models/movenet-lightning-int8/weightSpecs.json",
-      "text"
-    ) as Promise<{}>,
-    requestFile(
-      "https://mp.muzi.fun/resources/ml-models/movenet-lightning-int8/weightData.bin",
-      "arraybuffer"
+  const [modelTopologyText, weightSpecsText, weightData] = await Promise.all([
+    downloadFromCloudStorage(
+      "cloud://wunong-8gv2gdnhe01614cd.7775-wunong-8gv2gdnhe01614cd-1312488745/resources/modelTopology.json",
+      "utf8"
+    ) as Promise<string>,
+    downloadFromCloudStorage(
+      "cloud://wunong-8gv2gdnhe01614cd.7775-wunong-8gv2gdnhe01614cd-1312488745/resources/weightSpecs.json",
+      "utf8"
+    ) as Promise<string>,
+    downloadFromCloudStorage(
+      "cloud://wunong-8gv2gdnhe01614cd.7775-wunong-8gv2gdnhe01614cd-1312488745/resources/weightData.bin",
+      undefined
     ) as Promise<ArrayBuffer>,
   ]);
 
   return {
-    modelTopology,
-    weightSpecs,
+    modelTopology: JSON.parse(modelTopologyText),
+    weightSpecs: JSON.parse(weightSpecsText),
     weightData,
   };
 }

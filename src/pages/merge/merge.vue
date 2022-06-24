@@ -438,7 +438,6 @@ import { WechatPlatform, PlatformManager } from "platformize-three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 import { loadGLTF } from "@/ts/animation";
-import { requestFile } from "@/ts/utils/network";
 import { Keypoint } from "@tensorflow-models/pose-detection";
 import { analyzeKeypointsList } from "@/ts/pose-analysis";
 import { getPoseDetector, estimateFrame } from "@/ts/pose-detection";
@@ -447,11 +446,12 @@ import { drawPose, drawProgress } from "@/ts/utils/canvas";
 import { sleep } from "@/ts/utils/misc";
 import {
   addUserActivities,
+  downloadFromCloudStorage,
   getUserActivities,
   removeUserActivity,
   updateUserActivity,
 } from "@/ts/utils/wx-database";
-import { readFile, writeFile } from "@/ts/utils/file";
+import { readFile, removeFile, writeFile } from "@/ts/utils/file";
 
 // ! action & pain
 
@@ -666,7 +666,6 @@ export default {
 
       loaded: false,
       paused: true,
-      url: "https://mp.muzi.fun/resources/models/final.glb",
       animationNameMap: {
         101: "双手护颈",
         102: "颈侧肌拉伸",
@@ -787,7 +786,7 @@ export default {
     this.statusBarHeight = uni.getSystemInfoSync().statusBarHeight;
   },
   async onLoad() {
-    loadPromise = this.load(this.url);
+    loadPromise = this.load();
 
     const userActivities = await getUserActivities();
     for (const activity of userActivities) {
@@ -1346,7 +1345,7 @@ export default {
       camera.updateProjectionMatrix();
       renderer.setSize(canvasInfo.width, canvasInfo.height);
     },
-    async load(url) {
+    async load() {
       canvas = await this.selectCanvas("#gl");
       canvasDimention.width = canvas.width;
       canvasDimention.height = canvas.height;
@@ -1383,7 +1382,10 @@ export default {
           undefined
         );
       } catch (e) {
-        gltfData = await requestFile(url, "arraybuffer");
+        gltfData = await downloadFromCloudStorage(
+          "cloud://wunong-8gv2gdnhe01614cd.7775-wunong-8gv2gdnhe01614cd-1312488745/resources/final.glb",
+          undefined
+        );
         writeFile(`${wx.env.USER_DATA_PATH}/final.glb`, gltfData, undefined);
       }
 
