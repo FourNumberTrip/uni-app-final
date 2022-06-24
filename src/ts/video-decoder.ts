@@ -1,12 +1,10 @@
 export class VideoDecoder {
   private fileUrl: string;
   private videoDecoder: WechatMiniprogram.VideoDecoder;
-  private ended: boolean;
 
   constructor(fileUrl: string) {
     this.fileUrl = fileUrl;
     this.videoDecoder = wx.createVideoDecoder();
-    this.ended = false;
   }
 
   private async onDecodingStart() {
