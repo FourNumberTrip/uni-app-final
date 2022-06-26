@@ -321,7 +321,7 @@
             <view
               :class="['button', 'extend', extended ? 'disabled' : '']"
               @click="onClickExtendRest()"
-              >{{ extended ? "已延长" : "延长20秒" }}</view
+              >{{ extended ? "已延长" : `延长${DEFAULT_REST_TIME}秒` }}</view
             >
             <view class="button skip" @click="onClickSkipRest()">结束休息</view>
           </view>
@@ -458,7 +458,7 @@ import { readFile, removeFile, writeFile } from "@/ts/utils/file";
 // config
 
 // wait this amount of time before starting the timer
-const WAITING_TIME_BEFORE_ACTION = 10;
+const WAITING_TIME_BEFORE_ACTION = 1;
 // for transition the animation smoothly
 const FADING_DURATION = 0.5;
 
@@ -780,12 +780,15 @@ export default {
 
       canvasContainerAnimationClass: "",
       analyzeProgress: 0,
+
+      pixelRatio: 3,
     };
   },
   created() {
     this.statusBarHeight = uni.getSystemInfoSync().statusBarHeight;
   },
   async onLoad() {
+    this.pixelRatio = wx.getSystemInfoSync().pixelRatio;
     loadPromise = this.load();
 
     const userActivities = await getUserActivities();
@@ -1450,11 +1453,7 @@ export default {
       directionalLight.position.set(1, 2, 1);
       scene.add(directionalLight);
       renderer.setSize(canvas.width, canvas.height);
-      uni.getSystemInfo({
-        success: (res) => {
-          renderer.setPixelRatio(res.pixelRatio);
-        },
-      });
+      renderer.setPixelRatio(this.pixelRatio);
 
       let countdownCanvas = await this.selectCanvas("#countdown-canvas");
       const render = () => {
@@ -1530,6 +1529,15 @@ export default {
                         setTimeout(() => {
                           activeAction[this.currentAnimationId].paused = true;
                           this.resting = true;
+                          this.$nextTick(async () => {
+                            const canvasInfo = await this.getCanvasInfo(
+                              "#countdown-canvas"
+                            );
+                            countdownCanvas.width =
+                              canvasInfo.width * this.pixelRatio;
+                            countdownCanvas.height =
+                              canvasInfo.height * this.pixelRatio;
+                          });
                         }, 500);
                       }
                     } else {
@@ -1541,7 +1549,8 @@ export default {
                         this.restingTime /
                           (this.DEFAULT_REST_TIME + this.extended
                             ? this.DEFAULT_REST_TIME
-                            : 0)
+                            : 0),
+                        this.pixelRatio
                       );
                     }
                     // if all the actions are finished

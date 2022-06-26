@@ -37,7 +37,8 @@ const LINES = [
 
 export function drawProgress(
   canvas: WechatMiniprogram.Canvas,
-  progress: number
+  progress: number,
+  pixelRatio: number
 ) {
   const ctx = canvas.getContext("2d");
   const posX = canvas.width / 2;
@@ -47,9 +48,15 @@ export function drawProgress(
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   // background
   ctx.beginPath();
-  ctx.arc(posX, posY, 40, (Math.PI / 180) * 270, (Math.PI / 180) * (270 + 360));
+  ctx.arc(
+    posX,
+    posY,
+    60 * pixelRatio,
+    (Math.PI / 180) * 270,
+    (Math.PI / 180) * (270 + 360)
+  );
   ctx.strokeStyle = "#e1e1e1";
-  ctx.lineWidth = 10;
+  ctx.lineWidth = 15 * pixelRatio;
   ctx.lineCap = "round";
   ctx.stroke();
 
@@ -58,12 +65,12 @@ export function drawProgress(
   ctx.arc(
     posX,
     posY,
-    40,
+    60 * pixelRatio,
     (Math.PI / 180) * 270,
     (Math.PI / 180) * (270 + degrees)
   );
   ctx.strokeStyle = "#b5deb3";
-  ctx.lineWidth = 10;
+  ctx.lineWidth = 15 * pixelRatio;
   ctx.lineCap = "round";
   ctx.stroke();
 }
