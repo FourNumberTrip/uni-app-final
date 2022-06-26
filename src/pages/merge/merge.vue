@@ -458,7 +458,7 @@ import { readFile, removeFile, writeFile } from "@/ts/utils/file";
 // config
 
 // wait this amount of time before starting the timer
-const WAITING_TIME_BEFORE_ACTION = 1;
+const WAITING_TIME_BEFORE_ACTION = 10;
 // for transition the animation smoothly
 const FADING_DURATION = 0.5;
 
@@ -1547,9 +1547,8 @@ export default {
                       drawProgress(
                         countdownCanvas,
                         this.restingTime /
-                          (this.DEFAULT_REST_TIME + this.extended
-                            ? this.DEFAULT_REST_TIME
-                            : 0),
+                          (this.DEFAULT_REST_TIME +
+                            (this.extended ? this.DEFAULT_REST_TIME : 0)),
                         this.pixelRatio
                       );
                     }
