@@ -947,7 +947,7 @@ export default {
         title: "删除中",
       });
       await removeUserActivity(
-        this.listItems.splice(this.currentAnimationIndex, 1)[0]._id
+        this.listItems.splice(this.selectedItemIndex, 1)[0]._id
       );
       wx.hideLoading();
       this.isPopupVisible = false;
