@@ -54,7 +54,7 @@ const ANGLE_RULES = [
   {
     // left shoulder, right shoulder, left hip, right hip
     joints: [5, 6, 11, 12],
-    weight: 1,
+    weight: 2,
     name: "waist",
   },
   // left hip
@@ -140,12 +140,23 @@ export function analyzeKeypointsList(keypointsList: Keypoint[][]) {
     })
     .sort((a, b) => b.std - a.std);
 
+  const usedId: { [key: string]: boolean } = {};
+
   return report
     .filter((_, index) => index < 4)
-    .map((item) => ({
-      id: JOINTS_TO_ACTION[item.name][
-        Math.floor(Math.random() * JOINTS_TO_ACTION[item.name].length)
-      ],
-      loopTimes: 8,
-    }));
+    .map((item) => {
+      const id =
+        JOINTS_TO_ACTION[item.name][
+          Math.floor(Math.random() * JOINTS_TO_ACTION[item.name].length)
+        ];
+      if (!usedId[id]) {
+        usedId[id] = true;
+        return {
+          id,
+          loopTimes: 8,
+        };
+      }
+      return null;
+    })
+    .filter((item) => item !== null);
 }
