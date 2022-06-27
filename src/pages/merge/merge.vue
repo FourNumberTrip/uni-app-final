@@ -1094,7 +1094,7 @@ export default {
     onAddButtonClick() {
       wx.showModal({
         title: "提示",
-        content: "请录制一段小于十秒的视频",
+        content: "请录制一段长度小于五秒的视频",
         success: async (res) => {
           if (res.confirm) {
             const videoFileInfo = await wx.chooseMedia({
