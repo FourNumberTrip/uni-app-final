@@ -908,13 +908,13 @@ export default {
       } else if (this.currentPage === "complete") {
         this.leavingCompletePage = true;
         if (lastPage === "pain") {
-          this.initPainPage(1300);
+          this.initPainPage(900);
         }
 
         setTimeout(() => {
           this.currentPage = lastPage;
           this.leavingCompletePage = false;
-        }, 1200);
+        }, 800);
       } else if (this.currentPage === "guide") {
         this.guideStage = 4;
         setTimeout(() => {
