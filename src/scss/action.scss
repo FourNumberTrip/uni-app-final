@@ -161,7 +161,7 @@ $appear-disappear-animation-duration: 0.8s;
 
     @keyframes webgl-appear-animation {
       from {
-        transform: translateX(-100%);
+        transform: translateX(-120%);
       }
       to {
         transform: translateX(0%);
@@ -173,7 +173,7 @@ $appear-disappear-animation-duration: 0.8s;
         transform: translateX(0%);
       }
       to {
-        transform: translateX(-100%);
+        transform: translateX(-120%);
       }
     }
 

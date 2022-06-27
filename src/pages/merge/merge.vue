@@ -203,6 +203,7 @@
         </view>
 
         <canvas
+          v-if="currentPage === 'action' || currentPage === 'pain'"
           :class="[
             'webgl',
             finished ? 'webgl-disappear-animation' : 'webgl-appear-animation',
@@ -437,7 +438,7 @@ import {
 import { WechatPlatform, PlatformManager } from "platformize-three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
-import { loadGLTF } from "@/ts/animation";
+import { loadGLTF, getGLTFData } from "@/ts/animation";
 import { Keypoint } from "@tensorflow-models/pose-detection";
 import { analyzeKeypointsList } from "@/ts/pose-analysis";
 import { getPoseDetector, estimateFrame } from "@/ts/pose-detection";
@@ -446,12 +447,10 @@ import { drawPose, drawProgress } from "@/ts/utils/canvas";
 import { sleep } from "@/ts/utils/misc";
 import {
   addUserActivities,
-  downloadFromCloudStorage,
   getUserActivities,
   removeUserActivity,
   updateUserActivity,
 } from "@/ts/utils/wx-database";
-import { readFile, removeFile, writeFile } from "@/ts/utils/file";
 
 // ! action & pain
 
@@ -470,8 +469,6 @@ let mixer;
 let controls;
 /** @type { WebGLRenderer } */
 let renderer;
-/** @type { WechatMiniprogram.Canvas } */
-let canvas;
 /** @type { Scene } */
 let scene;
 /** @type { PerspectiveCamera } */
@@ -493,7 +490,9 @@ let directionalLight;
 let jointsBallGlow = [];
 
 /** @type { Promise<void> } */
-let loadPromise;
+let getGLTFDataPromise;
+/** @type { ArrayBuffer } */
+let gltfData;
 
 let observer;
 
@@ -788,8 +787,8 @@ export default {
     this.statusBarHeight = uni.getSystemInfoSync().statusBarHeight;
   },
   async onLoad() {
+    getGLTFDataPromise = await getGLTFData();
     this.pixelRatio = wx.getSystemInfoSync().pixelRatio;
-    loadPromise = this.load();
 
     const userActivities = await getUserActivities();
     for (const activity of userActivities) {
@@ -876,7 +875,7 @@ export default {
         if (lastPage === "pain") {
           setTimeout(() => {
             this.currentPage = lastPage;
-            this.initPainPage();
+            this.initPainPage(100, true);
           }, 800);
         } else {
           setTimeout(() => {
@@ -1169,14 +1168,21 @@ export default {
 
     // ! action & pain
 
-    async initPainPage(canvasSizeResettingDelay = 100) {
-      if (!this.loaded) {
+    async initPainPage(canvasSizeResettingDelay = 100, samePage = false) {
+      if (!samePage) {
+        if (!gltfData) {
+          gltfData = await getGLTFDataPromise;
+          await this.load();
+        }
         await wx.showLoading({
           title: "加载模型中",
         });
-        await loadPromise;
+        const canvas = await this.iNeedAFuckingCanvas("#gl");
+        await this.switchCanvas(canvas);
+        await this.startRendering(canvas);
         await wx.hideLoading();
       }
+
       this.addBalls();
       directionalLight.intensity = 0.2;
       controls.reset();
@@ -1206,12 +1212,22 @@ export default {
         this.resetCanvasSize();
       }, canvasSizeResettingDelay);
     },
-    async initActionPage(animations, canvasSizeResettingDelay = 100) {
-      if (!this.loaded) {
+    async initActionPage(
+      animations,
+      canvasSizeResettingDelay = 100,
+      samePage = false
+    ) {
+      if (!samePage) {
+        if (!gltfData) {
+          gltfData = await getGLTFDataPromise;
+          await this.load();
+        }
         await wx.showLoading({
           title: "加载模型中",
         });
-        await loadPromise;
+        const canvas = await this.iNeedAFuckingCanvas("#gl");
+        await this.switchCanvas(canvas);
+        await this.startRendering(canvas);
         await wx.hideLoading();
       }
 
@@ -1325,9 +1341,21 @@ export default {
           .select(selector)
           .node()
           .exec((res) => {
-            resolve(res[0].node);
+            if (res[0]) {
+              resolve(res[0].node);
+            } else {
+              resolve(null);
+            }
           });
       });
+    },
+    async iNeedAFuckingCanvas(selector) {
+      while (true) {
+        const canvas = await this.selectCanvas(selector);
+        if (canvas) {
+          return canvas;
+        }
+      }
     },
     async getCanvasInfo(selector) {
       return await new Promise((resolve) => {
@@ -1339,6 +1367,13 @@ export default {
           .exec();
       });
     },
+    async waitForNextTick() {
+      return await new Promise((resolve) => {
+        this.$nextTick(() => {
+          resolve();
+        });
+      });
+    },
     async resetCanvasSize() {
       const canvasInfo = await this.getCanvasInfo("#gl");
       canvasDimention.width = canvasInfo.width;
@@ -1348,115 +1383,13 @@ export default {
       camera.updateProjectionMatrix();
       renderer.setSize(canvasInfo.width, canvasInfo.height);
     },
-    async load() {
-      canvas = await this.selectCanvas("#gl");
-      canvasDimention.width = canvas.width;
-      canvasDimention.height = canvas.height;
-
-      platform = new WechatPlatform(canvas);
-      PlatformManager.set(platform);
-
-      renderer = new WebGLRenderer({
-        canvas,
-        antialias: true,
-        alpha: true,
-      });
-      // ! set the alpha value to 0 when transition to action page
-      renderer.setClearColor(0xf5f3f6, 1);
-
-      rayCaster = new Raycaster();
-
-      camera = new PerspectiveCamera(
-        45,
-        canvas.width / canvas.height,
-        0.1,
-        2000
-      );
-
-      camera.position.set(0, 0, 10);
-      scene = new Scene();
-      controls = new OrbitControls(camera, canvas);
-      controls.enableDamping = false;
-
-      let gltfData;
-      try {
-        gltfData = await readFile(
-          `${wx.env.USER_DATA_PATH}/final.glb`,
-          undefined
-        );
-      } catch (e) {
-        gltfData = await downloadFromCloudStorage(
-          "cloud://wunong-8gv2gdnhe01614cd.7775-wunong-8gv2gdnhe01614cd-1312488745/resources/final.glb",
-          undefined
-        );
-        writeFile(`${wx.env.USER_DATA_PATH}/final.glb`, gltfData, undefined);
-      }
-
-      const gltf = await loadGLTF(gltfData);
-      gltf.scene.position.y = -3;
-      gltf.scene.scale.multiplyScalar(3.5);
-      gltf.scene.traverse(function (obj) {
-        obj.frustumCulled = false;
-      });
-      scene.add(gltf.scene);
-      mixer = new AnimationMixer(gltf.scene);
-      for (const animation of gltf.animations) {
-        activeAction[animation.name] = mixer.clipAction(animation);
-      }
-
-      //关节位置小球
-      const geometry = new SphereGeometry(0.2, 32, 16);
-
-      const customMaterial = new ShaderMaterial({
-        uniforms: {
-          c: { type: "f", value: 0.1 },
-          p: { type: "f", value: 3 },
-          glowColor: { type: "c", value: new Color(0xff0000) },
-          viewVector: { type: "v3", value: camera.position },
-        },
-        vertexShader:
-          "uniform vec3 viewVector;\n" +
-          "uniform float c;\n" +
-          "uniform float p;\n" +
-          "varying float intensity;\n" +
-          "void main() \n" +
-          "{\n" +
-          "    vec3 vNormal = normalize( normalMatrix * normal );\n" +
-          "\tvec3 vNormel = normalize( normalMatrix * viewVector );\n" +
-          "\tintensity = pow( c - dot(vNormal, vNormel), p );\n" +
-          "\t\n" +
-          "    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );\n" +
-          "}",
-        fragmentShader:
-          "uniform vec3 glowColor;\n" +
-          "varying float intensity;\n" +
-          "void main() \n" +
-          "{\n" +
-          "\tvec3 glow = glowColor * intensity;\n" +
-          "    gl_FragColor = vec4( glow, 1.0 );\n" +
-          "}",
-        side: DoubleSide,
-        blending: AdditiveBlending,
-        transparent: true,
-      });
-
-      for (let i = 0; i < this.balls.length; i++) {
-        const ball = new Mesh(geometry, customMaterial.clone());
-        ball.position.set(this.balls[i].x, this.balls[i].y, 1.5);
-        ball.name = "ball" + i;
-        jointsBallGlow.push(ball);
-      }
-
-      renderer.outputEncoding = sRGBEncoding;
-      scene.add(new AmbientLight(0xffffff, 1.0));
-      directionalLight = new DirectionalLight(0xffffff, 1.0);
-      directionalLight.position.set(1, 2, 1);
-      scene.add(directionalLight);
-      renderer.setSize(canvas.width, canvas.height);
-      renderer.setPixelRatio(this.pixelRatio);
-
+    async startRendering(canvas) {
       let countdownCanvas = await this.selectCanvas("#countdown-canvas");
       const render = () => {
+        if (this.currentPage !== "action" && this.currentPage !== "pain") {
+          return;
+        }
+
         const frameId = canvas.requestAnimationFrame(render);
         if (!this.paused) {
           if (this.turning) this.turn(0.01);
@@ -1479,7 +1412,11 @@ export default {
               this.finished = true;
               setTimeout(() => {
                 this.currentPage = "action";
-                this.initActionPage(this.painReliefAnimations[jointName]);
+                this.initActionPage(
+                  this.painReliefAnimations[jointName],
+                  100,
+                  true
+                );
               }, 800);
               activeAction["still"].stop();
               this.pageStack.push("pain");
@@ -1577,6 +1514,93 @@ export default {
         }
       };
       render();
+    },
+    async switchCanvas(canvas) {
+      canvasDimention.width = canvas.width;
+      canvasDimention.height = canvas.height;
+
+      platform = new WechatPlatform(canvas);
+      PlatformManager.set(platform);
+
+      renderer = new WebGLRenderer({
+        canvas,
+        antialias: true,
+        alpha: true,
+      });
+      renderer.setClearColor(0xf5f3f6, 1);
+      renderer.outputEncoding = sRGBEncoding;
+      renderer.setSize(canvas.width, canvas.height);
+      renderer.setPixelRatio(this.pixelRatio);
+
+      controls = new OrbitControls(camera, canvas);
+      controls.enableDamping = false;
+    },
+    async load() {
+      rayCaster = new Raycaster();
+      camera = new PerspectiveCamera(45, 1, 0.1, 2000);
+
+      camera.position.set(0, 0, 10);
+      scene = new Scene();
+
+      const gltf = await loadGLTF(gltfData);
+      gltf.scene.position.y = -3;
+      gltf.scene.scale.multiplyScalar(3.5);
+      gltf.scene.traverse(function (obj) {
+        obj.frustumCulled = false;
+      });
+      scene.add(gltf.scene);
+      mixer = new AnimationMixer(gltf.scene);
+      for (const animation of gltf.animations) {
+        activeAction[animation.name] = mixer.clipAction(animation);
+      }
+
+      //关节位置小球
+      const geometry = new SphereGeometry(0.2, 32, 16);
+
+      const customMaterial = new ShaderMaterial({
+        uniforms: {
+          c: { type: "f", value: 0.1 },
+          p: { type: "f", value: 3 },
+          glowColor: { type: "c", value: new Color(0xff0000) },
+          viewVector: { type: "v3", value: camera.position },
+        },
+        vertexShader:
+          "uniform vec3 viewVector;\n" +
+          "uniform float c;\n" +
+          "uniform float p;\n" +
+          "varying float intensity;\n" +
+          "void main() \n" +
+          "{\n" +
+          "    vec3 vNormal = normalize( normalMatrix * normal );\n" +
+          "\tvec3 vNormel = normalize( normalMatrix * viewVector );\n" +
+          "\tintensity = pow( c - dot(vNormal, vNormel), p );\n" +
+          "\t\n" +
+          "    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );\n" +
+          "}",
+        fragmentShader:
+          "uniform vec3 glowColor;\n" +
+          "varying float intensity;\n" +
+          "void main() \n" +
+          "{\n" +
+          "\tvec3 glow = glowColor * intensity;\n" +
+          "    gl_FragColor = vec4( glow, 1.0 );\n" +
+          "}",
+        side: DoubleSide,
+        blending: AdditiveBlending,
+        transparent: true,
+      });
+
+      for (let i = 0; i < this.balls.length; i++) {
+        const ball = new Mesh(geometry, customMaterial.clone());
+        ball.position.set(this.balls[i].x, this.balls[i].y, 1.5);
+        ball.name = "ball" + i;
+        jointsBallGlow.push(ball);
+      }
+
+      scene.add(new AmbientLight(0xffffff, 1.0));
+      directionalLight = new DirectionalLight(0xffffff, 1.0);
+      directionalLight.position.set(1, 2, 1);
+      scene.add(directionalLight);
 
       this.loaded = true;
     },
@@ -1595,14 +1619,10 @@ export default {
     onClickModel(e) {
       const touchCanvasX = e.target.x - e.target.offsetLeft;
       const touchCanvasY = e.target.y - e.target.offsetTop;
-      uni.getSystemInfo({
-        success: (res) => {
-          pointer = new Vector2(
-            (touchCanvasX / canvasDimention.width) * 2 - 1,
-            -(touchCanvasY / canvasDimention.height) * 2 + 1
-          );
-        },
-      });
+      pointer = new Vector2(
+        (touchCanvasX / canvasDimention.width) * 2 - 1,
+        -(touchCanvasY / canvasDimention.height) * 2 + 1
+      );
     },
 
     // ! complete
