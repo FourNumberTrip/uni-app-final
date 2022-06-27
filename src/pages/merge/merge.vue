@@ -787,7 +787,9 @@ export default {
     this.statusBarHeight = uni.getSystemInfoSync().statusBarHeight;
   },
   async onLoad() {
-    wx.showLoading();
+    wx.showLoading({
+      title: "加载中",
+    });
     setTimeout(() => {
       this.currentPage = "select";
       wx.hideLoading();
