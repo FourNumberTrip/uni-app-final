@@ -278,7 +278,7 @@
               <view class="spacer"></view>
               <view
                 class="material-icon pause"
-                data-color="gray"
+                :data-color="waiting ? 'lightgray' : 'gray'"
                 :data-icon="paused ? 'play' : 'pause'"
                 @click="onClickPause"
               ></view>
@@ -1322,7 +1322,9 @@ export default {
       this.savedMixerTime = mixer.time;
     },
     onClickPause() {
-      this.togglePause();
+      if (!this.waiting) {
+        this.togglePause();
+      }
     },
     onClickPrevious() {
       if (this.currentAnimationIndex > 0) {

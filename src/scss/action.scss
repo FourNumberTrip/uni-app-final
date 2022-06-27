@@ -345,6 +345,7 @@ $appear-disappear-animation-duration: 0.8s;
         }
 
         @include material-icon("gray", #707070, "pause", $material-icon-pause);
+        @include material-icon("lightgray", #bcbcbc, "pause", $material-icon-pause);
         @include material-icon("gray", #707070, "play", $material-icon-play-arrow);
         .pause {
           padding-top: 10rpx;
