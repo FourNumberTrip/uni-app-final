@@ -527,7 +527,7 @@ const guides = [
 export default {
   data() {
     return {
-      currentPage: "select",
+      currentPage: "empty",
 
       // ! general
 
@@ -787,6 +787,12 @@ export default {
     this.statusBarHeight = uni.getSystemInfoSync().statusBarHeight;
   },
   async onLoad() {
+    wx.showLoading();
+    setTimeout(() => {
+      this.currentPage = "select";
+      wx.hideLoading();
+    }, 600);
+
     getGLTFDataPromise = await getGLTFData();
     this.pixelRatio = wx.getSystemInfoSync().pixelRatio;
 
